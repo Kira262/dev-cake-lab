@@ -15,6 +15,26 @@ import {
   X,
 } from "lucide-react";
 
+const BASE = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
+
+function asset(file) {
+  return `${import.meta.env.BASE_URL}assets/${file}`;
+}
+
+function appPath() {
+  let path = window.location.pathname || "/";
+  if (BASE && (path === BASE || path.startsWith(`${BASE}/`))) {
+    path = path.slice(BASE.length) || "/";
+  }
+  return path.startsWith("/") ? path : `/${path}`;
+}
+
+function toLocation(to) {
+  const url = new URL(to, window.location.origin);
+  const prefixed = url.pathname === "/" ? `${BASE}/` : `${BASE}${url.pathname}`;
+  return `${prefixed}${url.search}${url.hash}`;
+}
+
 const categories = [
   ["Cheesecakes", "Creamy layers, biscuit bases", "cake"],
   ["Cookie Tins", "300–400 g dessert tins", "cookie"],
@@ -33,7 +53,7 @@ const products = [
     note: "250–300 g · creamy caramel cheesecake",
     badge: "",
     art: "chocolate",
-    image: "/assets/biscoff-cheesecake.jpg",
+    image: asset("biscoff-cheesecake.jpg"),
   },
   {
     id: 2,
@@ -43,7 +63,7 @@ const products = [
     note: "250–300 g · berry cream cheesecake",
     badge: "",
     art: "jar",
-    image: "/assets/biscoff-cheesecake.jpg",
+    image: asset("biscoff-cheesecake.jpg"),
   },
   {
     id: 3,
@@ -53,7 +73,7 @@ const products = [
     note: "250–300 g · Biscoff spread & biscuit base",
     badge: "BESTSELLER",
     art: "chocolate",
-    image: "/assets/biscoff-cheesecake.jpg",
+    image: asset("biscoff-cheesecake.jpg"),
   },
   {
     id: 4,
@@ -63,7 +83,7 @@ const products = [
     note: "300–400 g · assorted ganache cookies",
     badge: "",
     art: "cookie",
-    image: "/assets/cookies.jpg",
+    image: asset("cookies.jpg"),
   },
   {
     id: 5,
@@ -73,7 +93,7 @@ const products = [
     note: "300–400 g · Nutella-filled cookies",
     badge: "",
     art: "cookie",
-    image: "/assets/cookies.jpg",
+    image: asset("cookies.jpg"),
   },
   {
     id: 6,
@@ -83,7 +103,7 @@ const products = [
     note: "300–400 g · Biscoff cookies",
     badge: "FAN FAVOURITE",
     art: "cookie",
-    image: "/assets/cookies.jpg",
+    image: asset("cookies.jpg"),
   },
   {
     id: 7,
@@ -93,7 +113,7 @@ const products = [
     note: "10–20 g · per piece",
     badge: "",
     art: "cookie",
-    image: "/assets/cookies.jpg",
+    image: asset("cookies.jpg"),
     unit: "per piece",
   },
   {
@@ -104,7 +124,7 @@ const products = [
     note: "300–400 g · rich ganache cake bowl",
     badge: "",
     art: "jar",
-    image: "/assets/brownies.jpg",
+    image: asset("brownies.jpg"),
   },
   {
     id: 9,
@@ -114,7 +134,7 @@ const products = [
     note: "300–400 g · berry cake layers",
     badge: "",
     art: "jar",
-    image: "/assets/biscoff-cheesecake.jpg",
+    image: asset("biscoff-cheesecake.jpg"),
   },
   {
     id: 10,
@@ -124,7 +144,7 @@ const products = [
     note: "300–400 g · Nutella chocolate layers",
     badge: "",
     art: "chocolate",
-    image: "/assets/molten-lava.jpg",
+    image: asset("molten-lava.jpg"),
   },
   {
     id: 11,
@@ -134,7 +154,7 @@ const products = [
     note: "300–400 g · Biscoff cake layers",
     badge: "SIGNATURE",
     art: "jar",
-    image: "/assets/biscoff-cheesecake.jpg",
+    image: asset("biscoff-cheesecake.jpg"),
   },
   {
     id: 12,
@@ -144,7 +164,7 @@ const products = [
     note: "Classic cupcake · vanilla or chocolate",
     badge: "",
     art: "cupcake",
-    image: "/assets/cupcakes.jpg",
+    image: asset("cupcakes.jpg"),
   },
   {
     id: 13,
@@ -154,7 +174,7 @@ const products = [
     note: "Chocolate chips · soft sponge",
     badge: "",
     art: "cupcake",
-    image: "/assets/cupcakes.jpg",
+    image: asset("cupcakes.jpg"),
   },
   {
     id: 14,
@@ -164,7 +184,7 @@ const products = [
     note: "Ganache topped · chocolate sponge",
     badge: "",
     art: "cupcake",
-    image: "/assets/cupcakes.jpg",
+    image: asset("cupcakes.jpg"),
   },
   {
     id: 15,
@@ -174,7 +194,7 @@ const products = [
     note: "Nutella cream · chocolate sponge",
     badge: "",
     art: "cupcake",
-    image: "/assets/cupcakes.jpg",
+    image: asset("cupcakes.jpg"),
   },
   {
     id: 16,
@@ -184,7 +204,7 @@ const products = [
     note: "Cookie dough center · soft sponge",
     badge: "",
     art: "cupcake",
-    image: "/assets/cupcakes.jpg",
+    image: asset("cupcakes.jpg"),
   },
   {
     id: 17,
@@ -194,7 +214,7 @@ const products = [
     note: "Biscoff cream · biscuit crumble",
     badge: "TOP PICK",
     art: "cupcake",
-    image: "/assets/cupcakes.jpg",
+    image: asset("cupcakes.jpg"),
   },
 ];
 
@@ -216,7 +236,7 @@ const reviews = [
 const categoryNames = categories.map((c) => c[0]);
 
 function readPath() {
-  return window.location.pathname || "/";
+  return appPath();
 }
 
 function readMenuType() {
@@ -256,7 +276,7 @@ export default function App() {
   };
 
   const navigate = (to, options = {}) => {
-    window.history.pushState({}, "", to);
+    window.history.pushState({}, "", toLocation(to));
     syncFromLocation();
     setMenuOpen(false);
     if (options.focusSearch) setFocusSearch(true);
@@ -366,7 +386,7 @@ function Header({
       >
         <img
           className="wordmark-logo"
-          src="/assets/dev-cake-logo.png"
+          src={asset("dev-cake-logo.png")}
           alt="The Dev's Cake Lab"
         />
       </button>
@@ -514,7 +534,7 @@ function HomePage({ navigate, add }) {
 
       <section className="feature wrap">
         <div className="feature-art photo-feature">
-          <img src="/assets/biscoff-cheesecake.jpg" alt="Biscoff cheesecake" />
+          <img src={asset("biscoff-cheesecake.jpg")} alt="Biscoff cheesecake" />
           <span className="stamp">
             SIGNATURE
             <br />
@@ -978,7 +998,7 @@ function Footer({ navigate }) {
           >
             <img
               className="wordmark-logo"
-              src="/assets/dev-cake-logo.png"
+              src={asset("dev-cake-logo.png")}
               alt="The Dev's Cake Lab"
             />
           </button>

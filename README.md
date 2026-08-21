@@ -1,15 +1,16 @@
-# Dev's Cake Lab — Frontend Variants
+# Dev's Cake Lab
 
-Two standalone Vite + React frontend-only versions are included:
-
-- `with-cat/` — Dev's Cake Lab dessert aesthetic with the playful chef-cat hero illustration.
-- `without-cat/` — same brand system and pages, but with a cake/whisk hero instead of a cat.
-
-Run either version:
+Vite + React frontend for Dev's Cake Lab.
 
 ```bash
 npm install
 npm run dev
 ```
 
-Then open the localhost URL shown by Vite.
+## GitHub Pages
+
+The live site must be the **Vite build**, not the source `index.html`. After pushing `main`, set:
+
+**Settings → Pages → Source → GitHub Actions**
+
+The site will be at `https://kira262.github.io/dev-cake-lab/`.
