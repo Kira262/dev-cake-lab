@@ -13,4 +13,4 @@ The live site must be the **Vite build**, not the source `index.html`. After pus
 
 **Settings → Pages → Source → GitHub Actions**
 
-The site will be at `https://kira262.github.io/dev-cake-lab/`.
+The site will be at [https://kira262.github.io/dev-cake-lab/]`(https://kira262.github.io/dev-cake-lab/)`.
