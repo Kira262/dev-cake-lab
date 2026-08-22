@@ -1,0 +1,53 @@
+# Agent guide — Dev's Cake Lab
+
+Instructions for AI coding agents working in this repository.
+
+## Goal
+
+Keep the site a polished, brand-forward dessert SPA that builds cleanly and deploys to GitHub Pages under `/dev-cake-lab/`. Prefer small, targeted edits over refactors.
+
+## Read first
+
+1. `summary.md` — product overview and known gaps  
+2. `instructions.md` — run, routes, assets, deploy rules  
+3. `README.md` — short human setup notes  
+
+## Hard constraints
+
+1. **Preserve the GitHub Pages base path.** Use `asset()`, `toLocation()`, and `appPath()` / `navigate()`. Do not hardcode `/` asset paths that break under `/dev-cake-lab/`.
+2. **Do not put `.hero-note` inside `.cat-hero`.** Keep it on `.cat-hero-shell` as a sibling. `.cat-hero` clips overflow; the note will get cut off again if moved inside.
+3. **Do not change Pages to serve source `index.html`.** Deploy must remain the Vite `dist` via `.github/workflows/deploy-pages.yml`.
+4. **Keep the SPA 404 fallback.** The workflow copies `dist/index.html` → `dist/404.html`; leave that step unless you replace it with an equivalent.
+5. **Match existing style.** Same fonts, CSS variables, and layout language in `src/styles.css`. Avoid generic “AI purple / cream / newspaper” redesigns unless the user asks for a redesign.
+6. **No drive-by refactors.** Do not split `App.jsx` or introduce a router/library unless requested.
+7. **No secrets in commits.** Do not commit `.env` or credentials.
+
+## Where to edit
+
+| Change | Where |
+|--------|--------|
+| Copy, menu, prices, contact details | `src/App.jsx` |
+| Layout / look | `src/styles.css` |
+| Base path / build | `vite.config.js` |
+| Images | `public/assets/` + `asset("…")` |
+| Deploy | `.github/workflows/deploy-pages.yml` |
+
+## Safe defaults
+
+- After UI changes that touch routing or assets, mentally verify production URLs under `/dev-cake-lab/`.
+- When adding images, place them in `public/assets/` and wire them through `asset()`.
+- When fixing contact/cart sync, prefer updating the `ContactPage` effect deps carefully so user-edited textarea text is not wiped unexpectedly.
+- Prefer `npm run build` locally before claiming a Pages fix is done.
+
+## Out of scope unless asked
+
+- Backend, payments, email delivery
+- CMS or database
+- Rewriting into multiple route files / TypeScript migration
+- Force-pushing or rewriting published git history
+
+## Response style for agents
+
+- Be concise; say what changed and where.
+- Do not commit or open PRs unless the user asks.
+- If assets are missing, say which filenames are required rather than inventing placeholders.
