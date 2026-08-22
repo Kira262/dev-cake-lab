@@ -392,14 +392,25 @@ button {
 .hero-note,
 .no-cat-hero .hero-note {
   position: absolute;
-  right: 26px;
-  bottom: 22px;
+  right: 18px;
+  bottom: 18px;
+  z-index: 4;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  max-width: min(220px, calc(100% - 36px));
   background: #fffaf2;
   border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 9px 13px;
+  border-radius: 16px;
+  padding: 10px 12px;
   font-size: 9px;
-  letter-spacing: 0.13em;
+  letter-spacing: 0.06em;
+  line-height: 1.35;
+  white-space: normal;
+  word-break: break-word;
+}
+.hero-note span {
+  display: block;
 }
 .category-band {
   background: #fffaf2;
