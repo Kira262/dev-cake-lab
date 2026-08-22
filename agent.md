@@ -8,9 +8,9 @@ Keep the site a polished, brand-forward dessert SPA that builds cleanly and depl
 
 ## Read first
 
-1. `summary.md` — product overview and known gaps  
-2. `instructions.md` — run, routes, assets, deploy rules  
-3. `README.md` — short human setup notes  
+1. `summary.md` — product overview and known gaps
+2. `instructions.md` — run, routes, assets, deploy rules
+3. `README.md` — short human setup notes
 
 ## Hard constraints
 
@@ -19,18 +19,24 @@ Keep the site a polished, brand-forward dessert SPA that builds cleanly and depl
 3. **Do not change Pages to serve source `index.html`.** Deploy must remain the Vite `dist` via `.github/workflows/deploy-pages.yml`.
 4. **Keep the SPA 404 fallback.** The workflow copies `dist/index.html` → `dist/404.html`; leave that step unless you replace it with an equivalent.
 5. **Match existing style.** Same fonts, CSS variables, and layout language in `src/styles.css`. Avoid generic “AI purple / cream / newspaper” redesigns unless the user asks for a redesign.
-6. **No drive-by refactors.** Do not split `App.jsx` or introduce a router/library unless requested.
+6. **No drive-by refactors.** Do not introduce a router/library unless requested.
 7. **No secrets in commits.** Do not commit `.env` or credentials.
 
 ## Where to edit
 
-| Change | Where |
-|--------|--------|
-| Copy, menu, prices, contact details | `src/App.jsx` |
-| Layout / look | `src/styles.css` |
-| Base path / build | `vite.config.js` |
-| Images | `public/assets/` + `asset("…")` |
-| Deploy | `.github/workflows/deploy-pages.yml` |
+| Change                              | Where                                |
+| ----------------------------------- | ------------------------------------ |
+| Menu, prices, categories, reviews   | `src/data/catalog.js`                |
+| Phone, email, address, social links | `src/data/contacts.js`               |
+| Cart / enquiry message helpers      | `src/lib/cart.js`                    |
+| Routes, nav helpers                 | `src/lib/routes.js`                  |
+| Base path, `asset()`, `navigate`    | `src/lib/paths.js`, `src/App.jsx`    |
+| Page UI                             | `src/pages/*.jsx`                    |
+| Shared UI (header, cart, cards)     | `src/components/*.jsx`               |
+| Layout / look                       | `src/styles.css`                     |
+| Base path / build                   | `vite.config.js`                     |
+| Images                              | `public/assets/` + `asset("…")`      |
+| Deploy                              | `.github/workflows/deploy-pages.yml` |
 
 ## Safe defaults
 
@@ -43,7 +49,7 @@ Keep the site a polished, brand-forward dessert SPA that builds cleanly and depl
 
 - Backend, payments, email delivery
 - CMS or database
-- Rewriting into multiple route files / TypeScript migration
+- TypeScript migration
 - Force-pushing or rewriting published git history
 
 ## Response style for agents
