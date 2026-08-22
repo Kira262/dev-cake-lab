@@ -1709,6 +1709,37 @@ footer {
   color: var(--ink);
   font-weight: 400;
 }
+.addon-heading {
+  font-size: 11px;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+.addon-list {
+  margin-bottom: 18px;
+}
+.addon-chip {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 8px;
+  padding: 10px 14px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: #fff;
+  text-align: left;
+}
+.addon-chip small {
+  display: block;
+  font-weight: 400;
+  color: #7e7165;
+  margin-top: 3px;
+}
+.addon-chip.on {
+  border-color: var(--olive);
+  background: #f3f0e4;
+}
 
 .category-drag-shell .drag-hint {
   display: flex;

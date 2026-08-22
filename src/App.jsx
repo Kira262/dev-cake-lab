@@ -279,6 +279,23 @@ function productPath(slug) {
   return `/product/${slug}`;
 }
 
+const ADDONS = [
+  { id: "topping", name: "Extra topping", price: 50 },
+  { id: "wrap", name: "Gift wrap", price: 40 },
+  { id: "candles", name: "Birthday candles", price: 20 },
+];
+
+function addonSum(addonIds = []) {
+  return ADDONS.filter((a) => addonIds.includes(a.id)).reduce(
+    (sum, a) => sum + a.price,
+    0,
+  );
+}
+
+function addonLabels(addonIds = []) {
+  return ADDONS.filter((a) => addonIds.includes(a.id)).map((a) => a.name);
+}
+
 function readProductSlug() {
   const path = appPath();
   const match = path.match(/^\/product\/([^/]+)\/?$/);
@@ -288,11 +305,12 @@ function readProductSlug() {
 function makeLineId(product, extras = {}) {
   const message = (extras.message || "").trim();
   const notes = (extras.notes || "").trim();
-  return `${product.id}::${message}::${notes}`;
+  const addonKey = (extras.addons || []).slice().sort().join(",");
+  return `${product.id}::${message}::${notes}::${addonKey}`;
 }
 
 function lineTotal(item) {
-  return item.price * item.qty;
+  return (item.price + addonSum(item.addons)) * item.qty;
 }
 
 function orderMessage(cart, total) {
@@ -301,6 +319,8 @@ function orderMessage(cart, total) {
     const extras = [
       item.message && `message: ${item.message}`,
       item.notes && `notes: ${item.notes}`,
+      addonLabels(item.addons).length &&
+        `add-ons: ${addonLabels(item.addons).join(", ")}`,
     ].filter(Boolean);
     const extra = extras.length ? ` (${extras.join("; ")})` : "";
     return `• ${item.name} × ${item.qty}${extra} — ₹${lineTotal(item).toLocaleString("en-IN")}`;
@@ -356,6 +376,7 @@ export default function App() {
               qty,
               message: (extras.message || "").trim(),
               notes: (extras.notes || "").trim(),
+              addons: extras.addons || [],
             },
           ];
     });
@@ -844,7 +865,15 @@ function ProductPage({ product, add, navigate }) {
   const [qty, setQty] = useState(1);
   const [message, setMessage] = useState("");
   const [notes, setNotes] = useState("");
-  const linePrice = product.price * qty;
+  const [addons, setAddons] = useState([]);
+  const linePrice = (product.price + addonSum(addons)) * qty;
+
+  const toggleAddon = (id) =>
+    setAddons((current) =>
+      current.includes(id)
+        ? current.filter((item) => item !== id)
+        : [...current, id],
+    );
 
   return (
     <main>
@@ -902,6 +931,27 @@ function ProductPage({ product, add, navigate }) {
                 <Plus size={16} />
               </button>
             </div>
+            <div className="addon-list">
+              <p className="addon-heading">Add-ons</p>
+              {ADDONS.map((addon) => {
+                const on = addons.includes(addon.id);
+                return (
+                  <button
+                    key={addon.id}
+                    type="button"
+                    className={`addon-chip ${on ? "on" : ""}`}
+                    onClick={() => toggleAddon(addon.id)}
+                    aria-pressed={on}
+                  >
+                    <span>
+                      {addon.name}
+                      <small>₹{addon.price}</small>
+                    </span>
+                    <span>{on ? "Added" : "Add"}</span>
+                  </button>
+                );
+              })}
+            </div>
             <label className="product-field">
               Message on cake
               <input
@@ -922,7 +972,7 @@ function ProductPage({ product, add, navigate }) {
             <button
               className="primary"
               type="button"
-              onClick={() => add(product, { qty, message, notes })}
+              onClick={() => add(product, { qty, message, notes, addons })}
             >
               Add to bag <ArrowRight size={17} />
             </button>
@@ -1316,9 +1366,12 @@ function Cart({ open, setOpen, cart, total, changeQty, navigate, startOrder }) {
                   <div>
                     <b>{item.name}</b>
                     <small>
-                      ₹{item.price.toLocaleString("en-IN")}
+                      ₹{(item.price + addonSum(item.addons)).toLocaleString("en-IN")}
                       {item.message ? ` · “${item.message}”` : ""}
                       {item.notes ? ` · ${item.notes}` : ""}
+                      {addonLabels(item.addons).length
+                        ? ` · ${addonLabels(item.addons).join(", ")}`
+                        : ""}
                     </small>
                     <div className="qty">
                       <button onClick={() => changeQty(item.lineId, -1)}>
