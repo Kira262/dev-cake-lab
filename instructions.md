@@ -83,7 +83,7 @@ The badge **A LITTLE CAT. A LOT OF CAKE.** must stay on `.cat-hero-shell`, **out
 - Cart lives in `App` state.
 - “Continue to order” bumps `orderTicket` and navigates to `/contact`.
 - `ContactPage` refreshes the prefilled message when `orderTicket` changes.
-- The contact form opens a `mailto:` to `devscakelab@gmail.com` with the enquiry filled in.
+- The contact form opens Gmail compose (`mail.google.com`) to `devscakelab@gmail.com` with the enquiry filled in.
 
 ## Deploy (GitHub Pages)
 

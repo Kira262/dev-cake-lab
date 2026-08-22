@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Mail, Phone } from "lucide-react";
-import { CONTACTS } from "../data/contacts.js";
+import { CONTACTS, gmailComposeUrl } from "../data/contacts.js";
 import { orderMessage } from "../lib/cart.js";
 
 export function ContactPage({ cart = [], total = 0, orderTicket = 0 }) {
@@ -29,8 +29,11 @@ export function ContactPage({ cart = [], total = 0, orderTicket = 0 }) {
       "",
       message,
     ].join("\n");
-    const href = `mailto:${CONTACTS.email}?subject=${encodeURIComponent(`Dev's Cake Lab enquiry — ${topic}`)}&body=${encodeURIComponent(body)}`;
-    window.location.href = href;
+    const href = gmailComposeUrl({
+      subject: `Dev's Cake Lab enquiry — ${topic}`,
+      body,
+    });
+    window.open(href, "_blank", "noopener,noreferrer");
     setSent(true);
   };
 
@@ -92,7 +95,7 @@ export function ContactPage({ cart = [], total = 0, orderTicket = 0 }) {
           </button>
           {sent && (
             <p className="form-success">
-              Your email app should open with this enquiry to {CONTACTS.email}.
+              Gmail should open with this enquiry to {CONTACTS.email}.
             </p>
           )}
         </form>
@@ -108,7 +111,13 @@ export function ContactPage({ cart = [], total = 0, orderTicket = 0 }) {
             <Mail size={18} />
             <h3>Email</h3>
             <p>
-              <a href={`mailto:${CONTACTS.email}`}>{CONTACTS.email}</a>
+              <a
+                href={gmailComposeUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {CONTACTS.email}
+              </a>
             </p>
           </div>
           <div>
