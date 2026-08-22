@@ -17,6 +17,22 @@ import {
 
 const BASE = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
 
+const CONTACTS = {
+  phoneDisplay: "+91 96382 41506",
+  phoneTel: "+919638241506",
+  email: "devscakelab@gmail.com",
+  instagram: "DEVCAKELAB",
+  instagramUrl: "https://www.instagram.com/devcakelab/",
+  whatsappUrl: "https://wa.me/919638241506",
+  addressName: "Dev's Cake Lab",
+  addressLines: [
+    "P.D. Apartment, Opp Mira Madhav Flat",
+    "Ellisbridge, Ahmedabad, India 380006",
+  ],
+  mapsQuery:
+    "P.D. Apartment, Opp Mira Madhav Flat, Ellisbridge, Ahmedabad, India 380006",
+};
+
 function asset(file) {
   return `${import.meta.env.BASE_URL}assets/${file}`;
 }
@@ -53,7 +69,7 @@ const products = [
     note: "250–300 g · creamy caramel cheesecake",
     badge: "",
     art: "chocolate",
-    image: asset("biscoff-cheesecake.jpg"),
+    image: asset("caramel-cheesecake.jpg"),
   },
   {
     id: 2,
@@ -63,7 +79,7 @@ const products = [
     note: "250–300 g · berry cream cheesecake",
     badge: "",
     art: "jar",
-    image: asset("biscoff-cheesecake.jpg"),
+    image: asset("mix-berry-cheesecake.jpg"),
   },
   {
     id: 3,
@@ -83,7 +99,7 @@ const products = [
     note: "300–400 g · assorted ganache cookies",
     badge: "",
     art: "cookie",
-    image: asset("cookies.jpg"),
+    image: asset("ganache-cookie-tin.jpg"),
   },
   {
     id: 5,
@@ -93,7 +109,7 @@ const products = [
     note: "300–400 g · Nutella-filled cookies",
     badge: "",
     art: "cookie",
-    image: asset("cookies.jpg"),
+    image: asset("nutella-cookie-tin.jpg"),
   },
   {
     id: 6,
@@ -103,7 +119,7 @@ const products = [
     note: "300–400 g · Biscoff cookies",
     badge: "FAN FAVOURITE",
     art: "cookie",
-    image: asset("cookies.jpg"),
+    image: asset("biscoff-cookie-tin.jpg"),
   },
   {
     id: 7,
@@ -113,7 +129,7 @@ const products = [
     note: "10–20 g · per piece",
     badge: "",
     art: "cookie",
-    image: asset("cookies.jpg"),
+    image: asset("nutella-cookies.jpg"),
     unit: "per piece",
   },
   {
@@ -124,7 +140,7 @@ const products = [
     note: "300–400 g · rich ganache cake bowl",
     badge: "",
     art: "jar",
-    image: asset("brownies.jpg"),
+    image: asset("ganache-cake-bowl.jpg"),
   },
   {
     id: 9,
@@ -134,7 +150,7 @@ const products = [
     note: "300–400 g · berry cake layers",
     badge: "",
     art: "jar",
-    image: asset("biscoff-cheesecake.jpg"),
+    image: asset("mix-berry-cake-bowl.jpg"),
   },
   {
     id: 10,
@@ -144,7 +160,7 @@ const products = [
     note: "300–400 g · Nutella chocolate layers",
     badge: "",
     art: "chocolate",
-    image: asset("molten-lava.jpg"),
+    image: asset("nutella-cake-bowl.jpg"),
   },
   {
     id: 11,
@@ -154,7 +170,7 @@ const products = [
     note: "300–400 g · Biscoff cake layers",
     badge: "SIGNATURE",
     art: "jar",
-    image: asset("biscoff-cheesecake.jpg"),
+    image: asset("biscoff-cake-bowl.jpg"),
   },
   {
     id: 12,
@@ -164,7 +180,7 @@ const products = [
     note: "Classic cupcake · vanilla or chocolate",
     badge: "",
     art: "cupcake",
-    image: asset("cupcakes.jpg"),
+    image: asset("cupcake-vanilla-chocolate.jpg"),
   },
   {
     id: 13,
@@ -174,7 +190,7 @@ const products = [
     note: "Chocolate chips · soft sponge",
     badge: "",
     art: "cupcake",
-    image: asset("cupcakes.jpg"),
+    image: asset("chocochip-cupcake.jpg"),
   },
   {
     id: 14,
@@ -184,7 +200,7 @@ const products = [
     note: "Ganache topped · chocolate sponge",
     badge: "",
     art: "cupcake",
-    image: asset("cupcakes.jpg"),
+    image: asset("ganache-cupcake.jpg"),
   },
   {
     id: 15,
@@ -194,7 +210,7 @@ const products = [
     note: "Nutella cream · chocolate sponge",
     badge: "",
     art: "cupcake",
-    image: asset("cupcakes.jpg"),
+    image: asset("nutella-cupcake.jpg"),
   },
   {
     id: 16,
@@ -204,7 +220,7 @@ const products = [
     note: "Cookie dough center · soft sponge",
     badge: "",
     art: "cupcake",
-    image: asset("cupcakes.jpg"),
+    image: asset("cookie-dough-cupcake.jpg"),
   },
   {
     id: 17,
@@ -214,9 +230,17 @@ const products = [
     note: "Biscoff cream · biscuit crumble",
     badge: "TOP PICK",
     art: "cupcake",
-    image: asset("cupcakes.jpg"),
+    image: asset("biscoff-cupcake.jpg"),
   },
-];
+].map((p) => {
+  const file = p.image.split("/").pop();
+  const stem = file.replace(/\.[^.]+$/, "");
+  return {
+    ...p,
+    slug: stem,
+    gallery: [p.image, asset(`${stem}-detail.jpg`)],
+  };
+});
 
 const reviews = [
   [
@@ -251,12 +275,36 @@ function menuPath(type) {
     : `/menu?type=${encodeURIComponent(type)}`;
 }
 
+function productPath(slug) {
+  return `/product/${slug}`;
+}
+
+function readProductSlug() {
+  const path = appPath();
+  const match = path.match(/^\/product\/([^/]+)\/?$/);
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function makeLineId(product, extras = {}) {
+  const message = (extras.message || "").trim();
+  const notes = (extras.notes || "").trim();
+  return `${product.id}::${message}::${notes}`;
+}
+
+function lineTotal(item) {
+  return item.price * item.qty;
+}
+
 function orderMessage(cart, total) {
   if (!cart.length) return "";
-  const lines = cart.map(
-    (item) =>
-      `• ${item.name} × ${item.qty} — ₹${(item.price * item.qty).toLocaleString("en-IN")}`,
-  );
+  const lines = cart.map((item) => {
+    const extras = [
+      item.message && `message: ${item.message}`,
+      item.notes && `notes: ${item.notes}`,
+    ].filter(Boolean);
+    const extra = extras.length ? ` (${extras.join("; ")})` : "";
+    return `• ${item.name} × ${item.qty}${extra} — ₹${lineTotal(item).toLocaleString("en-IN")}`;
+  });
   return `I'd like to order:\n${lines.join("\n")}\n\nSubtotal: ₹${total.toLocaleString("en-IN")}\n\n`;
 }
 
@@ -289,30 +337,47 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
-  const add = (product) => {
+  const add = (product, extras = {}) => {
+    const qty = extras.qty || 1;
+    const lineId = makeLineId(product, extras);
     setCart((items) => {
-      const found = items.find((item) => item.id === product.id);
+      const found = items.find((item) => item.lineId === lineId);
       return found
         ? items.map((item) =>
-            item.id === product.id ? { ...item, qty: item.qty + 1 } : item,
+            item.lineId === lineId
+              ? { ...item, qty: item.qty + qty }
+              : item,
           )
-        : [...items, { ...product, qty: 1 }];
+        : [
+            ...items,
+            {
+              ...product,
+              lineId,
+              qty,
+              message: (extras.message || "").trim(),
+              notes: (extras.notes || "").trim(),
+            },
+          ];
     });
     setCartOpen(true);
   };
-  const changeQty = (id, delta) =>
+  const changeQty = (lineId, delta) =>
     setCart((items) =>
       items.flatMap((item) =>
-        item.id === id
+        item.lineId === lineId
           ? [{ ...item, qty: item.qty + delta }].filter((x) => x.qty > 0)
           : [item],
       ),
     );
-  const total = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
+  const total = cart.reduce((sum, item) => sum + lineTotal(item), 0);
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
+  const productSlug = readProductSlug();
+  const activeProduct = products.find((p) => p.slug === productSlug);
 
   const page =
-    route === "/menu" ? (
+    productSlug && activeProduct ? (
+      <ProductPage product={activeProduct} add={add} navigate={navigate} />
+    ) : route === "/menu" || (productSlug && !activeProduct) ? (
       <MenuPage
         add={add}
         query={query}
@@ -339,6 +404,7 @@ export default function App() {
         navigate={navigate}
         route={route}
         menuType={menuType}
+        productType={activeProduct?.type}
         count={count}
         openCart={() => setCartOpen(true)}
         openSearch={() => navigate("/menu", { focusSearch: true })}
@@ -364,9 +430,16 @@ export default function App() {
   );
 }
 
-function isNavActive(label, route, menuType) {
-  if (label === "Cakes") return route === "/menu" && menuType === "Cheesecakes";
-  if (label === "Shop") return route === "/menu" && menuType !== "Cheesecakes";
+function isNavActive(label, route, menuType, productType) {
+  if (label === "Cakes") {
+    if (route.startsWith("/product/")) return productType === "Cheesecakes";
+    return route === "/menu" && menuType === "Cheesecakes";
+  }
+  if (label === "Shop") {
+    if (route.startsWith("/product/"))
+      return Boolean(productType) && productType !== "Cheesecakes";
+    return route === "/menu" && menuType !== "Cheesecakes";
+  }
   if (label === "Visit") return route === "/visit";
   if (label === "Contact") return route === "/contact";
   return false;
@@ -376,6 +449,7 @@ function Header({
   navigate,
   route,
   menuType,
+  productType,
   count,
   openCart,
   openSearch,
@@ -405,7 +479,9 @@ function Header({
         {nav.map(([label, href]) => (
           <button
             key={label}
-            className={isNavActive(label, route, menuType) ? "active" : ""}
+            className={
+              isNavActive(label, route, menuType, productType) ? "active" : ""
+            }
             onClick={() => navigate(href)}
           >
             {label}
@@ -440,7 +516,9 @@ function Header({
           {nav.map(([label, href]) => (
             <button
               key={label}
-              className={isNavActive(label, route, menuType) ? "active" : ""}
+              className={
+                isNavActive(label, route, menuType, productType) ? "active" : ""
+              }
               onClick={() => navigate(href)}
             >
               {label}
@@ -513,7 +591,12 @@ function HomePage({ navigate, add }) {
         </div>
         <div className="products">
           {products.slice(0, 4).map((p) => (
-            <ProductCard key={p.id} product={p} add={add} />
+            <ProductCard
+              key={p.id}
+              product={p}
+              add={add}
+              navigate={navigate}
+            />
           ))}
         </div>
       </section>
@@ -602,31 +685,33 @@ function HomePage({ navigate, add }) {
 
 function CatHero() {
   return (
-    <div className="cat-hero">
-      <div className="paper-sun" />
-      <div className="cat-scene">
-        <div className="cat-ear left" />
-        <div className="cat-ear right" />
-        <div className="cat-head">
-          <span className="cat-eye one" />
-          <span className="cat-eye two" />
-          <span className="cat-nose" />
-          <span className="cat-mouth" />
+    <div className="cat-hero-shell">
+      <div className="cat-hero">
+        <div className="paper-sun" />
+        <div className="cat-scene">
+          <div className="cat-ear left" />
+          <div className="cat-ear right" />
+          <div className="cat-head">
+            <span className="cat-eye one" />
+            <span className="cat-eye two" />
+            <span className="cat-nose" />
+            <span className="cat-mouth" />
+          </div>
+          <div className="cat-body" />
+          <div className="cat-tail" />
+          <div className="chef-hat">
+            <i />
+            <i />
+            <i />
+          </div>
+          <div className="apron">
+            DEV'S
+            <br />
+            <small>CAKE LAB</small>
+          </div>
         </div>
-        <div className="cat-body" />
-        <div className="cat-tail" />
-        <div className="chef-hat">
-          <i />
-          <i />
-          <i />
-        </div>
-        <div className="apron">
-          DEV'S
-          <br />
-          <small>CAKE LAB</small>
-        </div>
+        <div className="cake-crumbs">✦ · ✦ · ✦</div>
       </div>
-      <div className="cake-crumbs">✦ · ✦ · ✦</div>
       <div className="hero-note">A LITTLE CAT. A LOT OF CAKE.</div>
     </div>
   );
@@ -709,38 +794,142 @@ function DessertArt({ type, large }) {
   );
 }
 
-function ProductCard({ product, add }) {
+function ProductCard({ product, add, navigate }) {
+  const open = () => navigate(productPath(product.slug));
   return (
     <article className="product-card">
       <div className="product-visual">
-        {product.image ? (
-          <img
-            className="product-photo"
-            src={product.image}
-            alt={product.name}
-          />
-        ) : (
-          <DessertArt type={product.art} />
-        )}
+        <button className="product-hit" type="button" onClick={open}>
+          {product.image ? (
+            <img
+              className="product-photo"
+              src={product.image}
+              alt={product.name}
+            />
+          ) : (
+            <DessertArt type={product.art} />
+          )}
+        </button>
         {product.badge && <span className="badge">{product.badge}</span>}
-        <button className="quick-add" onClick={() => add(product)}>
+        <button
+          className="quick-add"
+          type="button"
+          onClick={() => add(product)}
+        >
           + Add
         </button>
       </div>
-      <div className="product-meta">
-        <div>
-          <h3>{product.name}</h3>
-          <p>{product.note}</p>
+      <button className="product-meta-btn" type="button" onClick={open}>
+        <div className="product-meta">
+          <div>
+            <h3>{product.name}</h3>
+            <p>{product.note}</p>
+          </div>
+          <strong>
+            ₹{product.price.toLocaleString("en-IN")}
+            {product.unit ? ` / ${product.unit}` : ""}
+          </strong>
         </div>
-        <strong>
-          ₹{product.price.toLocaleString("en-IN")}
-          {product.unit ? ` / ${product.unit}` : ""}
-        </strong>
-      </div>
+      </button>
       <div className="rating">
         <Star size={13} fill="currentColor" /> Dev's Cake Lab
       </div>
     </article>
+  );
+}
+
+function ProductPage({ product, add, navigate }) {
+  const gallery = product.gallery?.length ? product.gallery : [product.image];
+  const [photo, setPhoto] = useState(0);
+  const [qty, setQty] = useState(1);
+  const [message, setMessage] = useState("");
+  const [notes, setNotes] = useState("");
+  const linePrice = product.price * qty;
+
+  return (
+    <main>
+      <section className="wrap product-page">
+        <button className="text-link back-link" onClick={() => navigate("/menu")}>
+          ← Back to menu
+        </button>
+        <div className="product-page-grid">
+          <div className="product-gallery">
+            <div className="product-gallery-main">
+              <img src={gallery[photo]} alt={product.name} />
+              {product.badge && <span className="badge">{product.badge}</span>}
+            </div>
+            {gallery.length > 1 && (
+              <div className="product-thumbs">
+                {gallery.map((src, i) => (
+                  <button
+                    key={src}
+                    type="button"
+                    className={i === photo ? "active" : ""}
+                    onClick={() => setPhoto(i)}
+                    aria-label={`View photo ${i + 1}`}
+                  >
+                    <img src={src} alt="" />
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="product-detail">
+            <span className="kicker">{product.type}</span>
+            <h1>{product.name}</h1>
+            <p>{product.note}</p>
+            <div className="price-note">
+              <strong>₹{linePrice.toLocaleString("en-IN")}</strong>
+              <span>
+                ₹{product.price.toLocaleString("en-IN")}
+                {product.unit ? ` / ${product.unit}` : ""} × {qty}
+              </span>
+            </div>
+            <div className="qty product-qty">
+              <button
+                type="button"
+                aria-label="Decrease quantity"
+                onClick={() => setQty((n) => Math.max(1, n - 1))}
+              >
+                <Minus size={16} />
+              </button>
+              <span>{qty}</span>
+              <button
+                type="button"
+                aria-label="Increase quantity"
+                onClick={() => setQty((n) => n + 1)}
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+            <label className="product-field">
+              Message on cake
+              <input
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                placeholder="Optional — happy birthday, names..."
+              />
+            </label>
+            <label className="product-field">
+              Flavour / packing notes
+              <textarea
+                rows="3"
+                value={notes}
+                onChange={(e) => setNotes(e.target.value)}
+                placeholder="Optional — less sweet, extra packing..."
+              />
+            </label>
+            <button
+              className="primary"
+              type="button"
+              onClick={() => add(product, { qty, message, notes })}
+            >
+              Add to bag <ArrowRight size={17} />
+            </button>
+          </div>
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -823,7 +1012,12 @@ function MenuPage({
           <>
             <div className="products">
               {list.map((p) => (
-                <ProductCard key={p.id} product={p} add={add} />
+                <ProductCard
+                  key={p.id}
+                  product={p}
+                  add={add}
+                  navigate={navigate}
+                />
               ))}
             </div>
             {list.length === 0 && (
@@ -876,6 +1070,9 @@ function FAQ() {
 }
 
 function VisitPage() {
+  const mapsEmbed = `https://maps.google.com/maps?q=${encodeURIComponent(CONTACTS.mapsQuery)}&z=15&output=embed`;
+  const mapsLink = `https://maps.google.com/?q=${encodeURIComponent(CONTACTS.mapsQuery)}`;
+
   return (
     <main>
       <section className="page-hero wrap">
@@ -894,9 +1091,13 @@ function VisitPage() {
           <MapPin size={21} />
           <h2>Find us</h2>
           <p>
-            Dev's Cake Lab
-            <br />
-            Chandigarh, India
+            {CONTACTS.addressName}
+            {CONTACTS.addressLines.map((line) => (
+              <React.Fragment key={line}>
+                <br />
+                {line}
+              </React.Fragment>
+            ))}
           </p>
           <div className="hours">
             <b>Mon–Sat</b>
@@ -904,9 +1105,23 @@ function VisitPage() {
             <b>Sunday</b>
             <span>11:00 AM — 6:00 PM</span>
           </div>
+          <a
+            className="maps-link"
+            href={mapsLink}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open in Google Maps
+          </a>
         </div>
         <div className="visit-card map">
-          <span className="map-pin">✦</span>
+          <iframe
+            title="Dev's Cake Lab at P.D. Apartment, Ellisbridge, Ahmedabad"
+            src={mapsEmbed}
+            loading="lazy"
+            referrerPolicy="no-referrer-when-downgrade"
+            allowFullScreen
+          />
           <p>
             Pickup, custom cake consultations and dessert gifting are available
             here.
@@ -987,17 +1202,29 @@ function ContactPage({ cart = [], total = 0, orderTicket = 0 }) {
           <div>
             <Phone size={18} />
             <h3>Call</h3>
-            <p>+91 96382 41506</p>
+            <p>
+              <a href={`tel:${CONTACTS.phoneTel}`}>{CONTACTS.phoneDisplay}</a>
+            </p>
           </div>
           <div>
             <Mail size={18} />
             <h3>Email</h3>
-            <p>devcakelab.co@gmail.com</p>
+            <p>
+              <a href={`mailto:${CONTACTS.email}`}>{CONTACTS.email}</a>
+            </p>
           </div>
           <div>
             <span className="social-icon">◎</span>
             <h3>Instagram</h3>
-            <p>@Devcakelab</p>
+            <p>
+              <a
+                href={CONTACTS.instagramUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {CONTACTS.instagram}
+              </a>
+            </p>
           </div>
         </aside>
       </section>
@@ -1035,9 +1262,21 @@ function Footer({ navigate }) {
         </div>
         <div>
           <h4>FOLLOW</h4>
-          <button>Instagram</button>
-          <button>Facebook</button>
-          <button>WhatsApp</button>
+          <a
+            href={CONTACTS.instagramUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Instagram
+          </a>
+
+          <a
+            href={CONTACTS.whatsappUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            WhatsApp
+          </a>
         </div>
       </div>
       <div className="wrap footer-bottom">
@@ -1066,26 +1305,34 @@ function Cart({ open, setOpen, cart, total, changeQty, navigate, startOrder }) {
           <>
             <div className="cart-items">
               {cart.map((item) => (
-                <div className="cart-item" key={item.id}>
+                <div className="cart-item" key={item.lineId}>
                   <div className="cart-art">
-                    <DessertArt type={item.art} />
+                    {item.image ? (
+                      <img src={item.image} alt="" />
+                    ) : (
+                      <DessertArt type={item.art} />
+                    )}
                   </div>
                   <div>
                     <b>{item.name}</b>
-                    <small>₹{item.price.toLocaleString("en-IN")}</small>
+                    <small>
+                      ₹{item.price.toLocaleString("en-IN")}
+                      {item.message ? ` · “${item.message}”` : ""}
+                      {item.notes ? ` · ${item.notes}` : ""}
+                    </small>
                     <div className="qty">
-                      <button onClick={() => changeQty(item.id, -1)}>
+                      <button onClick={() => changeQty(item.lineId, -1)}>
                         <Minus size={13} />
                       </button>
                       <span>{item.qty}</span>
-                      <button onClick={() => changeQty(item.id, 1)}>
+                      <button onClick={() => changeQty(item.lineId, 1)}>
                         <Plus size={13} />
                       </button>
                     </div>
                   </div>
                   <button
                     className="remove"
-                    onClick={() => changeQty(item.id, -item.qty)}
+                    onClick={() => changeQty(item.lineId, -item.qty)}
                   >
                     <X size={16} />
                   </button>
