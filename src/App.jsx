@@ -627,12 +627,7 @@ function CatHero() {
         </div>
       </div>
       <div className="cake-crumbs">✦ · ✦ · ✦</div>
-      <div className="hero-note">
-        <span>+91 96382 41506</span>
-        <span>devscakelab@gmail.com</span>
-        <span>IG · DEVCAKELAB</span>
-        <span>FB · DEV'S CAKE LAB</span>
-      </div>
+      <div className="hero-note">A LITTLE CAT. A LOT OF CAKE.</div>
     </div>
   );
 }
@@ -997,17 +992,12 @@ function ContactPage({ cart = [], total = 0, orderTicket = 0 }) {
           <div>
             <Mail size={18} />
             <h3>Email</h3>
-            <p>devscakelab@gmail.com</p>
+            <p>devcakelab.co@gmail.com</p>
           </div>
           <div>
             <span className="social-icon">◎</span>
             <h3>Instagram</h3>
-            <p>@DEVCAKELAB</p>
-          </div>
-          <div>
-            <span className="social-icon">f</span>
-            <h3>Facebook</h3>
-            <p>DEV'S CAKE LAB</p>
+            <p>@Devcakelab</p>
           </div>
         </aside>
       </section>
