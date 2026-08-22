@@ -333,11 +333,12 @@ export default function App() {
   return (
     <div className="app">
       <div className="announcement">
-        FREE DELIVERY ON ORDERS OVER ₹750 <span>•</span> HAND-FINISHED IN SMALL
-        BATCHES <Heart size={13} fill="currentColor" />
+        HAND-FINISHED IN SMALL BATCHES <Heart size={13} fill="currentColor" />
       </div>
       <Header
         navigate={navigate}
+        route={route}
+        menuType={menuType}
         count={count}
         openCart={() => setCartOpen(true)}
         openSearch={() => navigate("/menu", { focusSearch: true })}
@@ -363,8 +364,18 @@ export default function App() {
   );
 }
 
+function isNavActive(label, route, menuType) {
+  if (label === "Cakes") return route === "/menu" && menuType === "Cheesecakes";
+  if (label === "Shop") return route === "/menu" && menuType !== "Cheesecakes";
+  if (label === "Visit") return route === "/visit";
+  if (label === "Contact") return route === "/contact";
+  return false;
+}
+
 function Header({
   navigate,
+  route,
+  menuType,
   count,
   openCart,
   openSearch,
@@ -392,7 +403,11 @@ function Header({
       </button>
       <nav>
         {nav.map(([label, href]) => (
-          <button key={label} onClick={() => navigate(href)}>
+          <button
+            key={label}
+            className={isNavActive(label, route, menuType) ? "active" : ""}
+            onClick={() => navigate(href)}
+          >
             {label}
           </button>
         ))}
@@ -423,7 +438,11 @@ function Header({
       {menuOpen && (
         <div className="mobile-nav">
           {nav.map(([label, href]) => (
-            <button key={label} onClick={() => navigate(href)}>
+            <button
+              key={label}
+              className={isNavActive(label, route, menuType) ? "active" : ""}
+              onClick={() => navigate(href)}
+            >
               {label}
             </button>
           ))}
