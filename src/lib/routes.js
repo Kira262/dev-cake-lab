@@ -24,7 +24,12 @@ export function productPath(slug) {
 export function readProductSlug() {
   const path = appPath();
   const match = path.match(/^\/product\/([^/]+)\/?$/);
-  return match ? decodeURIComponent(match[1]) : "";
+  if (!match) return "";
+  try {
+    return decodeURIComponent(match[1]);
+  } catch {
+    return "";
+  }
 }
 
 export function isNavActive(label, route) {

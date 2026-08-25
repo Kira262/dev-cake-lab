@@ -5,6 +5,7 @@ import { CatHero } from "../components/CatHero.jsx";
 import { CategoryCarousel } from "../components/CategoryCarousel.jsx";
 import { FAQ } from "../components/FAQ.jsx";
 import { ProductCard } from "../components/ProductCard.jsx";
+import { TypewriterWord } from "../components/TypewriterWord.jsx";
 
 export function HomePage({ navigate, add }) {
   return (
@@ -15,7 +16,9 @@ export function HomePage({ navigate, add }) {
           <h1>
             Baked with
             <br />
-            <i>obsession.</i>
+            <i>
+              <TypewriterWord />
+            </i>
           </h1>
           <p>
             Cheesecakes, cookie tins, cake bowls and cupcakes made with real

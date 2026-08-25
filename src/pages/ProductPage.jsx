@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { ArrowRight, Minus, Plus } from "lucide-react";
+import { DIET_NOTE } from "../data/catalog.js";
+import { MAX_LINE_QTY } from "../lib/cart.js";
+import { NOTES_MAX } from "../lib/validate.js";
 
 export function ProductPage({ product, add, navigate }) {
   const gallery = product.gallery?.length ? product.gallery : [product.image];
   const [photo, setPhoto] = useState(0);
   const [qty, setQty] = useState(1);
-  const [message, setMessage] = useState("");
   const [notes, setNotes] = useState("");
   const linePrice = product.price * qty;
 
@@ -44,6 +46,7 @@ export function ProductPage({ product, add, navigate }) {
             <span className="kicker">{product.type}</span>
             <h1>{product.name}</h1>
             <p>{product.note}</p>
+            <p className="diet-note">{DIET_NOTE}</p>
             <div className="price-note">
               <strong>₹{linePrice.toLocaleString("en-IN")}</strong>
               <span>
@@ -63,32 +66,25 @@ export function ProductPage({ product, add, navigate }) {
               <button
                 type="button"
                 aria-label="Increase quantity"
-                onClick={() => setQty((n) => n + 1)}
+                onClick={() => setQty((n) => Math.min(MAX_LINE_QTY, n + 1))}
               >
                 <Plus size={16} />
               </button>
             </div>
             <label className="product-field">
-              Message on cake
-              <input
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder="Optional — happy birthday, names..."
-              />
-            </label>
-            <label className="product-field">
               Flavour / packing notes
               <textarea
                 rows="3"
                 value={notes}
+                maxLength={NOTES_MAX}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional — less sweet, extra packing..."
+                placeholder="Optional — less sweet, extra packing, eggless..."
               />
             </label>
             <button
               className="primary"
               type="button"
-              onClick={() => add(product, { qty, message, notes })}
+              onClick={() => add(product, { qty, notes })}
             >
               Add to bag <ArrowRight size={17} />
             </button>

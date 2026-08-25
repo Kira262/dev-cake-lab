@@ -14,7 +14,18 @@ export const CONTACTS = {
     "P.D. Apartment, Opp Mira Madhav Flat, Ellisbridge, Ahmedabad, India 380006",
 };
 
-export function gmailComposeUrl({ to = CONTACTS.email, subject = "", body = "" } = {}) {
+export function whatsappOrderUrl(text = "") {
+  const url = new URL(CONTACTS.whatsappUrl);
+  const body = String(text || "").trim();
+  if (body) url.searchParams.set("text", body);
+  return url.toString();
+}
+
+export function gmailComposeUrl({
+  to = CONTACTS.email,
+  subject = "",
+  body = "",
+} = {}) {
   const params = new URLSearchParams({
     view: "cm",
     fs: "1",

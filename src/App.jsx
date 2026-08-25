@@ -1,7 +1,15 @@
 import React, { useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { products } from "./data/catalog.js";
-import { makeLineId, lineTotal } from "./lib/cart.js";
+import {
+  makeLineId,
+  lineTotal,
+  clampQty,
+  hydrateBag,
+  readBag,
+  saveBag,
+} from "./lib/cart.js";
+import { NOTES_MAX, clipText } from "./lib/validate.js";
 import { toLocation } from "./lib/paths.js";
 import { readMenuType, readPath, readProductSlug } from "./lib/routes.js";
 import { Cart } from "./components/Cart.jsx";
@@ -16,7 +24,7 @@ import { VisitPage } from "./pages/VisitPage.jsx";
 export default function App() {
   const [route, setRoute] = useState(readPath);
   const [menuType, setMenuType] = useState(readMenuType);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => hydrateBag(readBag(), products));
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -42,14 +50,21 @@ export default function App() {
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
+  useEffect(() => {
+    saveBag(cart);
+  }, [cart]);
+
   const add = (product, extras = {}) => {
-    const qty = extras.qty || 1;
-    const lineId = makeLineId(product, extras);
+    const qty = clampQty(extras.qty);
+    const notes = clipText(extras.notes, NOTES_MAX);
+    const lineId = makeLineId(product, { notes });
     setCart((items) => {
       const found = items.find((item) => item.lineId === lineId);
       return found
         ? items.map((item) =>
-            item.lineId === lineId ? { ...item, qty: item.qty + qty } : item,
+            item.lineId === lineId
+              ? { ...item, qty: clampQty(item.qty + qty) }
+              : item,
           )
         : [
             ...items,
@@ -57,8 +72,7 @@ export default function App() {
               ...product,
               lineId,
               qty,
-              message: (extras.message || "").trim(),
-              notes: (extras.notes || "").trim(),
+              notes,
             },
           ];
     });
@@ -66,11 +80,12 @@ export default function App() {
   };
   const changeQty = (lineId, delta) =>
     setCart((items) =>
-      items.flatMap((item) =>
-        item.lineId === lineId
-          ? [{ ...item, qty: item.qty + delta }].filter((x) => x.qty > 0)
-          : [item],
-      ),
+      items.flatMap((item) => {
+        if (item.lineId !== lineId) return [item];
+        const next = item.qty + delta;
+        if (next <= 0) return [];
+        return [{ ...item, qty: clampQty(next) }];
+      }),
     );
   const total = cart.reduce((sum, item) => sum + lineTotal(item), 0);
   const count = cart.reduce((sum, item) => sum + item.qty, 0);

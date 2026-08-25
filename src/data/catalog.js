@@ -1,5 +1,7 @@
 import { asset } from "../lib/paths.js";
 
+export const DIET_NOTE = "Eggless and less-sweet on request.";
+
 export const categories = [
   ["Cheesecakes", "Creamy layers, biscuit bases", "cake"],
   ["Cookie Tins", "300–400 g dessert tins", "tin"],

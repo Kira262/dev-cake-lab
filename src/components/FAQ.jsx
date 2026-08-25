@@ -1,12 +1,26 @@
 import { useState } from "react";
 import { Minus, Plus } from "lucide-react";
 
+const ITEMS = [
+  {
+    q: "How far ahead should I order a custom cake?",
+    a: "Give us 2–4 days. Rush orders depend on availability — ask on WhatsApp.",
+  },
+  {
+    q: "How does pickup and delivery work?",
+    a: "Pickup is free at P.D. Apartment, Ellisbridge. Mon–Sat 10:00 AM–8:00 PM, Sunday 11:00 AM–6:00 PM. Delivery charges depend on your area; we quote on WhatsApp after we see the address. We do not calculate fees on the site.",
+  },
+  {
+    q: "Do you offer eggless or less-sweet options?",
+    a: "Yes. Add it in the packing notes or tell us on WhatsApp and we will suggest suitable flavours.",
+  },
+  {
+    q: "How do I store my cake or desserts?",
+    a: "Most cakes should be refrigerated and brought to room temperature before serving.",
+  },
+];
+
 export function FAQ() {
-  const questions = [
-    "How far ahead should I order a custom cake?",
-    "Do you offer eggless or less-sweet options?",
-    "How do I store my cake or desserts?",
-  ];
   const [open, setOpen] = useState(0);
   return (
     <section className="wrap faq section">
@@ -16,23 +30,15 @@ export function FAQ() {
         <p>Everything you need before placing an order.</p>
       </div>
       <div>
-        {questions.map((q, i) => (
+        {ITEMS.map((item, i) => (
           <button
-            key={q}
+            key={item.q}
             className="faq-row"
             onClick={() => setOpen(open === i ? -1 : i)}
           >
-            <span>{q}</span>
+            <span>{item.q}</span>
             {open === i ? <Minus size={16} /> : <Plus size={16} />}{" "}
-            {open === i && (
-              <small>
-                {i === 0
-                  ? "For custom cakes, 2–4 days is ideal. Rush orders depend on availability."
-                  : i === 1
-                    ? "Yes. Message us with your preference and we will suggest suitable flavours."
-                    : "Most cakes should be refrigerated and brought to room temperature before serving."}
-              </small>
-            )}
+            {open === i && <small>{item.a}</small>}
           </button>
         ))}
       </div>

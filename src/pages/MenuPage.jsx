@@ -68,8 +68,8 @@ export function MenuPage({
           <div className="empty-state custom-cake-cta">
             <h3>Custom cakes, made for your date</h3>
             <p>
-              Tell us the occasion, flavour and size — we will sketch something
-              worth celebrating.
+              Give us 2–4 days. Tell us the occasion, flavour and size — we will
+              sketch something worth celebrating.
             </p>
             <button className="primary" onClick={() => navigate("/contact")}>
               Start a custom cake enquiry <ArrowRight size={17} />

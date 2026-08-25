@@ -195,6 +195,37 @@ button {
   color: var(--olive);
   font-weight: 500;
 }
+.typewriter-slot {
+  display: inline-block;
+  min-width: 11ch;
+}
+.typewriter-caret {
+  display: inline-block;
+  width: 0.07em;
+  height: 0.78em;
+  margin-left: 0.05em;
+  background: currentColor;
+  vertical-align: -0.04em;
+  animation: typewriter-blink 1s step-end infinite;
+}
+@keyframes typewriter-blink {
+  50% {
+    opacity: 0;
+  }
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .typewriter-caret {
+    animation: none;
+    display: none;
+  }
+}
 .hero p,
 .page-hero p {
   font-size: 15px;
@@ -1163,6 +1194,7 @@ button {
   border: 1px solid var(--line);
   border-radius: 28px;
   padding: 34px;
+  position: relative;
 }
 .contact-form label {
   display: block;
@@ -1182,9 +1214,151 @@ button {
   outline: 0;
   color: var(--ink);
 }
+.contact-form input.invalid,
+.contact-form textarea.invalid {
+  border-color: var(--rust);
+}
+.field-error {
+  display: block;
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--rust);
+}
+.field-hint {
+  display: block;
+  margin-top: 6px;
+  font-size: 10px;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: #9a8d80;
+}
+.honeypot {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+.form-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.form-actions .primary,
+.form-actions .secondary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  text-decoration: none;
+  width: 100%;
+}
+.form-actions .primary[aria-disabled="true"] {
+  opacity: 0.55;
+}
 .form-success {
   color: var(--olive);
   font-size: 12px;
+}
+.fulfil {
+  margin-bottom: 18px;
+}
+.fulfil-legend {
+  font-size: 11px;
+  font-weight: 700;
+  margin: 0 0 8px;
+}
+.fulfil-toggle {
+  display: flex;
+  gap: 8px;
+}
+.fulfil-toggle button {
+  flex: 1;
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 10px 12px;
+  font-size: 11px;
+  font-weight: 700;
+}
+.fulfil-toggle button.active {
+  background: var(--olive);
+  color: #fffaf2;
+  border-color: var(--olive);
+}
+.fulfil-note,
+.cart-foot .fulfil-note {
+  margin: 10px 0 0;
+  font-size: 10px;
+  font-weight: 400;
+  color: #84776b;
+  line-height: 1.5;
+}
+.fulfil-address {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  margin-top: 12px;
+}
+.fulfil-address textarea,
+.fulfil-address input {
+  width: 100%;
+  margin-top: 7px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: #fff;
+  outline: 0;
+  color: var(--ink);
+}
+.fulfil-address textarea {
+  resize: vertical;
+  min-height: 72px;
+}
+.fulfil-address textarea.invalid {
+  border-color: var(--rust);
+}
+.area-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0 0 8px;
+}
+.area-chips button {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 999px;
+  padding: 8px 11px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.area-chips button.active {
+  background: var(--olive);
+  color: #fffaf2;
+  border-color: var(--olive);
+}
+.diet-note {
+  font-size: 11px;
+  color: #84776b;
+  margin: 6px 0 0;
+  font-weight: 500;
+}
+.product-meta .diet-note {
+  margin-top: 4px;
+}
+.needed-by input[type="date"] {
+  width: 100%;
+  margin-top: 7px;
+  padding: 13px 14px;
+  border-radius: 13px;
+  border: 1px solid var(--line);
+  background: #fff;
+  outline: 0;
+  color: var(--ink);
+}
+.needed-by input[type="date"].invalid {
+  border-color: var(--rust);
 }
 .contact aside > div {
   padding: 22px 0;
@@ -1380,10 +1554,23 @@ footer {
   background: #f4e7d6;
   border-top: 1px solid var(--line);
 }
-.cart-foot > div {
+.cart-subtotal {
   display: flex;
   justify-content: space-between;
   font-size: 13px;
+  margin-bottom: 12px;
+}
+.cart-foot .fulfil {
+  margin-bottom: 12px;
+}
+.cart-foot .fulfil-legend {
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--rust);
+}
+.cart-foot .primary[aria-disabled="true"] {
+  opacity: 0.55;
 }
 .cart-foot p {
   font-size: 10px;
@@ -1392,6 +1579,13 @@ footer {
 .cart-foot .primary {
   width: 100%;
   justify-content: center;
+  text-decoration: none;
+  margin-top: 8px;
+}
+.cart-foot .text-link {
+  width: 100%;
+  justify-content: center;
+  margin-top: 10px;
 }
 .no-cat-hero {
   min-height: 505px;

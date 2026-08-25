@@ -52,6 +52,7 @@ export function VisitPage() {
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen
+            sandbox="allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-forms"
           />
           <p>
             Pickup, custom cake consultations and dessert gifting are available

@@ -1,7 +1,47 @@
+import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus, X } from "lucide-react";
 import { DessertArt } from "./DessertArt.jsx";
+import { FulfilmentFields } from "./FulfilmentFields.jsx";
+import { whatsappOrderUrl } from "../data/contacts.js";
+import { orderWhatsAppText } from "../lib/cart.js";
+import { readEnquiryDraft, saveEnquiryDraft } from "../lib/draft.js";
+import { isoDateFromToday, parseISODate } from "../lib/schedule.js";
+import { safeFulfilment } from "../lib/validate.js";
 
-export function Cart({ open, setOpen, cart, total, changeQty, navigate, startOrder }) {
+export function Cart({
+  open,
+  setOpen,
+  cart,
+  total,
+  changeQty,
+  navigate,
+  startOrder,
+}) {
+  const draft = readEnquiryDraft();
+  const [fulfilment, setFulfilment] = useState(() =>
+    safeFulfilment(draft.fulfilment),
+  );
+  const [address, setAddress] = useState(() => draft.address || "");
+  const [neededBy, setNeededBy] = useState(
+    () => parseISODate(draft.neededBy) ? draft.neededBy : "",
+  );
+
+  useEffect(() => {
+    if (!open) return;
+    const saved = readEnquiryDraft();
+    setFulfilment(safeFulfilment(saved.fulfilment));
+    setAddress(saved.address || "");
+    setNeededBy(parseISODate(saved.neededBy) ? saved.neededBy : "");
+  }, [open]);
+
+  useEffect(() => {
+    saveEnquiryDraft({ fulfilment, address, neededBy });
+  }, [fulfilment, address, neededBy]);
+
+  const whatsappHref = whatsappOrderUrl(
+    orderWhatsAppText(cart, total, { fulfilment, address, neededBy }),
+  );
+
   return (
     <>
       {open && <div className="overlay" onClick={() => setOpen(false)} />}
@@ -31,7 +71,6 @@ export function Cart({ open, setOpen, cart, total, changeQty, navigate, startOrd
                     <b>{item.name}</b>
                     <small>
                       ₹{item.price.toLocaleString("en-IN")}
-                      {item.message ? ` · “${item.message}”` : ""}
                       {item.notes ? ` · ${item.notes}` : ""}
                     </small>
                     <div className="qty">
@@ -54,13 +93,43 @@ export function Cart({ open, setOpen, cart, total, changeQty, navigate, startOrd
               ))}
             </div>
             <div className="cart-foot">
-              <div>
+              <div className="cart-subtotal">
                 <span>Subtotal</span>
                 <strong>₹{total.toLocaleString("en-IN")}</strong>
               </div>
-              <p>Delivery calculated at checkout.</p>
-              <button className="primary" onClick={startOrder}>
-                Continue to order <ArrowRight size={17} />
+              <label className="fulfil-address">
+                When
+                <input
+                  id="cart-needed-by"
+                  name="neededBy"
+                  type="date"
+                  min={isoDateFromToday(0)}
+                  max={isoDateFromToday(60)}
+                  value={neededBy}
+                  onChange={(e) => setNeededBy(e.target.value)}
+                />
+                <span className="field-hint">
+                  Optional — or skip and tell us on WhatsApp.
+                </span>
+              </label>
+              <FulfilmentFields
+                idPrefix="cart"
+                compact
+                fulfilment={fulfilment}
+                onFulfilment={setFulfilment}
+                address={address}
+                onAddress={setAddress}
+              />
+              <a
+                className="primary"
+                href={whatsappHref}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Order on WhatsApp <ArrowRight size={17} />
+              </a>
+              <button type="button" className="text-link" onClick={startOrder}>
+                Email instead
               </button>
             </div>
           </>
