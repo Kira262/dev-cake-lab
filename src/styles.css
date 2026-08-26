@@ -154,6 +154,7 @@ button {
 }
 .order-btn {
   padding: 12px 15px;
+  text-decoration: none;
 }
 .mobile-btn,
 .mobile-nav {
@@ -1254,8 +1255,9 @@ button {
   text-decoration: none;
   width: 100%;
 }
-.form-actions .primary[aria-disabled="true"] {
-  opacity: 0.55;
+.form-actions .field-hint {
+  margin: 0;
+  text-align: center;
 }
 .form-success {
   color: var(--olive);
@@ -1286,6 +1288,31 @@ button {
   background: var(--olive);
   color: #fffaf2;
   border-color: var(--olive);
+}
+.fulfil-pickup {
+  margin-top: 10px;
+}
+.fulfil-pickup-addr {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 400;
+  color: #75695d;
+  line-height: 1.55;
+}
+.fulfil-pickup .maps-link {
+  margin-top: 8px;
+}
+.fulfil-map {
+  overflow: hidden;
+  margin-top: 12px;
+  border-radius: 13px;
+  background: #e9dfd1;
+}
+.fulfil-map iframe {
+  display: block;
+  width: 100%;
+  height: 180px;
+  border: 0;
 }
 .fulfil-note,
 .cart-foot .fulfil-note {
@@ -1347,10 +1374,19 @@ button {
 .product-meta .diet-note {
   margin-top: 4px;
 }
-.needed-by input[type="date"] {
+.needed-by-row {
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 10px;
+}
+.needed-by-row .fulfil-address {
+  margin-top: 0;
+}
+.needed-by input[type="date"],
+.time-picker select {
   width: 100%;
   margin-top: 7px;
-  padding: 13px 14px;
+  padding: 13px 10px;
   border-radius: 13px;
   border: 1px solid var(--line);
   background: #fff;
@@ -1359,6 +1395,52 @@ button {
 }
 .needed-by input[type="date"].invalid {
   border-color: var(--rust);
+}
+.time-picker {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 7px;
+}
+.time-picker.invalid .time-part select {
+  border-color: var(--rust);
+}
+.time-part {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: inherit;
+  font-weight: inherit;
+}
+.time-part select {
+  margin-top: 0;
+  text-align: center;
+}
+.time-colon {
+  font-size: 16px;
+  font-weight: 700;
+  color: #84776b;
+  padding-top: 2px;
+}
+.time-period {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 0 0 auto;
+}
+.time-period button {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 8px;
+  padding: 4px 8px;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+}
+.time-period button.active {
+  background: var(--olive);
+  color: #fffaf2;
+  border-color: var(--olive);
 }
 .contact aside > div {
   padding: 22px 0;
@@ -1377,9 +1459,14 @@ button {
   color: inherit;
   text-decoration: none;
 }
-.contact aside a:hover {
-  color: var(--rust);
+.page-hero p .text-link {
+  display: inline;
+  padding: 0;
+  font-size: inherit;
+  font-weight: 700;
+  color: inherit;
   text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .social-icon {
   color: var(--rust);
@@ -1582,6 +1669,10 @@ footer {
   text-decoration: none;
   margin-top: 8px;
 }
+.cart-foot .field-hint {
+  margin-top: 8px;
+  text-align: center;
+}
 .cart-foot .text-link {
   width: 100%;
   justify-content: center;
@@ -1690,12 +1781,16 @@ footer {
     padding: 8px;
     box-shadow: var(--shadow);
   }
-  .mobile-nav button {
+  .mobile-nav button,
+  .mobile-nav a {
     border: 0;
     background: none;
     padding: 14px 12px;
     min-height: 44px;
     text-align: left;
+    color: inherit;
+    text-decoration: none;
+    font: inherit;
   }
   .mobile-nav button.active {
     color: var(--rust);

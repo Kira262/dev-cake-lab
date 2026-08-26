@@ -1,10 +1,9 @@
 import { useEffect, useState } from "react";
-import { ArrowRight, Mail, Phone } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { FulfilmentFields } from "../components/FulfilmentFields.jsx";
 import { IdentityFields } from "../components/IdentityFields.jsx";
 import { NeededByFields } from "../components/NeededByFields.jsx";
-import { CONTACTS, whatsappOrderUrl } from "../data/contacts.js";
-import { orderMessage } from "../lib/cart.js";
+import { CONTACTS, mapsLink, whatsappOrderUrl } from "../data/contacts.js";
 import { readEnquiryDraft, saveEnquiryDraft } from "../lib/draft.js";
 import { enquiryWhatsAppText, submitEnquiry } from "../lib/enquiry.js";
 import { parseNeededTime } from "../lib/schedule.js";
@@ -16,7 +15,6 @@ import {
   safeArea,
   safeFulfilment,
   scheduleReady,
-  scheduleRequired,
   validateAddress,
   validateArea,
   validateEmail,
@@ -27,12 +25,9 @@ import {
   validatePhone,
 } from "../lib/validate.js";
 
-export function ContactPage({
-  cart = [],
-  total = 0,
-  orderTicket = 0,
-  navigate,
-}) {
+const TOPIC = "Custom cake";
+
+export function CustomCakePage() {
   const draft = readEnquiryDraft();
   const [sent, setSent] = useState(false);
   const [sending, setSending] = useState(false);
@@ -53,11 +48,7 @@ export function ContactPage({
     () => parseNeededTime(draft.neededTime),
   );
   const [honey, setHoney] = useState("");
-  const [message, setMessage] = useState(() => orderMessage(cart, total));
-
-  useEffect(() => {
-    setMessage(orderMessage(cart, total));
-  }, [orderTicket]);
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     saveEnquiryDraft({
@@ -72,22 +63,22 @@ export function ContactPage({
     });
   }, [name, email, phone, fulfilment, address, area, neededBy, neededTime]);
 
-  const topic = cart.length ? "Menu order" : "Enquiry";
-  const minDays = minLeadDays(topic);
-  const dateRequired = scheduleRequired({ fulfilment });
+  const minDays = minLeadDays(TOPIC);
+  const dateOk = scheduleReady({
+    neededBy,
+    neededTime,
+    required: true,
+    minDays,
+  });
   const canWhatsApp =
     fulfilmentReady(fulfilment, address) &&
-    scheduleReady({
-      neededBy,
-      neededTime,
-      required: dateRequired,
-      minDays,
-    });
+    dateOk &&
+    message.trim().length >= 6;
   const whatsappHref = whatsappOrderUrl(
     enquiryWhatsAppText({
       name: name.trim(),
       phone: phone.trim(),
-      topic,
+      topic: TOPIC,
       message,
       fulfilment,
       address,
@@ -111,7 +102,6 @@ export function ContactPage({
 
   const collectErrors = (values, { forEmail = false } = {}) => {
     const delivery = safeFulfilment(values.fulfilment) === FULFILMENT.delivery;
-    const needDate = scheduleRequired({ fulfilment: values.fulfilment });
     const nameResult = forEmail
       ? validateName(values.name)
       : { ok: true, value: values.name };
@@ -120,23 +110,27 @@ export function ContactPage({
       ? validatePhone(values.phone)
       : { ok: true, value: values.phone };
     const messageResult = validateMessage(values.message);
+    const notesOk = String(values.message || "").trim().length >= 6;
     const areaResult = validateArea(values.area, { required: false });
     const addressResult = validateAddress(values.address, {
       required: delivery,
     });
     const dateResult = validateNeededBy(values.neededBy, {
-      required: needDate,
+      required: true,
       minDays,
     });
-    const timeResult = validateNeededTime(values.neededTime, {
-      required: needDate,
-    });
+    const timeResult = validateNeededTime(values.neededTime, { required: true });
     return {
       errors: {
         name: nameResult.ok ? "" : nameResult.error,
         email: emailResult.ok ? "" : emailResult.error,
         phone: phoneResult.ok ? "" : phoneResult.error,
-        message: messageResult.ok ? "" : messageResult.error,
+        message:
+          messageResult.ok && notesOk
+            ? ""
+            : messageResult.ok
+              ? "Tell us the occasion, size, and flavour."
+              : messageResult.error,
         area: areaResult.ok ? "" : areaResult.error,
         address: addressResult.ok ? "" : addressResult.error,
         neededBy: dateResult.ok ? "" : dateResult.error,
@@ -147,6 +141,7 @@ export function ContactPage({
         emailResult.ok &&
         phoneResult.ok &&
         messageResult.ok &&
+        notesOk &&
         areaResult.ok &&
         addressResult.ok &&
         dateResult.ok &&
@@ -188,7 +183,7 @@ export function ContactPage({
     try {
       await submitEnquiry({
         ...result.values,
-        topic,
+        topic: TOPIC,
       });
       setSent(true);
     } catch (err) {
@@ -205,19 +200,13 @@ export function ContactPage({
   return (
     <main>
       <section className="page-hero wrap">
-        <span className="kicker">GET IN TOUCH</span>
+        <span className="kicker">CUSTOM CAKES</span>
         <h1>
-          Let's make <i>something sweet.</i>
+          Made for your <i>date.</i>
         </h1>
         <p>
-          WhatsApp is fastest. Email if you prefer not to chat.{" "}
-          {navigate ? (
-            <button type="button" className="text-link" onClick={() => navigate("/custom")}>
-              Custom cakes have their own brief.
-            </button>
-          ) : (
-            "Custom cakes have their own brief."
-          )}
+          Give us 2–4 days. Tell us the occasion, how many you're feeding, and
+          the flavour — we'll sketch something on WhatsApp.
         </p>
       </section>
       <section className="wrap contact">
@@ -232,18 +221,18 @@ export function ContactPage({
             />
           </label>
           <NeededByFields
-            idPrefix="enquiry"
+            idPrefix="custom"
             neededBy={neededBy}
             onNeededBy={setNeededBy}
             neededTime={neededTime}
             onNeededTime={setNeededTime}
             minDays={minDays}
-            required={dateRequired}
+            required
             dateError={showError("neededBy") ? errors.neededBy : ""}
             timeError={showError("neededTime") ? errors.neededTime : ""}
           />
           <FulfilmentFields
-            idPrefix="enquiry"
+            idPrefix="custom"
             compact
             fulfilment={fulfilment}
             onFulfilment={(next) => {
@@ -264,23 +253,23 @@ export function ContactPage({
             addressError={showError("address") ? errors.address : ""}
           />
           <label>
-            Tell us more
+            Occasion, size, flavour
             <textarea
-              id="enquiry-message"
+              id="custom-message"
               name="message"
               rows="5"
               maxLength={MESSAGE_MAX}
               value={message}
               aria-invalid={showError("message") ? "true" : "false"}
               aria-describedby={
-                showError("message") ? "enquiry-message-error" : undefined
+                showError("message") ? "custom-message-error" : undefined
               }
               className={showError("message") ? "invalid" : ""}
               onChange={(e) => setMessage(e.target.value)}
-              placeholder="Flavour, size, notes…"
+              placeholder="Birthday for 12, vanilla sponge, less sweet, pale pink…"
             />
             {showError("message") && (
-              <span className="field-error" id="enquiry-message-error">
+              <span className="field-error" id="custom-message-error">
                 {errors.message}
               </span>
             )}
@@ -297,12 +286,6 @@ export function ContactPage({
               errors={errors}
             />
           )}
-          {cart.length > 0 && (
-            <p className="form-success">
-              Your bag ({cart.reduce((sum, item) => sum + item.qty, 0)} items ·
-              ₹{total.toLocaleString("en-IN")}) is included in this enquiry.
-            </p>
-          )}
           {sendError && <p className="field-error">{sendError}</p>}
           <div className="form-actions">
             <a
@@ -318,7 +301,7 @@ export function ContactPage({
                 setErrors(collectErrors(fieldValues).errors);
               }}
             >
-              WhatsApp this enquiry <ArrowRight size={17} />
+              WhatsApp this cake <ArrowRight size={17} />
             </a>
             <p className="field-hint">
               Opens a draft — tap Send in WhatsApp or we won't see the order.
@@ -347,30 +330,30 @@ export function ContactPage({
         </form>
         <aside>
           <div>
-            <Phone size={18} />
-            <h3>Call</h3>
-            <p>
-              <a href={`tel:${CONTACTS.phoneTel}`}>{CONTACTS.phoneDisplay}</a>
-            </p>
+            <h3>Lead time</h3>
+            <p>2–4 days. Rush orders depend on the diary — ask on WhatsApp.</p>
           </div>
           <div>
-            <Mail size={18} />
-            <h3>Email</h3>
+            <h3>Pickup</h3>
             <p>
-              <a href={`mailto:${CONTACTS.email}`}>{CONTACTS.email}</a>
+              {CONTACTS.addressName}
+              <br />
+              {CONTACTS.addressLines.join(", ")}
             </p>
+            <a
+              className="maps-link"
+              href={mapsLink()}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open in Google Maps
+            </a>
           </div>
           <div>
-            <span className="social-icon">◎</span>
-            <h3>Instagram</h3>
+            <h3>Quotes</h3>
             <p>
-              <a
-                href={CONTACTS.instagramUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {CONTACTS.instagram}
-              </a>
+              We don't price custom cakes on the site. Send the brief and we'll
+              quote on WhatsApp.
             </p>
           </div>
         </aside>

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus, X } from "lucide-react";
 import { DessertArt } from "./DessertArt.jsx";
+import { NeededByFields } from "./NeededByFields.jsx";
 import { FulfilmentFields } from "./FulfilmentFields.jsx";
 import { whatsappOrderUrl } from "../data/contacts.js";
 import { orderWhatsAppText } from "../lib/cart.js";
 import { readEnquiryDraft, saveEnquiryDraft } from "../lib/draft.js";
-import { isoDateFromToday, parseISODate } from "../lib/schedule.js";
+import { parseISODate, parseNeededTime } from "../lib/schedule.js";
 import { safeFulfilment } from "../lib/validate.js";
 
 export function Cart({
@@ -23,7 +24,10 @@ export function Cart({
   );
   const [address, setAddress] = useState(() => draft.address || "");
   const [neededBy, setNeededBy] = useState(
-    () => parseISODate(draft.neededBy) ? draft.neededBy : "",
+    () => (parseISODate(draft.neededBy) ? draft.neededBy : ""),
+  );
+  const [neededTime, setNeededTime] = useState(
+    () => parseNeededTime(draft.neededTime),
   );
 
   useEffect(() => {
@@ -32,14 +36,20 @@ export function Cart({
     setFulfilment(safeFulfilment(saved.fulfilment));
     setAddress(saved.address || "");
     setNeededBy(parseISODate(saved.neededBy) ? saved.neededBy : "");
+    setNeededTime(parseNeededTime(saved.neededTime));
   }, [open]);
 
   useEffect(() => {
-    saveEnquiryDraft({ fulfilment, address, neededBy });
-  }, [fulfilment, address, neededBy]);
+    saveEnquiryDraft({ fulfilment, address, neededBy, neededTime });
+  }, [fulfilment, address, neededBy, neededTime]);
 
   const whatsappHref = whatsappOrderUrl(
-    orderWhatsAppText(cart, total, { fulfilment, address, neededBy }),
+    orderWhatsAppText(cart, total, {
+      fulfilment,
+      address,
+      neededBy,
+      neededTime,
+    }),
   );
 
   return (
@@ -97,21 +107,14 @@ export function Cart({
                 <span>Subtotal</span>
                 <strong>₹{total.toLocaleString("en-IN")}</strong>
               </div>
-              <label className="fulfil-address">
-                When
-                <input
-                  id="cart-needed-by"
-                  name="neededBy"
-                  type="date"
-                  min={isoDateFromToday(0)}
-                  max={isoDateFromToday(60)}
-                  value={neededBy}
-                  onChange={(e) => setNeededBy(e.target.value)}
-                />
-                <span className="field-hint">
-                  Optional — or skip and tell us on WhatsApp.
-                </span>
-              </label>
+              <NeededByFields
+                idPrefix="cart"
+                legend="When"
+                neededBy={neededBy}
+                onNeededBy={setNeededBy}
+                neededTime={neededTime}
+                onNeededTime={setNeededTime}
+              />
               <FulfilmentFields
                 idPrefix="cart"
                 compact
@@ -128,6 +131,9 @@ export function Cart({
               >
                 Order on WhatsApp <ArrowRight size={17} />
               </a>
+              <p className="field-hint">
+                Opens a draft — tap Send in WhatsApp or we won't see the order.
+              </p>
               <button type="button" className="text-link" onClick={startOrder}>
                 Email instead
               </button>

@@ -71,8 +71,8 @@ export function MenuPage({
               Give us 2–4 days. Tell us the occasion, flavour and size — we will
               sketch something worth celebrating.
             </p>
-            <button className="primary" onClick={() => navigate("/contact")}>
-              Start a custom cake enquiry <ArrowRight size={17} />
+            <button className="primary" onClick={() => navigate("/custom")}>
+              Start a custom cake brief <ArrowRight size={17} />
             </button>
           </div>
         ) : (

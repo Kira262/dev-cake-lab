@@ -1,11 +1,11 @@
-import { isoDateFromToday, parseISODate } from "./schedule.js";
+import { isoDateFromToday, parseISODate, parseNeededTime } from "./schedule.js";
 
 export const NAME_MAX = 80;
 export const EMAIL_MAX = 80;
 export const ADDRESS_MAX = 240;
 export const MESSAGE_MAX = 1200;
 export const NOTES_MAX = 300;
-export const ENQUIRY_TOPICS = ["Menu order", "Custom cake", "Collaboration"];
+export const ENQUIRY_TOPICS = ["Menu order", "Custom cake", "Enquiry"];
 export const FULFILMENT = {
   pickup: "pickup",
   delivery: "delivery",
@@ -18,7 +18,6 @@ export const DELIVERY_AREAS = [
   "Paldi",
   "Other",
 ];
-export const TIME_SLOTS = ["Morning", "Evening"];
 
 const EMAIL_RE =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
@@ -129,24 +128,29 @@ export function validateArea(value, { required = false } = {}) {
   return { ok: true, value: area };
 }
 
-export function fulfilmentReady(fulfilment, address, area = "") {
+export function fulfilmentReady(fulfilment, address) {
   const delivery = safeFulfilment(fulfilment) === FULFILMENT.delivery;
-  return (
-    validateArea(area, { required: delivery }).ok &&
-    validateAddress(address, { required: delivery }).ok
-  );
+  return validateAddress(address, { required: delivery }).ok;
 }
 
-export function safeTimeSlot(value) {
-  return TIME_SLOTS.includes(value) ? value : "";
+export function validateNeededTime(value, { required = false } = {}) {
+  const raw = String(value || "").trim();
+  if (!raw) {
+    if (!required) return { ok: true, value: "" };
+    return { ok: false, error: "Pick a time so we can plan the bake." };
+  }
+  const time = parseNeededTime(raw);
+  if (!time) {
+    return {
+      ok: false,
+      error: "Enter a valid time, like 4:30 PM.",
+    };
+  }
+  return { ok: true, value: time };
 }
 
-export function scheduleRequired({ fulfilment, topic, hasCart = false } = {}) {
-  return (
-    safeFulfilment(fulfilment) === FULFILMENT.delivery ||
-    topic === "Custom cake" ||
-    hasCart
-  );
+export function scheduleRequired({ fulfilment } = {}) {
+  return safeFulfilment(fulfilment) === FULFILMENT.delivery;
 }
 
 export function minLeadDays(topic) {
@@ -178,24 +182,15 @@ export function validateNeededBy(value, { required = false, minDays = 0 } = {}) 
   return { ok: true, value: raw };
 }
 
-export function validateTimeSlot(value, { required = false } = {}) {
-  const slot = safeTimeSlot(value);
-  if (!slot) {
-    if (!required) return { ok: true, value: "" };
-    return { ok: false, error: "Pick morning or evening." };
-  }
-  return { ok: true, value: slot };
-}
-
 export function scheduleReady({
   neededBy,
-  slot,
+  neededTime = "",
   required = false,
   minDays = 0,
 } = {}) {
   return (
     validateNeededBy(neededBy, { required, minDays }).ok &&
-    validateTimeSlot(slot, { required }).ok
+    validateNeededTime(neededTime, { required }).ok
   );
 }
 
@@ -203,7 +198,8 @@ export function safeTopic(topic, { allowMenuOrder = false } = {}) {
   const allowed = allowMenuOrder
     ? ENQUIRY_TOPICS
     : ENQUIRY_TOPICS.filter((item) => item !== "Menu order");
-  return allowed.includes(topic) ? topic : "Custom cake";
+  if (topic === "Collaboration") return "Enquiry";
+  return allowed.includes(topic) ? topic : "Enquiry";
 }
 
 export function clipText(value, max) {

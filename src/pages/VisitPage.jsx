@@ -1,11 +1,8 @@
 import React from "react";
 import { MapPin } from "lucide-react";
-import { CONTACTS } from "../data/contacts.js";
+import { CONTACTS, mapsEmbedSrc, mapsLink } from "../data/contacts.js";
 
 export function VisitPage() {
-  const mapsEmbed = `https://maps.google.com/maps?q=${encodeURIComponent(CONTACTS.mapsQuery)}&z=15&output=embed`;
-  const mapsLink = `https://maps.google.com/?q=${encodeURIComponent(CONTACTS.mapsQuery)}`;
-
   return (
     <main>
       <section className="page-hero wrap">
@@ -38,7 +35,7 @@ export function VisitPage() {
           </div>
           <a
             className="maps-link"
-            href={mapsLink}
+            href={mapsLink()}
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -47,8 +44,8 @@ export function VisitPage() {
         </div>
         <div className="visit-card map">
           <iframe
-            title="Dev's Cake Lab at P.D. Apartment, Ellisbridge, Ahmedabad"
-            src={mapsEmbed}
+            title="Dev's Cake Lab at 401, P.D. Apartment, Ellisbridge, Ahmedabad"
+            src={mapsEmbedSrc()}
             loading="lazy"
             referrerPolicy="no-referrer-when-downgrade"
             allowFullScreen

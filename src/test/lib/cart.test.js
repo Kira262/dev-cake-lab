@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { mapsLink } from "../../data/contacts.js";
 import { clampQty, fulfilmentNote, hydrateBag, lineTotal, MAX_LINE_QTY, orderMessage } from "../../lib/cart.js";
 
 describe("clampQty", () => {
@@ -64,5 +65,12 @@ describe("fulfilmentNote", () => {
   it("leaves address open when delivery details are missing", () => {
     const text = fulfilmentNote({ fulfilment: "delivery" });
     expect(text).toContain("Address to confirm.");
+  });
+
+  it("includes the full shop address and maps link for pickup", () => {
+    const text = fulfilmentNote({ fulfilment: "pickup" });
+    expect(text).toContain("401, P.D. Apartment");
+    expect(text).toContain("Ellisbridge, Ahmedabad, India 380006");
+    expect(text).toContain(mapsLink());
   });
 });

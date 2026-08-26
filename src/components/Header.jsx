@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { asset } from "../lib/paths.js";
 import { isNavActive } from "../lib/routes.js";
+import { enquireWhatsAppUrl } from "../lib/enquiry.js";
 
 export function Header({
   navigate,
@@ -63,9 +64,14 @@ export function Header({
           <ShoppingBag size={17} />
           {count > 0 && <i>{count}</i>}
         </button>
-        <button className="order-btn" onClick={() => navigate("/contact")}>
+        <a
+          className="order-btn"
+          href={enquireWhatsAppUrl()}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
           Enquire <ArrowUpRight size={15} />
-        </button>
+        </a>
         <button className="mobile-btn" onClick={() => setMenuOpen(!menuOpen)}>
           {menuOpen ? <X /> : <Menu />}
         </button>
@@ -82,7 +88,14 @@ export function Header({
             </button>
           ))}
           <button onClick={openSearch}>Search desserts</button>
-          <button onClick={() => navigate("/contact")}>Enquire</button>
+          <a
+            href={enquireWhatsAppUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => setMenuOpen(false)}
+          >
+            Enquire
+          </a>
         </div>
       )}
     </header>
