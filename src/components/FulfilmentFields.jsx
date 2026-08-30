@@ -118,7 +118,7 @@ export function FulfilmentFields({
         )
       ) : (
         <p className="fulfil-note">
-          Free pickup at Ellisbridge. Delivery charges depend on your area.
+          Free pickup at Paldi. Delivery charges depend on your area.
         </p>
       )}
     </div>

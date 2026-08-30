@@ -38,11 +38,13 @@ export function formatDisplayDate(iso) {
   });
 }
 
-export function whenNote(when = "") {
+export function whenNote(when = "", slot = "") {
   const date = parseISODate(when);
   if (!date) {
     return "Date to confirm — we can pick a time on WhatsApp.";
   }
+  const time = String(slot || "").trim();
+  if (time) return `Needed: ${formatDisplayDate(when)}, ${time}.`;
   return `Needed: ${formatDisplayDate(when)}.`;
 }
 
@@ -53,7 +55,7 @@ export function scheduleNote({
 } = {}) {
   if (!neededBy) return "";
   const when = slot
-    ? `${formatDisplayDate(neededBy)}, ${String(slot).toLowerCase()}`
+    ? `${formatDisplayDate(neededBy)}, ${slot}`
     : formatDisplayDate(neededBy);
   const lead =
     minDays >= 2

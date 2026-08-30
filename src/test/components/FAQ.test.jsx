@@ -11,6 +11,6 @@ describe("FAQ", () => {
     expect(screen.getByText(/2–4 days/i)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: /pickup and delivery/i }));
     expect(screen.getByText(/charges depend on your area/i)).toBeTruthy();
-    expect(screen.getByText(/ellisbridge/i)).toBeTruthy();
+    expect(screen.getByText(/pritam nagar/i)).toBeTruthy();
   });
 });

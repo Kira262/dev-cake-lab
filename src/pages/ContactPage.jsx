@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Mail, Phone } from "lucide-react";
+import { InstagramIcon } from "../components/InstagramIcon.jsx";
 import { FulfilmentFields } from "../components/FulfilmentFields.jsx";
 import { NeededByFields } from "../components/NeededByFields.jsx";
 import { CONTACTS, gmailComposeUrl, whatsappOrderUrl } from "../data/contacts.js";
@@ -213,7 +214,7 @@ export function ContactPage({ cart = [], total = 0, orderTicket = 0 }) {
           Let's make <i>something sweet.</i>
         </h1>
         <p>
-          Fastest on WhatsApp. Pickup is free at Ellisbridge. Delivery charges
+          Fastest on WhatsApp. Pickup is free at Paldi. Delivery charges
           depend on your area — we'll confirm before sending.
         </p>
       </section>
@@ -448,7 +449,7 @@ export function ContactPage({ cart = [], total = 0, orderTicket = 0 }) {
             </p>
           </div>
           <div>
-            <span className="social-icon">◎</span>
+            <InstagramIcon className="social-icon" size={18} />
             <h3>Instagram</h3>
             <p>
               <a

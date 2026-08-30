@@ -35,7 +35,7 @@ async function fillSchedule(user, days = 3) {
   fireEvent.change(screen.getByLabelText(/^needed by/i), {
     target: { value: isoDateFromToday(days) },
   });
-  await user.click(screen.getByRole("radio", { name: /^morning$/i }));
+  await user.selectOptions(screen.getByLabelText(/^hour$/i), "10");
 }
 
 describe("ContactPage enquiry form", () => {
@@ -160,7 +160,7 @@ describe("ContactPage enquiry form", () => {
     expect(body.phone).toBe("+919876543210");
     expect(body.email).toBe("");
     expect(body.neededBy).toBe(isoDateFromToday(3));
-    expect(body.slot).toBe("Morning");
+    expect(body.slot).toBe("10:00 AM");
   });
 
   it("prefills the cart message but still requires name and phone", async () => {

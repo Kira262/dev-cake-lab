@@ -19,7 +19,7 @@ export function buildEnquiryPayload(values) {
     address:
       values.fulfilment === "delivery"
         ? values.address || "(missing)"
-        : "Pickup at Ellisbridge, Ahmedabad",
+        : `Pickup at ${CONTACTS.pickupPlace}`,
     neededBy: values.neededBy || "(not set)",
     slot: values.slot || "(not set)",
     message: values.message || "(No extra notes)",

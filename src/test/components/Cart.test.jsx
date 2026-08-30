@@ -44,7 +44,7 @@ describe("Cart fulfilment", () => {
   it("always offers WhatsApp, with pickup and date to confirm by default", () => {
     renderCart();
     const text = whatsappText();
-    expect(text).toContain("Pickup at Ellisbridge");
+    expect(text).toContain("Pickup at Paldi, Ahmedabad");
     expect(text).toContain("Date to confirm — we can pick a time on WhatsApp.");
   });
 

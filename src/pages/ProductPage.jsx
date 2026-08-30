@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus } from "lucide-react";
 import { DIET_NOTE } from "../data/catalog.js";
 import { MAX_LINE_QTY } from "../lib/cart.js";
@@ -11,8 +11,12 @@ export function ProductPage({ product, add, navigate }) {
   const [notes, setNotes] = useState("");
   const linePrice = product.price * qty;
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [product.slug, product.name]);
+
   return (
-    <main>
+    <main id="top">
       <section className="wrap product-page">
         <button
           className="text-link back-link"

@@ -18,7 +18,7 @@ export function menuPath(type) {
 }
 
 export function productPath(slug) {
-  return `/product/${slug}`;
+  return `/product/${slug}#top`;
 }
 
 export function readProductSlug() {

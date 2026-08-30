@@ -2,7 +2,7 @@ import { useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { categories } from "../data/catalog.js";
 import { menuPath } from "../lib/routes.js";
-import { DessertArt } from "./DessertArt.jsx";
+import { CategoryIcon } from "./CategoryIcon.jsx";
 
 export function CategoryCarousel({ navigate }) {
   const scroller = useRef(null);
@@ -64,7 +64,7 @@ export function CategoryCarousel({ navigate }) {
             className={`category-card ${art}`}
             data-category={title}
           >
-            <DessertArt type={art} />
+            <CategoryIcon type={art} />
             <b>{title}</b>
             <small>{caption}</small>
             <ArrowUpRight size={15} />

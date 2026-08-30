@@ -1,6 +1,7 @@
 import { ArrowRight } from "lucide-react";
 import { products, reviews } from "../data/catalog.js";
 import { asset } from "../lib/paths.js";
+import { productPath } from "../lib/routes.js";
 import { CatHero } from "../components/CatHero.jsx";
 import { CategoryCarousel } from "../components/CategoryCarousel.jsx";
 import { FAQ } from "../components/FAQ.jsx";
@@ -21,7 +22,7 @@ export function HomePage({ navigate, add }) {
             </i>
           </h1>
           <p>
-            Cheesecakes, cookie tins, cake bowls and cupcakes made with real
+            Cheesecakes, cookie lava tins, cake bowls and cupcakes made with real
             butter, good chocolate and a ridiculous amount of care.
           </p>
           <div className="hero-actions">
@@ -47,7 +48,7 @@ export function HomePage({ navigate, add }) {
             <span className="kicker">SOMETHING FOR EVERY SWEET TOOTH</span>
             <h2>Shop by category</h2>
             <p>
-              Cheesecakes, cookie tins, cake bowls and cupcakes — pick a
+              Cheesecakes, cookie lava tins, cake bowls and cupcakes — pick a
               category and browse.
             </p>
           </div>
@@ -124,13 +125,13 @@ export function HomePage({ navigate, add }) {
           </p>
           <div className="price-note">
             <strong>₹350</strong>
-            <span>250–300 g</span>
+            <span>250 g</span>
           </div>
           <button
             className="primary"
-            onClick={() => navigate("/product/biscoff-cheesecake")}
+            onClick={() => navigate(productPath("biscoff-cheesecake"))}
           >
-            Order this favourite <ArrowRight size={17} />
+            Order Chef's special <ArrowRight size={17} />
           </button>
         </div>
       </section>

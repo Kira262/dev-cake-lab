@@ -83,7 +83,7 @@ describe("enquiryWhatsAppText", () => {
     expect(text).toContain("Hi, I'm Pavan.");
     expect(text).toContain("Phone: +919876543210");
     expect(text).toContain("Saturday pickup");
-    expect(text).toContain("Pickup at Ellisbridge");
+    expect(text).toContain("Pickup at Paldi");
   });
 
   it("includes the delivery address for a quote", () => {
@@ -93,12 +93,13 @@ describe("enquiryWhatsAppText", () => {
       area: "Bodakdev",
       address: "near ISRO",
       neededBy: "2026-08-28",
-      slot: "Evening",
+      slot: "06:00 PM",
       message: "Tonight",
     });
     expect(text).toContain("Address:\nnear ISRO");
     expect(text).toContain("Delivery requested to Bodakdev");
     expect(text).toContain("confirm delivery charges");
     expect(text).toContain("Needed by:");
+    expect(text).toContain("06:00 PM");
   });
 });

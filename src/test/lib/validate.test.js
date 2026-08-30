@@ -4,6 +4,7 @@ import {
   NOTES_MAX,
   clipText,
   safeTopic,
+  safeTimeSlot,
   validateEmail,
   validateMessage,
   validateName,
@@ -11,6 +12,7 @@ import {
   validateAddress,
   validateArea,
   validateNeededBy,
+  validateTimeSlot,
 } from "../../lib/validate.js";
 import { isoDateFromToday } from "../../lib/schedule.js";
 
@@ -99,6 +101,19 @@ describe("validateArea", () => {
     expect(validateArea("Navrangpura", { required: true }).value).toBe(
       "Navrangpura",
     );
+  });
+});
+
+describe("validateTimeSlot", () => {
+  it("stores a 12-hour clock time and rejects morning/evening labels", () => {
+    expect(safeTimeSlot("Morning")).toBe("");
+    expect(safeTimeSlot("10:00 AM")).toBe("10:00 AM");
+    expect(safeTimeSlot("4:30 PM")).toBe("04:30 PM");
+    expect(validateTimeSlot("", { required: true }).ok).toBe(false);
+    expect(validateTimeSlot("10:15 AM", { required: true })).toEqual({
+      ok: true,
+      value: "10:15 AM",
+    });
   });
 });
 

@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { isNavActive, readProductSlug } from "../../lib/routes.js";
+import { isNavActive, productPath, readProductSlug } from "../../lib/routes.js";
 
 describe("readProductSlug", () => {
   afterEach(() => {
@@ -25,5 +25,13 @@ describe("isNavActive", () => {
     expect(isNavActive("Shop", "/product/biscoff-cheesecake")).toBe(true);
     expect(isNavActive("Visit", "/visit")).toBe(true);
     expect(isNavActive("Contact", "/contact")).toBe(true);
+  });
+});
+
+describe("productPath", () => {
+  it("opens the product at the top of the page", () => {
+    expect(productPath("biscoff-cheesecake")).toBe(
+      "/product/biscoff-cheesecake#top",
+    );
   });
 });

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Heart } from "lucide-react";
+import { Check, Heart } from "lucide-react";
 import { products } from "./data/catalog.js";
 import {
   makeLineId,
@@ -30,6 +30,7 @@ export default function App() {
   const [query, setQuery] = useState("");
   const [focusSearch, setFocusSearch] = useState(false);
   const [orderTicket, setOrderTicket] = useState(0);
+  const [toast, setToast] = useState(null);
 
   const syncFromLocation = () => {
     setRoute(readPath());
@@ -41,7 +42,7 @@ export default function App() {
     syncFromLocation();
     setMenuOpen(false);
     if (options.focusSearch) setFocusSearch(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    window.scrollTo(0, 0);
   };
 
   useEffect(() => {
@@ -76,8 +77,19 @@ export default function App() {
             },
           ];
     });
-    setCartOpen(true);
+    setCartOpen(false);
+    setToast({
+      id: Date.now(),
+      name: product.name,
+      qty,
+    });
   };
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = window.setTimeout(() => setToast(null), 2800);
+    return () => window.clearTimeout(timer);
+  }, [toast]);
   const changeQty = (lineId, delta) =>
     setCart((items) =>
       items.flatMap((item) => {
@@ -91,6 +103,10 @@ export default function App() {
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
   const productSlug = readProductSlug();
   const activeProduct = products.find((p) => p.slug === productSlug);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [route, productSlug]);
 
   const page =
     productSlug && activeProduct ? (
@@ -142,6 +158,27 @@ export default function App() {
           navigate("/contact");
         }}
       />
+      {toast && (
+        <div className="cart-toast" role="status" aria-live="polite">
+          <Check size={18} strokeWidth={2.4} />
+          <div>
+            <strong>Added to cart</strong>
+            <span>
+              {toast.name}
+              {toast.qty > 1 ? ` × ${toast.qty}` : ""}
+            </span>
+          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setToast(null);
+              setCartOpen(true);
+            }}
+          >
+            View bag
+          </button>
+        </div>
+      )}
     </div>
   );
 }

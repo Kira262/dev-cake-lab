@@ -18,7 +18,9 @@ describe("ProductPage caps", () => {
   it("has no icing message field and limits notes and quantity", async () => {
     const user = userEvent.setup();
     const add = vi.fn();
+    const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     render(<ProductPage product={product} add={add} navigate={vi.fn()} />);
+    expect(scrollTo).toHaveBeenCalledWith(0, 0);
 
     expect(screen.queryByLabelText(/message on cake/i)).toBeNull();
     expect(
@@ -31,5 +33,6 @@ describe("ProductPage caps", () => {
       await user.click(increase);
     }
     expect(screen.getByText(`₹${product.price.toLocaleString("en-IN")} × ${MAX_LINE_QTY}`)).toBeTruthy();
+    scrollTo.mockRestore();
   });
 });

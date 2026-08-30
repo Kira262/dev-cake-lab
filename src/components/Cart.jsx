@@ -2,11 +2,12 @@ import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus, X } from "lucide-react";
 import { DessertArt } from "./DessertArt.jsx";
 import { FulfilmentFields } from "./FulfilmentFields.jsx";
+import { TimePicker } from "./TimePicker.jsx";
 import { whatsappOrderUrl } from "../data/contacts.js";
 import { orderWhatsAppText } from "../lib/cart.js";
 import { readEnquiryDraft, saveEnquiryDraft } from "../lib/draft.js";
 import { isoDateFromToday, parseISODate } from "../lib/schedule.js";
-import { safeFulfilment } from "../lib/validate.js";
+import { safeFulfilment, safeTimeSlot } from "../lib/validate.js";
 
 export function Cart({
   open,
@@ -23,8 +24,9 @@ export function Cart({
   );
   const [address, setAddress] = useState(() => draft.address || "");
   const [neededBy, setNeededBy] = useState(
-    () => parseISODate(draft.neededBy) ? draft.neededBy : "",
+    () => (parseISODate(draft.neededBy) ? draft.neededBy : ""),
   );
+  const [slot, setSlot] = useState(() => safeTimeSlot(draft.slot));
 
   useEffect(() => {
     if (!open) return;
@@ -32,14 +34,15 @@ export function Cart({
     setFulfilment(safeFulfilment(saved.fulfilment));
     setAddress(saved.address || "");
     setNeededBy(parseISODate(saved.neededBy) ? saved.neededBy : "");
+    setSlot(safeTimeSlot(saved.slot));
   }, [open]);
 
   useEffect(() => {
-    saveEnquiryDraft({ fulfilment, address, neededBy });
-  }, [fulfilment, address, neededBy]);
+    saveEnquiryDraft({ fulfilment, address, neededBy, slot });
+  }, [fulfilment, address, neededBy, slot]);
 
   const whatsappHref = whatsappOrderUrl(
-    orderWhatsAppText(cart, total, { fulfilment, address, neededBy }),
+    orderWhatsAppText(cart, total, { fulfilment, address, neededBy, slot }),
   );
 
   return (
@@ -112,6 +115,11 @@ export function Cart({
                   Optional — or skip and tell us on WhatsApp.
                 </span>
               </label>
+              <TimePicker
+                idPrefix="cart"
+                value={slot}
+                onChange={setSlot}
+              />
               <FulfilmentFields
                 idPrefix="cart"
                 compact

@@ -18,7 +18,24 @@ export const DELIVERY_AREAS = [
   "Paldi",
   "Other",
 ];
-export const TIME_SLOTS = ["Morning", "Evening"];
+export const CLOCK_HOURS = [
+  "01",
+  "02",
+  "03",
+  "04",
+  "05",
+  "06",
+  "07",
+  "08",
+  "09",
+  "10",
+  "11",
+  "12",
+];
+export const CLOCK_MINUTES = ["00", "15", "30", "45"];
+export const CLOCK_PERIODS = ["AM", "PM"];
+
+const CLOCK_TIME_RE = /^(0?[1-9]|1[0-2]):([0-5][0-9])\s*(AM|PM)$/i;
 
 const EMAIL_RE =
   /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/;
@@ -137,8 +154,29 @@ export function fulfilmentReady(fulfilment, address, area = "") {
   );
 }
 
+export function formatClockTime(hour, minute, period) {
+  const h = String(hour || "").padStart(2, "0");
+  const m = String(minute || "").padStart(2, "0");
+  const p = String(period || "").toUpperCase();
+  if (!CLOCK_HOURS.includes(h) || !CLOCK_MINUTES.includes(m)) return "";
+  if (!CLOCK_PERIODS.includes(p)) return "";
+  return `${h}:${m} ${p}`;
+}
+
+export function parseClockTime(value) {
+  const match = CLOCK_TIME_RE.exec(String(value || "").trim());
+  if (!match) return null;
+  const hour = String(Number(match[1])).padStart(2, "0");
+  const minute = match[2];
+  const period = match[3].toUpperCase();
+  if (!CLOCK_MINUTES.includes(minute)) return null;
+  return { hour, minute, period };
+}
+
 export function safeTimeSlot(value) {
-  return TIME_SLOTS.includes(value) ? value : "";
+  const parsed = parseClockTime(value);
+  if (!parsed) return "";
+  return formatClockTime(parsed.hour, parsed.minute, parsed.period);
 }
 
 export function scheduleRequired({ fulfilment, topic, hasCart = false } = {}) {
@@ -182,7 +220,7 @@ export function validateTimeSlot(value, { required = false } = {}) {
   const slot = safeTimeSlot(value);
   if (!slot) {
     if (!required) return { ok: true, value: "" };
-    return { ok: false, error: "Pick morning or evening." };
+    return { ok: false, error: "Pick a time (HH:MM AM/PM)." };
   }
   return { ok: true, value: slot };
 }
