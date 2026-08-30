@@ -14,7 +14,7 @@ export function CategoryCarousel({ navigate }) {
   });
 
   const openCategory = (title) => {
-    if (title === "Custom Cakes") navigate("/contact");
+    if (title === "Custom Cakes") navigate("/custom");
     else navigate(menuPath(title));
   };
 

@@ -16,7 +16,7 @@ const product = {
 
 describe("ProductPage caps", () => {
   it("has no icing message field and limits notes and quantity", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ delay: null });
     const add = vi.fn();
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     render(<ProductPage product={product} add={add} navigate={vi.fn()} />);

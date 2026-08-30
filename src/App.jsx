@@ -16,6 +16,7 @@ import { Cart } from "./components/Cart.jsx";
 import { Footer } from "./components/Footer.jsx";
 import { Header } from "./components/Header.jsx";
 import { ContactPage } from "./pages/ContactPage.jsx";
+import { CustomCakePage } from "./pages/CustomCakePage.jsx";
 import { HomePage } from "./pages/HomePage.jsx";
 import { MenuPage } from "./pages/MenuPage.jsx";
 import { ProductPage } from "./pages/ProductPage.jsx";
@@ -122,7 +123,14 @@ export default function App() {
         onSearchFocused={() => setFocusSearch(false)}
       />
     ) : route === "/contact" ? (
-      <ContactPage cart={cart} total={total} orderTicket={orderTicket} />
+      <ContactPage
+        cart={cart}
+        total={total}
+        orderTicket={orderTicket}
+        navigate={navigate}
+      />
+    ) : route === "/custom" ? (
+      <CustomCakePage />
     ) : route === "/visit" ? (
       <VisitPage />
     ) : (

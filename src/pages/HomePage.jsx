@@ -29,7 +29,7 @@ export function HomePage({ navigate, add }) {
             <button className="primary" onClick={() => navigate("/menu")}>
               Explore the menu <ArrowRight size={17} />
             </button>
-            <button className="secondary" onClick={() => navigate("/contact")}>
+            <button className="secondary" onClick={() => navigate("/custom")}>
               Custom cakes
             </button>
           </div>

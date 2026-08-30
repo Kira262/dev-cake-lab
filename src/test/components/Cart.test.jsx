@@ -3,7 +3,7 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { Cart } from "../../components/Cart.jsx";
 import { lineTotal } from "../../lib/cart.js";
-import { formatDisplayDate, isoDateFromToday } from "../../lib/schedule.js";
+import { formatDisplayDate, formatDisplayTime, isoDateFromToday } from "../../lib/schedule.js";
 
 const cart = [
   {
@@ -44,7 +44,15 @@ describe("Cart fulfilment", () => {
   it("always offers WhatsApp, with pickup and date to confirm by default", () => {
     renderCart();
     const text = whatsappText();
-    expect(text).toContain("Pickup at Paldi, Ahmedabad");
+    expect(text).toContain("401, P.D. Apartment");
+    expect(text).toContain("https://maps.google.com/?q=");
+    expect(screen.getByText(/401, P\.D\. Apartment/i)).toBeTruthy();
+    expect(
+      screen.getByRole("link", { name: /open in google maps/i }).getAttribute("href"),
+    ).toContain("https://maps.google.com/?q=");
+    expect(
+      screen.getByText(/tap send in whatsapp or we won't see the order/i),
+    ).toBeTruthy();
     expect(text).toContain("Date to confirm — we can pick a time on WhatsApp.");
   });
 
@@ -65,9 +73,16 @@ describe("Cart fulfilment", () => {
     renderCart();
     const day = isoDateFromToday(2);
 
-    fireEvent.change(screen.getByLabelText(/when/i), {
+    fireEvent.change(screen.getByLabelText(/^date$/i), {
       target: { value: day },
     });
+    fireEvent.change(screen.getByLabelText(/^hour$/i), {
+      target: { value: "4" },
+    });
+    fireEvent.change(screen.getByLabelText(/^minute$/i), {
+      target: { value: "30" },
+    });
+    await user.click(screen.getByRole("button", { name: /^pm$/i }));
     await user.click(screen.getByRole("radio", { name: /^delivery$/i }));
     await user.type(
       screen.getByRole("textbox", { name: /area \/ address/i }),
@@ -75,7 +90,9 @@ describe("Cart fulfilment", () => {
     );
 
     const text = whatsappText();
-    expect(text).toContain(`Needed: ${formatDisplayDate(day)}.`);
+    expect(text).toContain(
+      `Needed: ${formatDisplayDate(day)}, ${formatDisplayTime("16:30")}.`,
+    );
     expect(text).toContain("Bodakdev, near ISRO");
     expect(text).toContain("confirm delivery charges");
   });

@@ -8,7 +8,7 @@ const ITEMS = [
   },
   {
     q: "How does pickup and delivery work?",
-    a: "Pickup is free at 41, Pritam Nagar Rd, Pritam Nagar, Paldi, Ahmedabad, Gujarat 380006. Mon–Sat 10:00 AM–10:00 PM, Sunday 10:00 AM–8:00 PM. Delivery charges depend on your area; we quote on WhatsApp after we see the address. We do not calculate fees on the site.",
+    a: "Pickup is free at 401, P.D. Apartment, Ellisbridge. Mon–Sat 10:00 AM–8:00 PM, Sunday 11:00 AM–6:00 PM. Delivery charges depend on your area; we quote on WhatsApp after we see the address. We do not calculate fees on the site.",
   },
   {
     q: "Do you offer eggless or less-sweet options?",

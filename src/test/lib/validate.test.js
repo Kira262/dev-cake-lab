@@ -4,7 +4,6 @@ import {
   NOTES_MAX,
   clipText,
   safeTopic,
-  safeTimeSlot,
   validateEmail,
   validateMessage,
   validateName,
@@ -12,7 +11,7 @@ import {
   validateAddress,
   validateArea,
   validateNeededBy,
-  validateTimeSlot,
+  validateNeededTime,
 } from "../../lib/validate.js";
 import { isoDateFromToday } from "../../lib/schedule.js";
 
@@ -88,7 +87,8 @@ describe("clipText and topics", () => {
   it("clips packing notes and rejects unknown topics", () => {
     expect(clipText("  hello  ", 4)).toBe("hell");
     expect(clipText("x".repeat(400), NOTES_MAX).length).toBe(NOTES_MAX);
-    expect(safeTopic("Evil")).toBe("Custom cake");
+    expect(safeTopic("Evil")).toBe("Enquiry");
+    expect(safeTopic("Collaboration")).toBe("Enquiry");
     expect(safeTopic("Menu order", { allowMenuOrder: true })).toBe(
       "Menu order",
     );
@@ -104,16 +104,14 @@ describe("validateArea", () => {
   });
 });
 
-describe("validateTimeSlot", () => {
-  it("stores a 12-hour clock time and rejects morning/evening labels", () => {
-    expect(safeTimeSlot("Morning")).toBe("");
-    expect(safeTimeSlot("10:00 AM")).toBe("10:00 AM");
-    expect(safeTimeSlot("4:30 PM")).toBe("04:30 PM");
-    expect(validateTimeSlot("", { required: true }).ok).toBe(false);
-    expect(validateTimeSlot("10:15 AM", { required: true })).toEqual({
-      ok: true,
-      value: "10:15 AM",
-    });
+describe("validateNeededTime", () => {
+  it("accepts a clock time and rejects morning or evening labels", () => {
+    expect(validateNeededTime("", { required: true }).ok).toBe(false);
+    expect(validateNeededTime("Evening", { required: true }).ok).toBe(false);
+    expect(validateNeededTime("16:30")).toEqual({ ok: true, value: "16:30" });
+    expect(validateNeededTime("4:30 PM")).toEqual({ ok: true, value: "16:30" });
+    expect(validateNeededTime("23:93 AM").ok).toBe(false);
+    expect(validateNeededTime("23:93 AM", { required: false }).ok).toBe(false);
   });
 });
 

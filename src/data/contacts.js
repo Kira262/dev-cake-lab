@@ -7,21 +7,23 @@ export const CONTACTS = {
   whatsappUrl: "https://wa.me/919638241506",
   addressName: "Dev's Cake Lab",
   addressLines: [
-    "41, Pritam Nagar Rd, Pritam Nagar, Paldi, Ahmedabad, Gujarat 380006",
+    "401, P.D. Apartment, Opp Mira Madhav Flat",
+    "Ellisbridge, Ahmedabad, India 380006",
   ],
   mapsQuery:
-    "41, Pritam Nagar Rd, Pritam Nagar, Paldi, Ahmedabad, Gujarat 380006",
-  pickupPlace: "Paldi, Ahmedabad",
+    "401, P.D. Apartment, Opp Mira Madhav Flat, Ellisbridge, Ahmedabad, India 380006",
 };
 
-export function mapsEmbedUrl() {
-  const q = encodeURIComponent(CONTACTS.mapsQuery);
-  return `https://maps.google.com/maps?q=${q}&z=17&hl=en&iwloc=A&output=embed`;
+export function pickupAddressText() {
+  return [CONTACTS.addressName, ...CONTACTS.addressLines].join("\n");
 }
 
-export function mapsLinkUrl() {
-  const q = encodeURIComponent(CONTACTS.mapsQuery);
-  return `https://maps.google.com/?q=${q}`;
+export function mapsLink() {
+  return `https://maps.google.com/?q=${encodeURIComponent(CONTACTS.mapsQuery)}`;
+}
+
+export function mapsEmbedSrc() {
+  return `https://maps.google.com/maps?q=${encodeURIComponent(CONTACTS.mapsQuery)}&z=15&output=embed`;
 }
 
 export function whatsappOrderUrl(text = "") {
