@@ -1,9 +1,21 @@
-import { CONTACTS } from "../data/contacts.js";
+import { CONTACTS, mapsLink, pickupAddressText, whatsappOrderUrl } from "../data/contacts.js";
 import { fulfilmentNote } from "./cart.js";
 import { minLeadDays } from "./validate.js";
 import { scheduleNote } from "./schedule.js";
 
 export const ENQUIRY_ENDPOINT = `https://formsubmit.co/ajax/${CONTACTS.email}`;
+
+export const ENQUIRE_WHATSAPP_TEXT = [
+  "Hi, I'd like to order from Dev's Cake Lab.",
+  "",
+  "I want:",
+  "For (date):",
+  "Pickup or delivery:",
+].join("\n");
+
+export function enquireWhatsAppUrl() {
+  return whatsappOrderUrl(ENQUIRE_WHATSAPP_TEXT);
+}
 
 export function buildEnquiryPayload(values) {
   return {
@@ -19,9 +31,11 @@ export function buildEnquiryPayload(values) {
     address:
       values.fulfilment === "delivery"
         ? values.address || "(missing)"
-        : "Pickup at Ellisbridge, Ahmedabad",
+        : pickupAddressText(),
+    location:
+      values.fulfilment === "delivery" ? "" : mapsLink(),
     neededBy: values.neededBy || "(not set)",
-    slot: values.slot || "(not set)",
+    time: values.neededTime || values.time || "(not set)",
     message: values.message || "(No extra notes)",
     _subject: `Dev's Cake Lab enquiry — ${values.topic}`,
     _template: "table",
@@ -39,16 +53,20 @@ export function enquiryWhatsAppText({
   address = "",
   area = "",
   neededBy = "",
-  slot = "",
+  time = "",
 } = {}) {
   const lines = [];
   if (name) lines.push(`Hi, I'm ${name}.`);
-  else lines.push("Hi, I'd like to order from Dev's Cake Lab.");
+  else if (topic === "Custom cake") {
+    lines.push("Hi, I'd like a custom cake.");
+  } else {
+    lines.push("Hi, I'd like to order from Dev's Cake Lab.");
+  }
   if (phone) lines.push(`Phone: ${phone}`);
   if (topic) lines.push(`Topic: ${topic}`);
   const when = scheduleNote({
     neededBy,
-    slot,
+    time,
     minDays: minLeadDays(topic),
   });
   if (when) lines.push(when);

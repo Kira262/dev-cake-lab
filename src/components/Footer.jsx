@@ -26,7 +26,7 @@ export function Footer({ navigate }) {
         </div>
         <div>
           <h4>ORDERS</h4>
-          <button onClick={() => navigate("/contact")}>Custom cakes</button>
+          <button onClick={() => navigate("/custom")}>Custom cakes</button>
           <button onClick={() => navigate("/contact")}>Contact</button>
         </div>
         <div>

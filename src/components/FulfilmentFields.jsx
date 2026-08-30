@@ -1,4 +1,6 @@
+import { Fragment } from "react";
 import { ADDRESS_MAX, DELIVERY_AREAS, FULFILMENT } from "../lib/validate.js";
+import { CONTACTS, mapsLink } from "../data/contacts.js";
 
 export function FulfilmentFields({
   idPrefix = "enquiry",
@@ -55,12 +57,20 @@ export function FulfilmentFields({
               autoComplete="street-address"
               maxLength={ADDRESS_MAX}
               value={address}
+              aria-invalid={addressError ? "true" : "false"}
+              aria-describedby={addressError ? errorId : hintId}
+              className={addressError ? "invalid" : ""}
               onChange={(e) => onAddress(e.target.value)}
               placeholder="Bodakdev, society name…"
             />
             <span className="field-hint" id={hintId}>
               Extra delivery charges — we'll quote on WhatsApp.
             </span>
+            {addressError && (
+              <span className="field-error" id={errorId}>
+                {addressError}
+              </span>
+            )}
           </label>
         ) : (
           <>
@@ -117,9 +127,28 @@ export function FulfilmentFields({
           </>
         )
       ) : (
-        <p className="fulfil-note">
-          Free pickup at Ellisbridge. Delivery charges depend on your area.
-        </p>
+        <div className="fulfil-pickup">
+          <p className="fulfil-pickup-addr">
+            {CONTACTS.addressName}
+            {CONTACTS.addressLines.map((line) => (
+              <Fragment key={line}>
+                <br />
+                {line}
+              </Fragment>
+            ))}
+          </p>
+          <a
+            className="maps-link"
+            href={mapsLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open in Google Maps
+          </a>
+          <p className="fulfil-note">
+            Free pickup. Delivery charges depend on your area.
+          </p>
+        </div>
       )}
     </div>
   );

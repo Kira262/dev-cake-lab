@@ -1,3 +1,4 @@
+import { mapsLink, pickupAddressText } from "../data/contacts.js";
 import { NOTES_MAX, clipText } from "./validate.js";
 import { whenNote } from "./schedule.js";
 
@@ -92,13 +93,13 @@ export function fulfilmentNote({
     lines.push("Please confirm delivery charges for this area.");
     return lines.join("\n");
   }
-  return "Pickup at Ellisbridge, Ahmedabad.";
+  return ["Pickup at:", pickupAddressText(), mapsLink()].join("\n");
 }
 
 export function orderWhatsAppText(cart, total, extras = {}) {
   return [
     orderMessage(cart, total).trim(),
-    whenNote(extras.when || extras.neededBy),
+    whenNote(extras.when || extras.neededBy, extras.neededTime || extras.time),
     fulfilmentNote(extras),
   ]
     .filter(Boolean)
