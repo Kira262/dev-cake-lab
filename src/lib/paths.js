@@ -1,7 +1,10 @@
 export const BASE = (import.meta.env.BASE_URL || "/").replace(/\/$/, "");
 
 export function asset(file) {
-  return `${import.meta.env.BASE_URL}assets/${file}`;
+  const name = String(file || "")
+    .split("/")
+    .pop();
+  return `${import.meta.env.BASE_URL}assets/${encodeURIComponent(name)}`;
 }
 
 export function appPath() {

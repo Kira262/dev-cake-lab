@@ -1,5 +1,6 @@
 import { CONTACTS } from "../data/contacts.js";
 import { asset } from "../lib/paths.js";
+import { AssetImage } from "./AssetImage.jsx";
 
 export function Footer({ navigate }) {
   return (
@@ -11,7 +12,7 @@ export function Footer({ navigate }) {
             onClick={() => navigate("/")}
             aria-label="The Dev's Cake Lab home"
           >
-            <img
+            <AssetImage
               className="wordmark-logo"
               src={asset("dev-cake-logo.png")}
               alt="The Dev's Cake Lab"

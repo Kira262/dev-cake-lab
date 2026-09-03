@@ -14,6 +14,15 @@ npm install
 npm run dev
 ```
 
+For cart and enquiry persistence, run the session API in a second terminal:
+
+```bash
+npm run server:install   # first time only
+npm run server
+```
+
+Copy `.env.example` to `.env` if you need a custom `VITE_API_URL` (defaults to `http://localhost:3001`).
+
 Open the URL Vite prints (usually `http://localhost:5173/`).
 
 Other scripts:
@@ -21,7 +30,9 @@ Other scripts:
 ```bash
 npm run build    # production build into dist/
 npm run preview  # preview the production build locally
-npm test         # Vitest: validation, enquiry send, pages, CSP
+npm test         # Vitest: validation, enquiry send, pages, CSP, assets
+npm run server   # session API (bag + enquiry drafts on disk)
+npm run test:server
 ```
 
 ## Project layout
@@ -38,6 +49,7 @@ src/
     contacts.js        Phone, email, address, social links
   lib/
     paths.js           asset(), appPath(), toLocation()
+    session.js         Session API client (bag + draft sync)
     routes.js          Route helpers, nav active state
     cart.js            Line IDs, totals, qty clamp, order message, bag persist
     draft.js           Remembered name, phone, email, address, date
@@ -52,6 +64,7 @@ src/
     pages/             Contact, Product, Visit page tests
     components/        Cart and FAQ tests
 public/assets/         Logo and product photos
+server/                Session API (JSON per user on disk)
 index.html             HTML shell + CSP
 ```
 
@@ -63,6 +76,7 @@ index.html             HTML shell + CSP
 | `src/data/catalog.js`                | Categories, products, reviews                                |
 | `src/data/contacts.js`               | Phone, email, address, social links                          |
 | `src/lib/paths.js`                   | `asset()`, `appPath()`, `toLocation()`                       |
+| `src/lib/session.js`                 | Session API client — bag and enquiry draft sync              |
 | `src/lib/routes.js`                  | Route helpers, nav active state                              |
 | `src/lib/cart.js`                    | Cart line IDs, totals, qty clamp, order message, bag persist |
 | `src/lib/draft.js`                   | Remembered enquiry / delivery details                        |
@@ -107,7 +121,19 @@ Expected product / brand files include:
 - `dev-cake-logo.png`
 - Per-product hero and `*-detail.jpg` photos (see `src/data/catalog.js`)
 
-Missing files will 404 in the browser (broken logos and product photos).
+Missing files will 404 in the browser (broken logos and product photos). `npm test` includes an asset audit that fails CI if any referenced file is absent.
+
+## Session API
+
+Cart and enquiry drafts sync to `server/data/sessions/{uuid}.json` via the Node API — not `localStorage` (except a small `sessionId` pointer).
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/sessions` | Create a new session |
+| `GET /api/sessions/:id` | Load session |
+| `PATCH /api/sessions/:id` | Update `bag` and/or `draft` |
+
+**Deploy:** host `server/` separately (VPS, Railway, Render, etc.). Set `VITE_API_URL` when building the frontend and add that API origin to `connect-src` in `index.html`. Optional: share a bookmark with `?sid=<uuid>` to restore a session after clearing site data.
 
 ## Hero note (do not put back inside `.cat-hero`)
 
@@ -117,7 +143,7 @@ The badge **A LITTLE CAT. A LOT OF CAKE.** must stay on `.cat-hero-shell`, **out
 
 ## Contact / cart behaviour
 
-- Cart lives in `App` state and is remembered in `localStorage`. Line qty is clamped to 1–20. Packing notes max 300. Menu items have no icing-message field (cheesecakes, tins, cookies, bowls, cupcakes).
+- Cart lives in `App` state and syncs to the session API (`src/lib/session.js`). Line qty is clamped to 1–20. Packing notes max 300. Menu items have no icing-message field (cheesecakes, tins, cookies, bowls, cupcakes).
 - **Order on WhatsApp** is always a live link from the bag. Defaults are pickup at Ellisbridge and “date to confirm.” Optional date picker; skip it and they can pick a time on WhatsApp. Delivery shows one Area / address line; if empty, the chat says address to confirm and asks to quote charges.
 - No name, email, phone, calendar, or morning/evening radios in the bag. **Email instead** opens `/contact`, which still has the longer form (date, slot, area chips, building) because email has no back-and-forth.
 - **Email instead** bumps `orderTicket` and navigates to `/contact`. The long form still asks for date, slot, area, and building because email has no chat.
@@ -125,7 +151,7 @@ The badge **A LITTLE CAT. A LOT OF CAKE.** must stay on `.cat-hero-shell`, **out
 - Contact is WhatsApp-first too: **WhatsApp this enquiry** uses the same prefilled text plus name/phone if filled. **Send email** POSTs to FormSubmit (`https://formsubmit.co/ajax/devscakelab@gmail.com`) on that one click — there is no review popup.
 - Enquiry fields: name (2–80, required for email), Indian mobile (10 digits starting 6–9, required for email), email optional (real `local@domain.tld` when filled, max 80), delivery area + address required only for delivery, message optional (max 1,200 characters / about 200 words).
 - The first live email send requires clicking FormSubmit’s activation email in that inbox. After that, enquiries arrive as normal email.
-- CSP `connect-src` must include `https://formsubmit.co` or the send will be blocked.
+- CSP `connect-src` must include `https://formsubmit.co` and your session API host, or saves will be blocked.
 - The contact sidebar email link may still open Gmail compose for a direct write.
 
 ## Deploy (GitHub Pages)

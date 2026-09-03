@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { products, reviews } from "../data/catalog.js";
 import { asset } from "../lib/paths.js";
 import { productPath } from "../lib/routes.js";
+import { AssetImage } from "../components/AssetImage.jsx";
 import { CatHero } from "../components/CatHero.jsx";
 import { CategoryCarousel } from "../components/CategoryCarousel.jsx";
 import { FAQ } from "../components/FAQ.jsx";
@@ -109,7 +110,11 @@ export function HomePage({ navigate, add }) {
 
       <section className="feature wrap">
         <div className="feature-art photo-feature">
-          <img src={asset("biscoff-cheesecake.jpg")} alt="Biscoff cheesecake" />
+          <AssetImage
+            src={asset("biscoff-cheesecake.jpg")}
+            alt="Biscoff cheesecake"
+            artType="chocolate"
+          />
           <span className="stamp">
             SIGNATURE
             <br />

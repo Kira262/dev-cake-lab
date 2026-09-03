@@ -26,7 +26,8 @@ A Vite + React marketing and ordering front end for **Dev's Cake Lab**, a desser
 ## Architecture notes
 
 - App shell, cart state, and page switch live in `src/App.jsx`.
-- Static assets are served from `public/assets/` via `asset()`.
+- Static assets are served from `public/assets/` via `asset()`; Vitest audits that every referenced file exists.
+- Cart and enquiry drafts persist via a separate session API (`server/`) — one JSON file per shopper session.
 - Production `base` in `vite.config.js` is `/dev-cake-lab/`.
 - SPA deep links on Pages use a copied `404.html` that mirrors `index.html`.
 - Enquiry POST goes to FormSubmit (`src/lib/enquiry.js`); CSP in `index.html` allows `https://formsubmit.co`.
@@ -34,7 +35,7 @@ A Vite + React marketing and ordering front end for **Dev's Cake Lab**, a desser
 
 ## Current gaps / known issues
 
-- Several product images referenced in code may still be missing from `public/assets/` (only the logo is guaranteed present).
+- The session API must be running separately for cart and enquiry persistence (`npm run server` locally). GitHub Pages serves only the static frontend; set `VITE_API_URL` at build time and add that host to CSP `connect-src` in `index.html`.
 - The first live enquiry requires clicking FormSubmit’s activation email in `devscakelab@gmail.com`. Delivery then depends on that third-party relay.
 - Cart edits on `/contact` after arrival may not refresh the textarea unless `orderTicket` changes again.
 

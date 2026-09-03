@@ -4,6 +4,7 @@ import { DIET_NOTE } from "../data/catalog.js";
 import { MAX_LINE_QTY } from "../lib/cart.js";
 import { scrollToTop } from "../lib/scroll.js";
 import { NOTES_MAX } from "../lib/validate.js";
+import { AssetImage } from "../components/AssetImage.jsx";
 
 function QtyStepper({ value, onChange, label }) {
   return (
@@ -82,7 +83,11 @@ export function ProductPage({ product, add, navigate }) {
         <div className="product-page-grid">
           <div className="product-gallery">
             <div className="product-gallery-main">
-              <img src={gallery[photo]} alt={product.name} />
+              <AssetImage
+                src={gallery[photo]}
+                alt={product.name}
+                artType={product.art}
+              />
               {product.badge && <span className="badge">{product.badge}</span>}
             </div>
             {gallery.length > 1 && (
@@ -95,7 +100,7 @@ export function ProductPage({ product, add, navigate }) {
                     onClick={() => setPhoto(i)}
                     aria-label={`View photo ${i + 1}`}
                   >
-                    <img src={src} alt="" />
+                    <AssetImage src={src} alt="" artType={product.art} />
                   </button>
                 ))}
               </div>

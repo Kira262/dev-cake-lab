@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus, X } from "lucide-react";
+import { AssetImage } from "./AssetImage.jsx";
 import { DessertArt } from "./DessertArt.jsx";
 import { NeededByFields } from "./NeededByFields.jsx";
 import { FulfilmentFields } from "./FulfilmentFields.jsx";
@@ -79,7 +80,7 @@ export function Cart({
                 <div className="cart-item" key={item.lineId}>
                   <div className="cart-art">
                     {item.image ? (
-                      <img src={item.image} alt="" />
+                      <AssetImage src={item.image} alt="" artType={item.art} />
                     ) : (
                       <DessertArt type={item.art} />
                     )}

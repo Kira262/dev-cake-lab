@@ -1,4 +1,5 @@
 import { mapsLink, pickupAddressText } from "../data/contacts.js";
+import { getBag, setBag } from "./session.js";
 import { NOTES_MAX, clipText } from "./validate.js";
 import { whenNote } from "./schedule.js";
 
@@ -49,22 +50,11 @@ export function hydrateBag(saved, catalog) {
 }
 
 export function readBag() {
-  try {
-    const raw = localStorage.getItem(BAG_KEY);
-    if (!raw) return [];
-    const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return getBag();
 }
 
 export function saveBag(cart) {
-  try {
-    localStorage.setItem(BAG_KEY, JSON.stringify(serializeBag(cart)));
-  } catch {
-    /* ignore quota / private mode */
-  }
+  setBag(serializeBag(cart));
 }
 
 export function orderMessage(cart, total) {

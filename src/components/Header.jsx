@@ -10,6 +10,7 @@ import { asset } from "../lib/paths.js";
 import { isNavActive } from "../lib/routes.js";
 import { enquireWhatsAppUrl } from "../lib/enquiry.js";
 import { lockBodyScroll, unlockBodyScroll } from "../lib/scroll.js";
+import { AssetImage } from "./AssetImage.jsx";
 
 export function Header({
   navigate,
@@ -42,7 +43,7 @@ export function Header({
           onClick={() => navigate("/")}
           aria-label="The Dev's Cake Lab home"
         >
-          <img
+          <AssetImage
             className="wordmark-logo"
             src={asset("dev-cake-logo.png")}
             alt="The Dev's Cake Lab"
@@ -106,7 +107,7 @@ export function Header({
         aria-label="Menu"
       >
         <div className="mobile-nav-head">
-          <img
+          <AssetImage
             className="mobile-nav-logo"
             src={asset("dev-cake-logo.png")}
             alt=""

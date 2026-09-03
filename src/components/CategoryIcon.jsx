@@ -1,5 +1,6 @@
 import { CakeSlice, Cookie } from "lucide-react";
 import { asset } from "../lib/paths.js";
+import { AssetImage } from "./AssetImage.jsx";
 
 const ICON_SIZE = 72;
 
@@ -31,7 +32,9 @@ function CustomCake({ size = ICON_SIZE, strokeWidth = 1.55 }) {
 }
 
 function CategoryImage({ file }) {
-  return <img className="category-icon-img" src={asset(file)} alt="" />;
+  return (
+    <AssetImage className="category-icon-img" src={asset(file)} alt="" />
+  );
 }
 
 function CheesecakeImage() {

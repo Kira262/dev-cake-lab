@@ -1,6 +1,7 @@
 import { Star } from "lucide-react";
 import { DIET_NOTE } from "../data/catalog.js";
 import { productPath } from "../lib/routes.js";
+import { AssetImage } from "./AssetImage.jsx";
 import { DessertArt } from "./DessertArt.jsx";
 
 export function ProductCard({ product, add, navigate }) {
@@ -10,10 +11,11 @@ export function ProductCard({ product, add, navigate }) {
       <div className="product-visual">
         <button className="product-hit" type="button" onClick={open}>
           {product.image ? (
-            <img
+            <AssetImage
               className="product-photo"
               src={product.image}
               alt={product.name}
+              artType={product.art}
             />
           ) : (
             <DessertArt type={product.art} />
