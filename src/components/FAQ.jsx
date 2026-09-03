@@ -11,10 +11,6 @@ const ITEMS = [
     a: "Pickup is free at 401, P.D. Apartment, Ellisbridge. Open daily 11:00 AM–1:00 AM. Delivery charges depend on your area; we quote on WhatsApp after we see the address. We do not calculate fees on the site.",
   },
   {
-    q: "Do you offer eggless or less-sweet options?",
-    a: "Yes. Add it in the packing notes or tell us on WhatsApp and we will suggest suitable flavours.",
-  },
-  {
     q: "How do I store my cake or desserts?",
     a: "Most cakes should be refrigerated and brought to room temperature before serving.",
   },

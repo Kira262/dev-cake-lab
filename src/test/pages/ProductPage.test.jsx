@@ -30,7 +30,7 @@ describe("ProductPage caps", () => {
     expect(
       screen.getByLabelText(/flavour \/ packing notes/i).getAttribute("maxLength"),
     ).toBe(String(NOTES_MAX));
-    expect(screen.getByText(/eggless and less-sweet/i)).toBeTruthy();
+    expect(screen.getByText(/less-sweet/i)).toBeTruthy();
 
     const increase = screen.getByRole("button", { name: /increase quantity/i });
     for (let i = 0; i < MAX_LINE_QTY + 5; i += 1) {

@@ -451,7 +451,7 @@ export function CustomCakePage() {
               maxLength={NOTES_MAX}
               value={allergies}
               onChange={(e) => setAllergies(e.target.value)}
-              placeholder="Nut-free, less sweet, eggless…"
+              placeholder="Nut-free, less sweet"
             />
           </label>
 

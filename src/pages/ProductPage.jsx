@@ -184,7 +184,7 @@ export function ProductPage({ product, add, navigate }) {
                 value={notes}
                 maxLength={NOTES_MAX}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Optional — less sweet, extra packing, eggless..."
+                placeholder="Optional — less sweet, extra packing..."
               />
             </label>
             <button className="primary" type="button" onClick={addToBag}>

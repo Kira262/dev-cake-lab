@@ -28,8 +28,8 @@ export const CAKE_SPONGES = [
   "Chocolate",
   "Red velvet",
   "Funfetti",
-  "Eggless vanilla",
-  "Eggless chocolate",
+  "vanilla",
+  "chocolate",
 ];
 
 export const CAKE_FLAVOURS = [
