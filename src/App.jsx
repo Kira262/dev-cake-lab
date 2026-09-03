@@ -12,6 +12,7 @@ import {
 import { NOTES_MAX, clipText } from "./lib/validate.js";
 import { toLocation } from "./lib/paths.js";
 import { readMenuType, readPath, readProductSlug } from "./lib/routes.js";
+import { scrollToTop } from "./lib/scroll.js";
 import { Cart } from "./components/Cart.jsx";
 import { Footer } from "./components/Footer.jsx";
 import { Header } from "./components/Header.jsx";
@@ -43,7 +44,7 @@ export default function App() {
     syncFromLocation();
     setMenuOpen(false);
     if (options.focusSearch) setFocusSearch(true);
-    window.scrollTo(0, 0);
+    scrollToTop();
   };
 
   useEffect(() => {
@@ -106,7 +107,7 @@ export default function App() {
   const activeProduct = products.find((p) => p.slug === productSlug);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    scrollToTop();
   }, [route, productSlug]);
 
   const page =

@@ -1,11 +1,15 @@
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { ArrowUpRight } from "lucide-react";
 import { categories } from "../data/catalog.js";
 import { menuPath } from "../lib/routes.js";
 import { CategoryIcon } from "./CategoryIcon.jsx";
 
+const COPIES = 3;
+
 export function CategoryCarousel({ navigate }) {
   const scroller = useRef(null);
+  const loopWidth = useRef(0);
+  const paused = useRef(false);
   const drag = useRef({
     down: false,
     dragging: false,
@@ -18,8 +22,59 @@ export function CategoryCarousel({ navigate }) {
     else navigate(menuPath(title));
   };
 
+  const wrapScroll = () => {
+    const el = scroller.current;
+    const width = loopWidth.current;
+    if (!el || !width) return;
+    while (el.scrollLeft < width) el.scrollLeft += width;
+    while (el.scrollLeft >= width * 2) el.scrollLeft -= width;
+  };
+
+  const measure = () => {
+    const el = scroller.current;
+    if (!el) return;
+    loopWidth.current = el.scrollWidth / COPIES;
+    if (el.scrollLeft < 8) el.scrollLeft = loopWidth.current;
+    wrapScroll();
+  };
+
+  useEffect(() => {
+    const el = scroller.current;
+    if (!el) return;
+
+    measure();
+    const ro =
+      typeof ResizeObserver === "function" ? new ResizeObserver(measure) : null;
+    ro?.observe(el);
+    const images = [...el.querySelectorAll("img")];
+    images.forEach((img) => img.addEventListener("load", measure));
+
+    let raf = 0;
+    const tick = () => {
+      if (!paused.current && !drag.current.down) {
+        el.scrollLeft += 0.55;
+        wrapScroll();
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    const reduce = window.matchMedia?.("(prefers-reduced-motion: reduce)");
+    if (!reduce?.matches) raf = requestAnimationFrame(tick);
+
+    const onScroll = () => wrapScroll();
+    el.addEventListener("scroll", onScroll, { passive: true });
+
+    return () => {
+      cancelAnimationFrame(raf);
+      ro?.disconnect();
+      images.forEach((img) => img.removeEventListener("load", measure));
+      el.removeEventListener("scroll", onScroll);
+    };
+  }, []);
+
   const onPointerDown = (e) => {
     if (!scroller.current) return;
+    paused.current = true;
     drag.current = {
       down: true,
       dragging: false,
@@ -36,6 +91,7 @@ export function CategoryCarousel({ navigate }) {
       scroller.current.setPointerCapture?.(e.pointerId);
     }
     scroller.current.scrollLeft = drag.current.startScroll - dx;
+    wrapScroll();
   };
   const onPointerUp = (e) => {
     const wasDrag = drag.current.dragging;
@@ -47,8 +103,28 @@ export function CategoryCarousel({ navigate }) {
     if (card?.dataset.category) openCategory(card.dataset.category);
   };
 
+  const pause = () => {
+    paused.current = true;
+  };
+  const resume = () => {
+    if (!drag.current.down) paused.current = false;
+  };
+
+  const slides = Array.from({ length: COPIES }, (_, copy) =>
+    categories.map(([title, caption, art]) => ({
+      title,
+      caption,
+      art,
+      key: `${copy}-${title}`,
+    })),
+  ).flat();
+
   return (
-    <div className="category-drag-shell">
+    <div
+      className="category-drag-shell"
+      onPointerEnter={pause}
+      onPointerLeave={resume}
+    >
       <div
         ref={scroller}
         className="category-grid category-drag"
@@ -57,9 +133,9 @@ export function CategoryCarousel({ navigate }) {
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        {categories.map(([title, caption, art]) => (
+        {slides.map(({ title, caption, art, key }) => (
           <button
-            key={title}
+            key={key}
             type="button"
             className={`category-card ${art}`}
             data-category={title}

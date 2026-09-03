@@ -12,6 +12,8 @@ export const CONTACTS = {
   ],
   mapsQuery:
     "401, P.D. Apartment, Opp Mira Madhav Flat, Ellisbridge, Ahmedabad, India 380006",
+  hoursLabel: "Daily",
+  hoursDisplay: "11:00 AM — 1:00 AM",
 };
 
 export function pickupAddressText() {

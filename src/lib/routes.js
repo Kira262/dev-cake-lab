@@ -18,7 +18,7 @@ export function menuPath(type) {
 }
 
 export function productPath(slug) {
-  return `/product/${slug}#top`;
+  return `/product/${slug}`;
 }
 
 export function readProductSlug() {
@@ -36,6 +36,7 @@ export function isNavActive(label, route) {
   if (label === "Home") return route === "/";
   if (label === "Shop")
     return route === "/menu" || route.startsWith("/product/");
+  if (label === "Custom cakes") return route === "/custom";
   if (label === "Visit") return route === "/visit";
   if (label === "Contact") return route === "/contact";
   return false;

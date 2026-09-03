@@ -20,7 +20,11 @@ describe("ProductPage caps", () => {
     const add = vi.fn();
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     render(<ProductPage product={product} add={add} navigate={vi.fn()} />);
-    expect(scrollTo).toHaveBeenCalledWith(0, 0);
+    expect(scrollTo).toHaveBeenCalledWith({
+      top: 0,
+      left: 0,
+      behavior: "instant",
+    });
 
     expect(screen.queryByLabelText(/message on cake/i)).toBeNull();
     expect(
@@ -34,5 +38,31 @@ describe("ProductPage caps", () => {
     }
     expect(screen.getByText(`₹${product.price.toLocaleString("en-IN")} × ${MAX_LINE_QTY}`)).toBeTruthy();
     scrollTo.mockRestore();
+  });
+
+  it("lets you pick vanilla, chocolate, or both with quantities", async () => {
+    const user = userEvent.setup({ delay: null });
+    const add = vi.fn();
+    vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    const cupcake = {
+      ...product,
+      name: "Cupcake — Vanilla or Chocolate",
+      price: 50,
+      flavours: ["Vanilla", "Chocolate"],
+    };
+    render(<ProductPage product={cupcake} add={add} navigate={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: /^both$/i }));
+    await user.click(screen.getByRole("button", { name: /increase vanilla quantity/i }));
+    await user.click(screen.getByRole("button", { name: /increase chocolate quantity/i }));
+    await user.click(screen.getByRole("button", { name: /add to bag/i }));
+
+    expect(add).toHaveBeenCalledWith(
+      cupcake,
+      expect.objectContaining({
+        qty: 4,
+        notes: "Flavour: Vanilla × 2, Chocolate × 2",
+      }),
+    );
   });
 });

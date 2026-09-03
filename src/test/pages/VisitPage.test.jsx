@@ -10,6 +10,7 @@ describe("VisitPage", () => {
     expect(iframe).toBeTruthy();
     expect(iframe.getAttribute("src")).toBe(mapsEmbedSrc());
     expect(screen.getByText(/401, P\.D\. Apartment/i)).toBeTruthy();
+    expect(screen.getByText(/11:00 AM — 1:00 AM/i)).toBeTruthy();
     expect(iframe.getAttribute("sandbox")).toContain("allow-scripts");
     expect(iframe.getAttribute("sandbox")).toContain("allow-same-origin");
   });

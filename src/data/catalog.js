@@ -132,6 +132,7 @@ export const products = [
     badge: "",
     art: "cupcake",
     image: asset("cupcake-vanilla-chocolate.jpg"),
+    flavours: ["Vanilla", "Chocolate"],
   },
   {
     id: 13,

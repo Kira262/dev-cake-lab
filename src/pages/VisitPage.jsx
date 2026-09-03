@@ -28,10 +28,8 @@ export function VisitPage() {
             ))}
           </p>
           <div className="hours">
-            <b>Mon–Sat</b>
-            <span>10:00 AM — 8:00 PM</span>
-            <b>Sunday</b>
-            <span>11:00 AM — 6:00 PM</span>
+            <b>{CONTACTS.hoursLabel}</b>
+            <span>{CONTACTS.hoursDisplay}</span>
           </div>
           <a
             className="maps-link"

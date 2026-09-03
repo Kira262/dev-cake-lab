@@ -13,5 +13,6 @@ describe("FAQ", () => {
     expect(screen.getByText(/charges depend on your area/i)).toBeTruthy();
     expect(screen.getByText(/401, P\.D\. Apartment/i)).toBeTruthy();
     expect(screen.getByText(/ellisbridge/i)).toBeTruthy();
+    expect(screen.getByText(/11:00 AM–1:00 AM/i)).toBeTruthy();
   });
 });

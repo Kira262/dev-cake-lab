@@ -23,7 +23,7 @@ export function ProductCard({ product, add, navigate }) {
         <button
           className="quick-add"
           type="button"
-          onClick={() => add(product)}
+          onClick={() => (product.flavours ? open() : add(product))}
         >
           + Add
         </button>

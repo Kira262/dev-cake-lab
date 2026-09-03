@@ -25,7 +25,7 @@ describe("CustomCakePage", () => {
     await user.click(link);
     expect(screen.getByText(/pick a date/i)).toBeTruthy();
     expect(screen.getByText(/pick a time/i)).toBeTruthy();
-    expect(screen.getByText(/occasion, size, and flavour/i)).toBeTruthy();
+    expect(screen.getByText(/tell us the occasion, size, and flavour/i)).toBeTruthy();
   });
 
   it("prefills WhatsApp with the custom cake brief", async () => {
@@ -43,8 +43,10 @@ describe("CustomCakePage", () => {
       target: { value: "30" },
     });
     await user.click(screen.getByRole("button", { name: /^pm$/i }));
+    await user.click(screen.getByRole("button", { name: /^birthday$/i }));
+    await user.click(screen.getByRole("button", { name: /^1 kg$/i }));
     await user.type(
-      screen.getByRole("textbox", { name: /occasion, size, flavour/i }),
+      screen.getByRole("textbox", { name: /design notes/i }),
       "Birthday for 12, vanilla, less sweet",
     );
 
@@ -76,8 +78,10 @@ describe("CustomCakePage", () => {
       target: { value: "30" },
     });
     await user.click(screen.getByRole("button", { name: /^pm$/i }));
+    await user.click(screen.getByRole("button", { name: /^anniversary$/i }));
+    await user.click(screen.getByRole("button", { name: /^1 kg$/i }));
     await user.type(
-      screen.getByRole("textbox", { name: /occasion, size, flavour/i }),
+      screen.getByRole("textbox", { name: /design notes/i }),
       "Anniversary cake, 8 slices, chocolate",
     );
     await user.click(screen.getByRole("button", { name: /email instead/i }));

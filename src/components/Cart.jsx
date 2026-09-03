@@ -7,6 +7,7 @@ import { whatsappOrderUrl } from "../data/contacts.js";
 import { orderWhatsAppText } from "../lib/cart.js";
 import { readEnquiryDraft, saveEnquiryDraft } from "../lib/draft.js";
 import { parseISODate, parseNeededTime } from "../lib/schedule.js";
+import { lockBodyScroll, unlockBodyScroll } from "../lib/scroll.js";
 import { safeFulfilment } from "../lib/validate.js";
 
 export function Cart({
@@ -29,6 +30,12 @@ export function Cart({
   const [neededTime, setNeededTime] = useState(
     () => parseNeededTime(draft.neededTime),
   );
+
+  useEffect(() => {
+    if (!open) return undefined;
+    lockBodyScroll();
+    return () => unlockBodyScroll();
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;

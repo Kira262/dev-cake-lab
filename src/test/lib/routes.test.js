@@ -23,6 +23,7 @@ describe("isNavActive", () => {
     expect(isNavActive("Home", "/")).toBe(true);
     expect(isNavActive("Shop", "/menu")).toBe(true);
     expect(isNavActive("Shop", "/product/biscoff-cheesecake")).toBe(true);
+    expect(isNavActive("Custom cakes", "/custom")).toBe(true);
     expect(isNavActive("Visit", "/visit")).toBe(true);
     expect(isNavActive("Contact", "/contact")).toBe(true);
   });
@@ -31,7 +32,7 @@ describe("isNavActive", () => {
 describe("productPath", () => {
   it("opens the product at the top of the page", () => {
     expect(productPath("biscoff-cheesecake")).toBe(
-      "/product/biscoff-cheesecake#top",
+      "/product/biscoff-cheesecake",
     );
   });
 });

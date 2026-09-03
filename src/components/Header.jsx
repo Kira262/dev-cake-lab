@@ -9,6 +9,7 @@ import {
 import { asset } from "../lib/paths.js";
 import { isNavActive } from "../lib/routes.js";
 import { enquireWhatsAppUrl } from "../lib/enquiry.js";
+import { lockBodyScroll, unlockBodyScroll } from "../lib/scroll.js";
 
 export function Header({
   navigate,
@@ -22,17 +23,15 @@ export function Header({
   const nav = [
     ["Home", "/"],
     ["Shop", "/menu"],
+    ["Custom cakes", "/custom"],
     ["Visit", "/visit"],
     ["Contact", "/contact"],
   ];
 
   useEffect(() => {
-    if (!menuOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = previous;
-    };
+    if (!menuOpen) return undefined;
+    lockBodyScroll();
+    return () => unlockBodyScroll();
   }, [menuOpen]);
 
   return (
@@ -106,6 +105,22 @@ export function Header({
         aria-hidden={!menuOpen}
         aria-label="Menu"
       >
+        <div className="mobile-nav-head">
+          <img
+            className="mobile-nav-logo"
+            src={asset("dev-cake-logo.png")}
+            alt=""
+          />
+          <button
+            type="button"
+            className="mobile-nav-close"
+            aria-label="Close menu"
+            tabIndex={menuOpen ? 0 : -1}
+            onClick={() => setMenuOpen(false)}
+          >
+            <X />
+          </button>
+        </div>
         {nav.map(([label, href]) => (
           <button
             key={label}
