@@ -222,7 +222,7 @@ export function ContactPage({
       </section>
       <section className="wrap contact">
         <form className="contact-form" onSubmit={sendEmail} noValidate>
-          {/* <label className="honeypot" aria-hidden="true">
+          <label className="honeypot" aria-hidden="true">
             Company
             <input
               tabIndex={-1}
@@ -262,7 +262,7 @@ export function ContactPage({
             onAddress={setAddress}
             areaError={showError("area") ? errors.area : ""}
             addressError={showError("address") ? errors.address : ""}
-          /> */}
+          />
           <label>
             Tell us more
             <textarea
@@ -323,7 +323,7 @@ export function ContactPage({
             <p className="field-hint">
               Opens a draft — tap Send in WhatsApp or we won't see the order.
             </p>
-            {/* <button
+            <button
               className="secondary"
               type={emailMode ? "submit" : "button"}
               disabled={sending}
@@ -337,7 +337,7 @@ export function ContactPage({
             >
               {sending ? "Sending…" : emailMode ? "Send email" : "Email instead"}
               {!sending && <ArrowRight size={17} />}
-            </button> */}
+            </button>
           </div>
           {sent && (
             <p className="form-success">
