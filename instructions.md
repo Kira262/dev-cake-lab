@@ -14,6 +14,15 @@ npm install
 npm run dev
 ```
 
+For cart and enquiry persistence, run the session API in a second terminal:
+
+```bash
+npm run server:install   # first time only
+npm run server
+```
+
+Copy `.env.example` to `.env` if you need a custom `VITE_API_URL` (defaults to `http://localhost:3001`).
+
 Open the URL Vite prints (usually `http://localhost:5173/`).
 
 Other scripts:
@@ -21,7 +30,9 @@ Other scripts:
 ```bash
 npm run build    # production build into dist/
 npm run preview  # preview the production build locally
-npm test         # Vitest: validation, enquiry send, pages, CSP
+npm test         # Vitest: validation, enquiry send, pages, CSP, assets
+npm run server   # session API (bag + enquiry drafts on disk)
+npm run test:server
 ```
 
 ## Project layout
@@ -39,6 +50,7 @@ src/
     customCake.js      Weights, shapes, occasions, sponges, flavours
   lib/
     paths.js           asset(), appPath(), toLocation(), webpFromUrl()
+    session.js         Session API client (bag + draft sync)
     routes.js          Route helpers, nav active state
     cart.js            Line IDs, totals, bag persist, short WhatsApp draft
     draft.js           Remembered name, phone, email, address, date
@@ -55,6 +67,7 @@ src/
     components/        Cart, Header, FAQ, CategoryCarousel, ProductCard
 public/assets/         Logo and product photos (JPEG/PNG + WebP)
 scripts/               optimize-images.mjs
+server/                Session API (JSON per user on disk)
 index.html             HTML shell + CSP
 ```
 
@@ -68,6 +81,7 @@ index.html             HTML shell + CSP
 | `src/data/customCake.js`             | Weights, shapes, occasions, sponges, flavours                |
 | `src/lib/customCake.js`              | Brief labels and WhatsApp text                               |
 | `src/lib/paths.js`                   | `asset()`, `appPath()`, `toLocation()`, `webpFromUrl()`      |
+| `src/lib/session.js`                 | Session API client — bag and enquiry draft sync              |
 | `src/lib/routes.js`                  | Route helpers, nav active state                              |
 | `src/lib/cart.js`                    | Cart line IDs, totals, qty clamp, short WhatsApp draft, bag persist |
 | `src/lib/draft.js`                   | Remembered enquiry / delivery details                        |
@@ -115,7 +129,19 @@ Expected product / brand files include:
 - `dev-cake-logo.png`
 - Per-product hero and `*-detail.jpg` photos (see `src/data/catalog.js`)
 
-Missing files will 404 in the browser (broken logos and product photos).
+Missing files will 404 in the browser (broken logos and product photos). `npm test` includes an asset audit that fails CI if any referenced file is absent.
+
+## Session API
+
+Cart and enquiry drafts sync to `server/data/sessions/{uuid}.json` via the Node API — not `localStorage` (except a small `sessionId` pointer).
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/sessions` | Create a new session |
+| `GET /api/sessions/:id` | Load session |
+| `PATCH /api/sessions/:id` | Update `bag` and/or `draft` |
+
+**Deploy:** host `server/` separately (VPS, Railway, Render, etc.). Set `VITE_API_URL` when building the frontend and add that API origin to `connect-src` in `index.html`. Optional: share a bookmark with `?sid=<uuid>` to restore a session after clearing site data.
 
 ## Hero note (do not put back inside `.cat-hero`)
 
@@ -155,7 +181,7 @@ Needed-by on `/custom` stays empty until they pick a date (2–4 day lead). Do n
 
 ## Contact / cart behaviour
 
-- Cart lives in `App` state and is remembered in `localStorage` (`devCakeLab.bag`). Line qty is clamped to 1–20. Packing notes max 300. Menu items have no icing-message field.
+- Cart lives in `App` state and syncs to the session API (`src/lib/session.js`). Line qty is clamped to 1–20. Packing notes max 300. Menu items have no icing-message field.
 - Opening the bag hydrates date/time with `bagWhenFromDraft`: a saved ISO date **today or later** is kept; otherwise **today** and now rounded **up to the next 15 minutes**. Contact and custom cakes do not get those defaults.
 - The drawer is a flex column: items + When/Pickup scroll in `.cart-scroll`; **Order on WhatsApp** stays pinned in `.cart-foot`. `.cart` uses `overflow: hidden` so the button cannot paint off-screen. There is no Email instead in the bag.
 - When + Pickup sit in one paper card. Minutes step by 15. Compact pickup is shop name + Maps (full address still goes into WhatsApp). Delivery is one Area / address field.
@@ -176,7 +202,7 @@ https://maps.google.com/?q=…
 
   Delivery is one line (`Delivery: Bodakdev, near ISRO` or `Delivery: address to confirm.`). If there is no date, `whenNote` is `Date to confirm.`
 - `/contact` is WhatsApp-only: a **Tell us more** box (prefilled from the bag on load), **WhatsApp this enquiry**, and a Call / Email (`mailto:`) / Instagram aside. No date, pickup, or FormSubmit on this page. Custom cakes still go to `/custom`.
-- Custom cake **Email instead** POSTs to FormSubmit (`https://formsubmit.co/ajax/devscakelab@gmail.com`). The first live send needs the activation email in that inbox. CSP `connect-src` must include `https://formsubmit.co`.
+- Custom cake **Email instead** POSTs to FormSubmit (`https://formsubmit.co/ajax/devscakelab@gmail.com`). The first live send needs the activation email in that inbox. CSP `connect-src` must include `https://formsubmit.co` and your session API host.
 
 ## Deploy (GitHub Pages)
 
