@@ -28,7 +28,7 @@ A Vite + React marketing and ordering front end for **Dev's Cake Lab**, a desser
 
 - App shell, cart state, and page switch live in `src/App.jsx`.
 - Static assets are served from `public/assets/` via `asset()`; product photos and the logo use WebP with a JPEG/PNG fallback (`SmartImage`). Inside `.cart-art`, `.smart-picture` is `display: block` so thumbs stay in the 65px cell (`display: contents` would break the item grid). Vitest audits that every referenced file exists.
-- Cart and enquiry drafts persist via a separate session API (`server/`) — one JSON file per shopper session.
+- Cart and enquiry drafts persist in the browser (`localStorage` via `src/lib/cart.js` and `src/lib/draft.js`).
 - Production `base` in `vite.config.js` is `/dev-cake-lab/`.
 - SPA deep links on Pages use a copied `404.html` that mirrors `index.html`.
 - Custom cake options live in `src/data/customCake.js`; the WhatsApp/email brief is built in `src/lib/customCake.js`. Flavours include ganache (white/milk/dark), Belgian chocolate, Nutella hazelnut, fruit/coffee options, and Custom.
@@ -39,7 +39,6 @@ A Vite + React marketing and ordering front end for **Dev's Cake Lab**, a desser
 ## Current gaps / known issues
 
 - New catalog photos still need a JPEG/PNG in `public/assets/` plus `node scripts/optimize-images.mjs` for WebP.
-- The session API must be running separately for cart and enquiry persistence (`npm run server` locally). GitHub Pages serves only the static frontend; set `VITE_API_URL` at build time and add that host to CSP `connect-src` in `index.html`.
 - Custom-cake email: the first live send requires clicking FormSubmit’s activation email in `devscakelab@gmail.com`. Delivery then depends on that third-party relay.
 - `/contact` prefills the message from the bag on load. Editing the bag afterward does not refresh that textarea (App no longer bumps `orderTicket`).
 

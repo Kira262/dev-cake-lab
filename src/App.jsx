@@ -9,7 +9,6 @@ import {
   readBag,
   saveBag,
 } from "./lib/cart.js";
-import { initSession } from "./lib/session.js";
 import { NOTES_MAX, clipText } from "./lib/validate.js";
 import { toLocation } from "./lib/paths.js";
 import { readMenuType, readPath, readProductSlug } from "./lib/routes.js";
@@ -25,11 +24,9 @@ import { ProductPage } from "./pages/ProductPage.jsx";
 import { VisitPage } from "./pages/VisitPage.jsx";
 
 export default function App() {
-  const [sessionReady, setSessionReady] = useState(false);
-  const [sessionError, setSessionError] = useState("");
   const [route, setRoute] = useState(readPath);
   const [menuType, setMenuType] = useState(readMenuType);
-  const [cart, setCart] = useState([]);
+  const [cart, setCart] = useState(() => hydrateBag(readBag(), products));
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -50,33 +47,14 @@ export default function App() {
   };
 
   useEffect(() => {
-    let active = true;
-    initSession()
-      .then(() => {
-        if (!active) return;
-        setCart(hydrateBag(readBag(), products));
-        setSessionReady(true);
-      })
-      .catch(() => {
-        if (!active) return;
-        setSessionError("Could not connect to the order session service.");
-        setSessionReady(true);
-      });
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
     const onPop = () => syncFromLocation();
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
 
   useEffect(() => {
-    if (!sessionReady) return;
     saveBag(cart);
-  }, [cart, sessionReady]);
+  }, [cart]);
 
   const add = (product, extras = {}) => {
     const qty = clampQty(extras.qty);
@@ -158,24 +136,11 @@ export default function App() {
       <HomePage navigate={navigate} add={add} />
     );
 
-  if (!sessionReady) {
-    return (
-      <div className="app app-loading">
-        <p>Loading your bag…</p>
-      </div>
-    );
-  }
-
   return (
     <div className="app">
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>
-      {sessionError && (
-        <div className="session-error" role="status">
-          {sessionError}
-        </div>
-      )}
       <Header
         navigate={navigate}
         route={route}

@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest";
 import { mapsLink } from "../../data/contacts.js";
-import { clampQty, fulfilmentNote, hydrateBag, lineTotal, MAX_LINE_QTY, orderMessage } from "../../lib/cart.js";
+import {
+  clampQty,
+  fulfilmentNote,
+  hydrateBag,
+  lineTotal,
+  MAX_LINE_QTY,
+  orderMessage,
+  readBag,
+  saveBag,
+} from "../../lib/cart.js";
 
 describe("clampQty", () => {
   it("clamps negative, zero, and huge quantities to 1–20", () => {
@@ -29,6 +38,15 @@ describe("orderMessage", () => {
     expect(text).not.toContain("notes:");
     expect(text).toContain("Total ₹700");
     expect(text).not.toContain("Subtotal:");
+  });
+});
+
+describe("bag persist", () => {
+  it("writes serialized rows to localStorage and reads them back", () => {
+    saveBag([
+      { id: 3, qty: 2, notes: "less sweet", price: 350, name: "Biscoff" },
+    ]);
+    expect(readBag()).toEqual([{ id: 3, qty: 2, notes: "less sweet" }]);
   });
 });
 

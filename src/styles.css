@@ -66,20 +66,6 @@ button {
 .mobile-enquire {
   display: none;
 }
-.app-loading {
-  display: grid;
-  place-items: center;
-  padding: 48px;
-  color: var(--olive2);
-}
-.session-error {
-  background: #fff3e8;
-  color: var(--brown);
-  text-align: center;
-  padding: 10px 16px;
-  font-size: 14px;
-  border-bottom: 1px solid var(--line);
-}
 .wrap {
   width: min(1160px, calc(100% - 48px));
   margin: auto;
