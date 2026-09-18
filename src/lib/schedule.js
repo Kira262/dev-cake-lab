@@ -90,6 +90,43 @@ export function isoDateFromToday(offsetDays = 0, now = new Date()) {
   return toISODate(date);
 }
 
+function roundUpToQuarterHour(now) {
+  const date = new Date(
+    now.getFullYear(),
+    now.getMonth(),
+    now.getDate(),
+    now.getHours(),
+    now.getMinutes(),
+    0,
+    0,
+  );
+  const rem = date.getMinutes() % 15;
+  const bump =
+    rem !== 0 || now.getSeconds() > 0 || now.getMilliseconds() > 0;
+  if (bump) date.setMinutes(date.getMinutes() + (rem === 0 ? 15 : 15 - rem));
+  return date;
+}
+
+export function isoTimeFromNow(now = new Date()) {
+  const date = roundUpToQuarterHour(now);
+  return `${String(date.getHours()).padStart(2, "0")}:${String(
+    date.getMinutes(),
+  ).padStart(2, "0")}`;
+}
+
+export function bagWhenFromDraft(draft = {}, now = new Date()) {
+  const today = isoDateFromToday(0, now);
+  const parsed = parseISODate(draft.neededBy);
+  const savedDate = parsed ? toISODate(parsed) : "";
+  const keepDate = Boolean(savedDate && savedDate >= today);
+  const savedTime = parseNeededTime(draft.neededTime);
+  const rounded = roundUpToQuarterHour(now);
+  return {
+    date: keepDate ? savedDate : toISODate(rounded),
+    time: keepDate && savedTime ? savedTime : isoTimeFromNow(now),
+  };
+}
+
 export function formatDisplayDate(iso) {
   const date = parseISODate(iso);
   if (!date) return String(iso || "");
@@ -103,7 +140,7 @@ export function formatDisplayDate(iso) {
 export function whenNote(when = "", time = "") {
   const date = parseISODate(when);
   if (!date) {
-    return "Date to confirm — we can pick a time on WhatsApp.";
+    return "Date to confirm.";
   }
   const clock = formatDisplayTime(time);
   return clock

@@ -4,6 +4,10 @@ export function asset(file) {
   return `${import.meta.env.BASE_URL}assets/${file}`;
 }
 
+export function webpFromUrl(url) {
+  return String(url).replace(/\.(jpe?g|png)(\?|#|$)/i, ".webp$2");
+}
+
 export function appPath() {
   let path = window.location.pathname || "/";
   if (BASE && (path === BASE || path.startsWith(`${BASE}/`))) {

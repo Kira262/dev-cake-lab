@@ -15,28 +15,31 @@ A Vite + React marketing and ordering front end for **Dev's Cake Lab**, a desser
 
 ## Main features
 
-- Header nav: **Home**, **Shop**, **Visit**, **Contact** (mobile menu button is top-right)
-- Home: hero with cat mascot, categories, best sellers, manifesto, signature product, reviews, FAQ
+- Header nav: **Home**, **Shop**, **Custom cakes**, **Visit**, **Contact**. Phones: bag icon beside the hamburger, plus a sticky WhatsApp **Enquire** pill
+- Home: hero with cat mascot, looping categories, best sellers, manifesto, reviews, FAQ (no announcement bar, no second Biscoff “chef’s special” block)
 - Shop (`/menu`): filter chips + search, product cards, custom-cake CTA
+- Custom cakes (`/custom`): paper-card brief with olive chips for weight, occasion, sponge, and flavour; tall/wide shape cards; sticky “Your cake” summary; WhatsApp quote; **Email instead** via FormSubmit
 - Visit: location and hours at P.D. Apartment, Ellisbridge, Ahmedabad, with a sandboxed Google Maps embed
-- Contact: short enquiry (name + Indian mobile required, email optional); needed-by date; pickup or delivery with area chips; WhatsApp this enquiry, or send via FormSubmit to `devscakelab@gmail.com` with no review popup
-- Cart drawer: qty 1–20; bag remembered; WhatsApp always open; optional date picker and one delivery address line; Email instead uses the longer contact form
+- Contact: WhatsApp-only — message box (bag can prefill it), **WhatsApp this enquiry**, Call / Email mailto / Instagram. Custom cakes go to `/custom`
+- Cart drawer: qty 1–20; bag remembered; opens with **today** and now rounded up to 15 minutes unless a future draft date exists; When + Pickup; **Order on WhatsApp** pinned; short chat draft (items, total, needed, pickup/delivery, Maps)
 - Client routing with production base-path support for GitHub Pages
 
 ## Architecture notes
 
 - App shell, cart state, and page switch live in `src/App.jsx`.
-- Static assets are served from `public/assets/` via `asset()`.
+- Static assets are served from `public/assets/` via `asset()`; product photos and the logo use WebP with a JPEG/PNG fallback (`SmartImage`). Inside `.cart-art`, `.smart-picture` is `display: block` so thumbs stay in the 65px cell (`display: contents` would break the item grid).
 - Production `base` in `vite.config.js` is `/dev-cake-lab/`.
 - SPA deep links on Pages use a copied `404.html` that mirrors `index.html`.
-- Enquiry POST goes to FormSubmit (`src/lib/enquiry.js`); CSP in `index.html` allows `https://formsubmit.co`.
-- Tests live under `src/test/` (mirrors `data/`, `lib/`, `pages/`). CI runs `npm test` before the Pages build.
+- Custom cake options live in `src/data/customCake.js`; the WhatsApp/email brief is built in `src/lib/customCake.js`. Flavours include ganache (white/milk/dark), Belgian chocolate, Nutella hazelnut, fruit/coffee options, and Custom.
+- FormSubmit is used only for custom-cake email (`src/lib/enquiry.js`); CSP in `index.html` allows `https://formsubmit.co`. Menu orders go through WhatsApp from the bag.
+- Bag WhatsApp copy is `orderWhatsAppText` in `src/lib/cart.js`; today/now defaults are `bagWhenFromDraft` in `src/lib/schedule.js`.
+- Tests live under `src/test/` (mirrors `data/`, `lib/`, `pages/`, `components/`). CI runs `npm test` before the Pages build.
 
 ## Current gaps / known issues
 
-- Several product images referenced in code may still be missing from `public/assets/` (only the logo is guaranteed present).
-- The first live enquiry requires clicking FormSubmit’s activation email in `devscakelab@gmail.com`. Delivery then depends on that third-party relay.
-- Cart edits on `/contact` after arrival may not refresh the textarea unless `orderTicket` changes again.
+- New catalog photos still need a JPEG/PNG in `public/assets/` plus `node scripts/optimize-images.mjs` for WebP.
+- Custom-cake email: the first live send requires clicking FormSubmit’s activation email in `devscakelab@gmail.com`. Delivery then depends on that third-party relay.
+- `/contact` prefills the message from the bag on load. Editing the bag afterward does not refresh that textarea (App no longer bumps `orderTicket`).
 
 ## Brand
 

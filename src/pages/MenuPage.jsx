@@ -32,7 +32,7 @@ export function MenuPage({
   }, [focusSearch, onSearchFocused]);
 
   return (
-    <main>
+    <main id="main-content">
       <section className="page-hero wrap">
         <span className="kicker">THE FULL MENU</span>
         <h1>

@@ -10,6 +10,7 @@ export function CategoryCarousel({ navigate }) {
   const scroller = useRef(null);
   const loopWidth = useRef(0);
   const paused = useRef(false);
+  const swallowClick = useRef(false);
   const drag = useRef({
     down: false,
     dragging: false,
@@ -74,6 +75,8 @@ export function CategoryCarousel({ navigate }) {
 
   const onPointerDown = (e) => {
     if (!scroller.current) return;
+    // Touch swipes must reach pointermove instead of becoming a tap on a card.
+    if (e.pointerType === "touch") e.preventDefault();
     paused.current = true;
     drag.current = {
       down: true,
@@ -93,14 +96,30 @@ export function CategoryCarousel({ navigate }) {
     scroller.current.scrollLeft = drag.current.startScroll - dx;
     wrapScroll();
   };
-  const onPointerUp = (e) => {
+  const endDrag = (e) => {
     const wasDrag = drag.current.dragging;
     drag.current.down = false;
     drag.current.dragging = false;
-    scroller.current?.releasePointerCapture?.(e.pointerId);
-    if (wasDrag) return;
+    const el = scroller.current;
+    if (el?.hasPointerCapture?.(e.pointerId)) el.releasePointerCapture(e.pointerId);
+    return wasDrag;
+  };
+  const onPointerUp = (e) => {
+    if (endDrag(e)) {
+      swallowClick.current = true;
+      return;
+    }
     const card = e.target.closest?.(".category-card");
     if (card?.dataset.category) openCategory(card.dataset.category);
+  };
+  const onPointerCancel = (e) => {
+    if (endDrag(e)) swallowClick.current = true;
+  };
+  const onClick = (e) => {
+    if (!swallowClick.current) return;
+    swallowClick.current = false;
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   const pause = () => {
@@ -131,7 +150,8 @@ export function CategoryCarousel({ navigate }) {
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
-        onPointerCancel={onPointerUp}
+        onPointerCancel={onPointerCancel}
+        onClick={onClick}
       >
         {slides.map(({ title, caption, art, key }) => (
           <button
@@ -148,7 +168,7 @@ export function CategoryCarousel({ navigate }) {
         ))}
       </div>
       <div className="drag-hint">
-        <span>←</span> Click & drag to explore <span>→</span>
+        <span>←</span> Drag to explore <span>→</span>
       </div>
     </div>
   );

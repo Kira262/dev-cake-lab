@@ -134,9 +134,8 @@ describe("enquiryWhatsAppText", () => {
       time: "18:00",
       message: "Tonight",
     });
-    expect(text).toContain("Address:\nnear ISRO");
-    expect(text).toContain("Delivery requested to Bodakdev");
-    expect(text).toContain("confirm delivery charges");
+    expect(text).toContain("Delivery: Bodakdev, near ISRO");
+    expect(text).not.toContain("confirm delivery charges");
     expect(text).toContain("Needed by:");
     expect(text).toMatch(/6:00/i);
   });

@@ -4,7 +4,7 @@ import { CONTACTS, mapsEmbedSrc, mapsLink } from "../data/contacts.js";
 
 export function VisitPage() {
   return (
-    <main>
+    <main id="main-content">
       <section className="page-hero wrap">
         <span className="kicker">COME SAY HELLO</span>
         <h1>

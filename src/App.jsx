@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Check, Heart } from "lucide-react";
+import { Check } from "lucide-react";
 import { products } from "./data/catalog.js";
 import {
   makeLineId,
@@ -31,7 +31,6 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [focusSearch, setFocusSearch] = useState(false);
-  const [orderTicket, setOrderTicket] = useState(0);
   const [toast, setToast] = useState(null);
 
   const syncFromLocation = () => {
@@ -127,7 +126,6 @@ export default function App() {
       <ContactPage
         cart={cart}
         total={total}
-        orderTicket={orderTicket}
         navigate={navigate}
       />
     ) : route === "/custom" ? (
@@ -140,9 +138,9 @@ export default function App() {
 
   return (
     <div className="app">
-      <div className="announcement">
-        HAND-FINISHED IN SMALL BATCHES <Heart size={13} fill="currentColor" />
-      </div>
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
       <Header
         navigate={navigate}
         route={route}
@@ -161,11 +159,6 @@ export default function App() {
         total={total}
         changeQty={changeQty}
         navigate={navigate}
-        startOrder={() => {
-          setCartOpen(false);
-          setOrderTicket((n) => n + 1);
-          navigate("/contact");
-        }}
       />
       {toast && (
         <div className="cart-toast" role="status" aria-live="polite">

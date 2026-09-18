@@ -16,8 +16,11 @@ describe("Header enquire", () => {
         setMenuOpen={vi.fn()}
       />,
     );
-    const href = screen.getByRole("link", { name: /enquire/i }).getAttribute("href");
-    expect(href).toBe(enquireWhatsAppUrl());
+    const links = screen.getAllByRole("link", { name: /enquire/i });
+    expect(links.length).toBeGreaterThan(0);
+    const hrefs = links.map((link) => link.getAttribute("href"));
+    expect(hrefs.every((href) => href === enquireWhatsAppUrl())).toBe(true);
+    const href = hrefs[0];
     const text = new URL(href).searchParams.get("text");
     expect(text).toBe(ENQUIRE_WHATSAPP_TEXT);
     expect(text).toContain("Hi, I'd like to order from Dev's Cake Lab.");
@@ -48,5 +51,43 @@ describe("Header mobile menu overlay", () => {
     rerender(<Header {...props} menuOpen />);
     expect(overlay.classList.contains("open")).toBe(true);
     expect(overlay.getAttribute("tabIndex")).toBe("0");
+  });
+});
+
+describe("Header shopping bag", () => {
+  it("includes the item count in the accessible name", () => {
+    render(
+      <Header
+        navigate={vi.fn()}
+        route="/"
+        count={3}
+        openCart={vi.fn()}
+        openSearch={vi.fn()}
+        menuOpen={false}
+        setMenuOpen={vi.fn()}
+      />,
+    );
+    expect(
+      screen.getByRole("button", { name: "Shopping bag, 3 items" }),
+    ).toBeTruthy();
+  });
+
+  it("closes the menu when the bag opens", () => {
+    const setMenuOpen = vi.fn();
+    const openCart = vi.fn();
+    render(
+      <Header
+        navigate={vi.fn()}
+        route="/"
+        count={1}
+        openCart={openCart}
+        openSearch={vi.fn()}
+        menuOpen
+        setMenuOpen={setMenuOpen}
+      />,
+    );
+    screen.getByRole("button", { name: "Shopping bag, 1 items" }).click();
+    expect(setMenuOpen).toHaveBeenCalledWith(false);
+    expect(openCart).toHaveBeenCalled();
   });
 });

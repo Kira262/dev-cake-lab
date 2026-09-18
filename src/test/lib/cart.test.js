@@ -22,11 +22,13 @@ describe("orderMessage", () => {
       },
     ];
     const text = orderMessage(cart, lineTotal(cart[0]));
-    expect(text).toContain("I'd like to order:");
+    expect(text).not.toContain("I'd like to order:");
     expect(text).toContain("Biscoff Cheesecake × 2");
     expect(text).not.toContain("message:");
-    expect(text).toContain("notes: less sweet");
-    expect(text).toContain("Subtotal: ₹700");
+    expect(text).toContain("(less sweet)");
+    expect(text).not.toContain("notes:");
+    expect(text).toContain("Total ₹700");
+    expect(text).not.toContain("Subtotal:");
   });
 });
 
@@ -57,20 +59,19 @@ describe("fulfilmentNote", () => {
       area: "Navrangpura",
       address: "near CEPT",
     });
-    expect(text).toContain("Delivery requested to Navrangpura");
-    expect(text).toContain("near CEPT");
-    expect(text).toContain("confirm delivery charges");
+    expect(text).toBe("Delivery: Navrangpura, near CEPT");
   });
 
   it("leaves address open when delivery details are missing", () => {
     const text = fulfilmentNote({ fulfilment: "delivery" });
-    expect(text).toContain("Address to confirm.");
+    expect(text).toBe("Delivery: address to confirm.");
   });
 
-  it("includes the full shop address and maps link for pickup", () => {
+  it("includes the shop address and maps link for pickup", () => {
     const text = fulfilmentNote({ fulfilment: "pickup" });
-    expect(text).toContain("401, P.D. Apartment");
-    expect(text).toContain("Ellisbridge, Ahmedabad, India 380006");
+    expect(text).toContain("Pickup: Dev's Cake Lab");
+    expect(text).toContain("401, P.D. Apartment, Opp Mira Madhav Flat, Ellisbridge");
+    expect(text).not.toContain("Ahmedabad, India 380006");
     expect(text).toContain(mapsLink());
   });
 });

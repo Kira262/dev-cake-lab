@@ -58,14 +58,11 @@ export function FulfilmentFields({
               maxLength={ADDRESS_MAX}
               value={address}
               aria-invalid={addressError ? "true" : "false"}
-              aria-describedby={addressError ? errorId : hintId}
+              aria-describedby={addressError ? errorId : undefined}
               className={addressError ? "invalid" : ""}
               onChange={(e) => onAddress(e.target.value)}
               placeholder="Bodakdev, society name…"
             />
-            <span className="field-hint" id={hintId}>
-              Extra delivery charges — we'll quote on WhatsApp.
-            </span>
             {addressError && (
               <span className="field-error" id={errorId}>
                 {addressError}
@@ -126,6 +123,18 @@ export function FulfilmentFields({
             </label>
           </>
         )
+      ) : compact ? (
+        <div className="fulfil-pickup">
+          <p className="fulfil-pickup-addr">{CONTACTS.addressName}</p>
+          <a
+            className="maps-link"
+            href={mapsLink()}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Open in Google Maps
+          </a>
+        </div>
       ) : (
         <div className="fulfil-pickup">
           <p className="fulfil-pickup-addr">

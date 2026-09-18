@@ -11,7 +11,7 @@ describe("formatCustomCakeBrief", () => {
       shapeId: "tall",
       occasion: "Birthday",
       sponge: "Vanilla",
-      flavour: "Chocolate ganache",
+      flavour: "Chocolate ganache (dark)",
       design: "Pale pink roses",
       cakeMessage: "Happy birthday Aya",
       allergies: "Nut-free",
@@ -20,11 +20,19 @@ describe("formatCustomCakeBrief", () => {
     expect(text).toContain("Weight: 1 kg");
     expect(text).toContain("Shape: Tall cake");
     expect(text).toContain("Sponge: Vanilla");
-    expect(text).toContain("Flavour / filling: Chocolate ganache");
+    expect(text).toContain("Flavour / filling: Chocolate ganache (dark)");
     expect(text).toContain("Pale pink roses");
     expect(text).toContain("Message on cake: Happy birthday Aya");
     expect(text).toContain("Nut-free");
     expect(text).toContain("quote on WhatsApp");
+  });
+
+  it("uses the custom flavour text", () => {
+    const text = formatCustomCakeBrief({
+      flavour: "Custom",
+      customFlavour: "pistachio rose",
+    });
+    expect(text).toContain("Flavour / filling: pistachio rose");
   });
 
   it("uses the custom weight text", () => {

@@ -1,7 +1,5 @@
 import { ArrowRight } from "lucide-react";
 import { products, reviews } from "../data/catalog.js";
-import { asset } from "../lib/paths.js";
-import { productPath } from "../lib/routes.js";
 import { CatHero } from "../components/CatHero.jsx";
 import { CategoryCarousel } from "../components/CategoryCarousel.jsx";
 import { FAQ } from "../components/FAQ.jsx";
@@ -10,7 +8,7 @@ import { TypewriterWord } from "../components/TypewriterWord.jsx";
 
 export function HomePage({ navigate, add }) {
   return (
-    <main>
+    <main id="main-content">
       <section className="hero wrap">
         <div className="hero-copy">
           <span className="kicker">ARTISAN DESSERTS · DEV'S CAKE LAB</span>
@@ -68,8 +66,14 @@ export function HomePage({ navigate, add }) {
           </button>
         </div>
         <div className="products">
-          {products.slice(0, 4).map((p) => (
-            <ProductCard key={p.id} product={p} add={add} navigate={navigate} />
+          {products.slice(0, 4).map((p, i) => (
+            <ProductCard
+              key={p.id}
+              product={p}
+              add={add}
+              navigate={navigate}
+              priority={i < 2}
+            />
           ))}
         </div>
       </section>
@@ -104,35 +108,6 @@ export function HomePage({ navigate, add }) {
               <p>Custom flavours, colours and cakes for your celebration.</p>
             </div>
           </div>
-        </div>
-      </section>
-
-      <section className="feature wrap">
-        <div className="feature-art photo-feature">
-          <img src={asset("biscoff-cheesecake.jpg")} alt="Biscoff cheesecake" />
-          <span className="stamp">
-            SIGNATURE
-            <br />
-            CHEESECAKE
-          </span>
-        </div>
-        <div className="feature-copy">
-          <span className="kicker">THE DEV SIGNATURE</span>
-          <h2>Biscoff Cheesecake</h2>
-          <p>
-            Creamy. Crunchy. Irresistible. A biscuit base, smooth cheesecake,
-            Biscoff spread and a generous crumble on top.
-          </p>
-          <div className="price-note">
-            <strong>₹350</strong>
-            <span>250 g</span>
-          </div>
-          <button
-            className="primary"
-            onClick={() => navigate(productPath("biscoff-cheesecake"))}
-          >
-            Order Chef's special <ArrowRight size={17} />
-          </button>
         </div>
       </section>
 

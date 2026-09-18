@@ -6,7 +6,17 @@ import {
 } from "../lib/schedule.js";
 
 const HOURS = Array.from({ length: 12 }, (_, i) => String(i + 1));
-const MINUTES = Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0"));
+
+function minutesForStep(step, extra = "") {
+  const size = Math.max(1, Number(step) || 1);
+  const list = Array.from({ length: Math.floor(60 / size) }, (_, i) =>
+    String(i * size).padStart(2, "0"),
+  );
+  if (extra && !list.includes(extra)) {
+    return [...list, extra].sort();
+  }
+  return list;
+}
 
 function TimePicker({
   idPrefix,
@@ -14,6 +24,7 @@ function TimePicker({
   onChange,
   invalid = false,
   describedBy,
+  minuteStep = 1,
 }) {
   const saved = toTwelveHourParts(value);
   const [hour, setHour] = useState(saved.hour);
@@ -21,11 +32,10 @@ function TimePicker({
   const [period, setPeriod] = useState(saved.period || "AM");
 
   useEffect(() => {
-    if (!value) return;
     const next = toTwelveHourParts(value);
     setHour(next.hour);
     setMinute(next.minute);
-    setPeriod(next.period);
+    setPeriod(next.period || "AM");
   }, [value]);
 
   const commit = (nextHour, nextMinute, nextPeriod) => {
@@ -86,7 +96,7 @@ function TimePicker({
           }}
         >
           <option value="">MM</option>
-          {MINUTES.map((item) => (
+          {minutesForStep(minuteStep, minute).map((item) => (
             <option key={item} value={item}>
               {item}
             </option>
@@ -124,12 +134,21 @@ export function NeededByFields({
   timeError = "",
   required = false,
   legend,
+  hint,
+  minuteStep = 1,
 }) {
   const dateId = `${idPrefix}-needed-by`;
   const dateErrorId = `${idPrefix}-needed-by-error`;
   const timeErrorId = `${idPrefix}-needed-time-error`;
   const hintId = `${idPrefix}-needed-by-hint`;
   const title = legend || (required ? "Needed by" : "Needed by (optional)");
+  const hintText =
+    hint === undefined
+      ? minDays >= 2
+        ? "Custom cakes need 2–4 days. Rush orders depend on availability."
+        : "Optional — or skip and tell us on WhatsApp."
+      : hint;
+  const hintDescribedBy = hintText ? hintId : undefined;
 
   return (
     <div className="fulfil needed-by">
@@ -145,7 +164,7 @@ export function NeededByFields({
             max={isoDateFromToday(60)}
             value={neededBy}
             aria-invalid={dateError ? "true" : "false"}
-            aria-describedby={dateError ? dateErrorId : hintId}
+            aria-describedby={dateError ? dateErrorId : hintDescribedBy}
             className={dateError ? "invalid" : ""}
             onChange={(e) => onNeededBy(e.target.value)}
           />
@@ -157,15 +176,16 @@ export function NeededByFields({
             value={neededTime}
             onChange={onNeededTime}
             invalid={Boolean(timeError)}
-            describedBy={timeError ? timeErrorId : hintId}
+            describedBy={timeError ? timeErrorId : hintDescribedBy}
+            minuteStep={minuteStep}
           />
         </div>
       </div>
-      <span className="field-hint" id={hintId}>
-        {minDays >= 2
-          ? "Custom cakes need 2–4 days. Rush orders depend on availability."
-          : "Optional — or skip and tell us on WhatsApp."}
-      </span>
+      {hintText ? (
+        <span className="field-hint" id={hintId}>
+          {hintText}
+        </span>
+      ) : null}
       {dateError && (
         <span className="field-error" id={dateErrorId}>
           {dateError}

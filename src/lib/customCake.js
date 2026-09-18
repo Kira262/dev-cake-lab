@@ -15,6 +15,13 @@ export function cakeShapeLabel(shapeId = "") {
   return CAKE_SHAPES.find((item) => item.id === shapeId)?.label || "";
 }
 
+export function cakeFlavourLabel({ flavour = "", customFlavour = "" } = {}) {
+  if (flavour === "Custom") {
+    return String(customFlavour || "").trim();
+  }
+  return String(flavour || "").trim();
+}
+
 export function customCakeBriefReady({
   weightId = "",
   customWeight = "",
@@ -34,6 +41,7 @@ export function formatCustomCakeBrief({
   occasion = "",
   sponge = "",
   flavour = "",
+  customFlavour = "",
   design = "",
   cakeMessage = "",
   allergies = "",
@@ -45,7 +53,8 @@ export function formatCustomCakeBrief({
   if (weight) lines.push(`Weight: ${weight}`);
   if (shape) lines.push(`Shape: ${shape}`);
   if (sponge) lines.push(`Sponge: ${sponge}`);
-  if (flavour) lines.push(`Flavour / filling: ${flavour}`);
+  const flavourLabel = cakeFlavourLabel({ flavour, customFlavour });
+  if (flavourLabel) lines.push(`Flavour / filling: ${flavourLabel}`);
   if (String(design || "").trim()) {
     lines.push("", "Design:", String(design).trim());
   }

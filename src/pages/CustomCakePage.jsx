@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Clock, MapPin, MessageCircle } from "lucide-react";
 import { FulfilmentFields } from "../components/FulfilmentFields.jsx";
 import { IdentityFields } from "../components/IdentityFields.jsx";
 import { NeededByFields } from "../components/NeededByFields.jsx";
@@ -12,6 +12,7 @@ import {
 } from "../data/customCake.js";
 import { CONTACTS, mapsLink, whatsappOrderUrl } from "../data/contacts.js";
 import {
+  cakeFlavourLabel,
   cakeShapeLabel,
   cakeWeightLabel,
   customCakeBriefReady,
@@ -78,6 +79,7 @@ export function CustomCakePage() {
   const [occasion, setOccasion] = useState("");
   const [sponge, setSponge] = useState("");
   const [flavour, setFlavour] = useState("");
+  const [customFlavour, setCustomFlavour] = useState("");
   const [design, setDesign] = useState("");
   const [cakeMessage, setCakeMessage] = useState("");
   const [allergies, setAllergies] = useState("");
@@ -103,6 +105,7 @@ export function CustomCakePage() {
       occasion,
       sponge,
       flavour,
+      customFlavour,
       design,
       cakeMessage,
       allergies,
@@ -114,6 +117,7 @@ export function CustomCakePage() {
       occasion,
       sponge,
       flavour,
+      customFlavour,
       design,
       cakeMessage,
       allergies,
@@ -149,7 +153,7 @@ export function CustomCakePage() {
     shape: cakeShapeLabel(shapeId) || "—",
     occasion: occasion || "—",
     sponge: sponge || "—",
-    flavour: flavour || "—",
+    flavour: cakeFlavourLabel({ flavour, customFlavour }) || "—",
   };
 
   const fieldValues = {
@@ -257,8 +261,8 @@ export function CustomCakePage() {
   };
 
   return (
-    <main>
-      <section className="page-hero wrap">
+    <main id="main-content">
+      <section className="page-hero wrap custom-hero">
         <span className="kicker">CUSTOM CAKES</span>
         <h1>
           Made for your <i>date.</i>
@@ -268,9 +272,14 @@ export function CustomCakePage() {
           payment on WhatsApp — send reference photos in the chat after you tap
           Send.
         </p>
+        <div className="hero-proof">
+          <span>2–4 DAYS</span>
+          <span>WHATSAPP QUOTE</span>
+          <span>50% ADVANCE</span>
+        </div>
       </section>
       <section className="wrap contact custom-cake">
-        <form className="contact-form" onSubmit={sendEmail} noValidate>
+        <form className="contact-form cake-form" onSubmit={sendEmail} noValidate>
           <label className="honeypot" aria-hidden="true">
             Company
             <input
@@ -342,36 +351,49 @@ export function CustomCakePage() {
             </div>
           </ChoiceGroup>
 
-          <div className="cake-pair">
-            <label>
-              Sponge
-              <select
-                value={sponge}
-                onChange={(e) => setSponge(e.target.value)}
-              >
-                <option value="">Select sponge</option>
-                {CAKE_SPONGES.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Flavour / filling
-              <select
-                value={flavour}
-                onChange={(e) => setFlavour(e.target.value)}
-              >
-                <option value="">Select flavour</option>
-                {CAKE_FLAVOURS.map((item) => (
-                  <option key={item} value={item}>
-                    {item}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          <ChoiceGroup legend="Sponge">
+            <div className="cake-pills cake-pills-wrap">
+              {CAKE_SPONGES.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={sponge === item ? "active" : ""}
+                  aria-pressed={sponge === item}
+                  onClick={() => setSponge(item)}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+          </ChoiceGroup>
+
+          <ChoiceGroup legend="Flavour / filling">
+            <div className="cake-pills cake-pills-wrap">
+              {CAKE_FLAVOURS.map((item) => (
+                <button
+                  key={item}
+                  type="button"
+                  className={flavour === item ? "active" : ""}
+                  aria-pressed={flavour === item}
+                  onClick={() => setFlavour(item)}
+                >
+                  {item}
+                </button>
+              ))}
+            </div>
+            {flavour === "Custom" && (
+              <label className="cake-nested">
+                Custom flavour
+                <input
+                  type="text"
+                  value={customFlavour}
+                  maxLength={80}
+                  placeholder="e.g. pistachio rose"
+                  onChange={(e) => setCustomFlavour(e.target.value)}
+                />
+              </label>
+            )}
+          </ChoiceGroup>
 
           <NeededByFields
             idPrefix="custom"
@@ -516,6 +538,7 @@ export function CustomCakePage() {
         </form>
         <aside className="cake-summary">
           <div>
+            <span className="kicker">YOUR BRIEF</span>
             <h3>Your cake</h3>
             <dl className="cake-dl">
               <div>
@@ -541,6 +564,7 @@ export function CustomCakePage() {
             </dl>
           </div>
           <div>
+            <MessageCircle size={18} />
             <h3>Quote</h3>
             <p>
               No price on the site. Send the brief and we'll quote on WhatsApp,
@@ -548,10 +572,12 @@ export function CustomCakePage() {
             </p>
           </div>
           <div>
+            <Clock size={18} />
             <h3>Lead time</h3>
             <p>2–4 days. Rush orders depend on the diary — ask on WhatsApp.</p>
           </div>
           <div>
+            <MapPin size={18} />
             <h3>Pickup</h3>
             <p>
               {CONTACTS.addressName}

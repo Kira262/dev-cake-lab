@@ -1,5 +1,6 @@
 import { CONTACTS } from "../data/contacts.js";
 import { asset } from "../lib/paths.js";
+import { SmartImage } from "./SmartImage.jsx";
 
 export function Footer({ navigate }) {
   return (
@@ -11,7 +12,7 @@ export function Footer({ navigate }) {
             onClick={() => navigate("/")}
             aria-label="The Dev's Cake Lab home"
           >
-            <img
+            <SmartImage
               className="wordmark-logo"
               src={asset("dev-cake-logo.png")}
               alt="The Dev's Cake Lab"
@@ -49,7 +50,6 @@ export function Footer({ navigate }) {
       </div>
       <div className="wrap footer-bottom">
         <span>© 2026 Dev's Cake Lab</span>
-        <span>Crafted. Tested. Perfected.</span>
       </div>
     </footer>
   );

@@ -7,6 +7,7 @@ import {
   X,
 } from "lucide-react";
 import { asset } from "../lib/paths.js";
+import { SmartImage } from "./SmartImage.jsx";
 import { isNavActive } from "../lib/routes.js";
 import { enquireWhatsAppUrl } from "../lib/enquiry.js";
 import { lockBodyScroll, unlockBodyScroll } from "../lib/scroll.js";
@@ -42,10 +43,11 @@ export function Header({
           onClick={() => navigate("/")}
           aria-label="The Dev's Cake Lab home"
         >
-          <img
+          <SmartImage
             className="wordmark-logo"
             src={asset("dev-cake-logo.png")}
             alt="The Dev's Cake Lab"
+            priority
           />
         </button>
         <nav className="desktop-nav" aria-label="Primary">
@@ -69,8 +71,11 @@ export function Header({
           </button>
           <button
             className="tool bag"
-            onClick={openCart}
-            aria-label="Shopping bag"
+            onClick={() => {
+              setMenuOpen(false);
+              openCart();
+            }}
+            aria-label={`Shopping bag, ${count} items`}
           >
             <ShoppingBag size={17} />
             {count > 0 && <i>{count}</i>}
@@ -106,7 +111,7 @@ export function Header({
         aria-label="Menu"
       >
         <div className="mobile-nav-head">
-          <img
+          <SmartImage
             className="mobile-nav-logo"
             src={asset("dev-cake-logo.png")}
             alt=""
@@ -134,16 +139,15 @@ export function Header({
         <button tabIndex={menuOpen ? 0 : -1} onClick={openSearch}>
           Search desserts
         </button>
-        <a
-          href={enquireWhatsAppUrl()}
-          target="_blank"
-          rel="noopener noreferrer"
-          tabIndex={menuOpen ? 0 : -1}
-          onClick={() => setMenuOpen(false)}
-        >
-          Enquire
-        </a>
       </nav>
+      <a
+        className="mobile-enquire"
+        href={enquireWhatsAppUrl()}
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        Enquire
+      </a>
     </>
   );
 }

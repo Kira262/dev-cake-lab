@@ -1,12 +1,13 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Minus, Plus, X } from "lucide-react";
 import { DessertArt } from "./DessertArt.jsx";
+import { SmartImage } from "./SmartImage.jsx";
 import { NeededByFields } from "./NeededByFields.jsx";
 import { FulfilmentFields } from "./FulfilmentFields.jsx";
 import { whatsappOrderUrl } from "../data/contacts.js";
 import { orderWhatsAppText } from "../lib/cart.js";
 import { readEnquiryDraft, saveEnquiryDraft } from "../lib/draft.js";
-import { parseISODate, parseNeededTime } from "../lib/schedule.js";
+import { bagWhenFromDraft } from "../lib/schedule.js";
 import { lockBodyScroll, unlockBodyScroll } from "../lib/scroll.js";
 import { safeFulfilment } from "../lib/validate.js";
 
@@ -17,19 +18,15 @@ export function Cart({
   total,
   changeQty,
   navigate,
-  startOrder,
 }) {
   const draft = readEnquiryDraft();
+  const firstWhen = open ? bagWhenFromDraft(draft) : { date: "", time: "" };
   const [fulfilment, setFulfilment] = useState(() =>
     safeFulfilment(draft.fulfilment),
   );
   const [address, setAddress] = useState(() => draft.address || "");
-  const [neededBy, setNeededBy] = useState(
-    () => (parseISODate(draft.neededBy) ? draft.neededBy : ""),
-  );
-  const [neededTime, setNeededTime] = useState(
-    () => parseNeededTime(draft.neededTime),
-  );
+  const [neededBy, setNeededBy] = useState(firstWhen.date);
+  const [neededTime, setNeededTime] = useState(firstWhen.time);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -40,15 +37,17 @@ export function Cart({
   useEffect(() => {
     if (!open) return;
     const saved = readEnquiryDraft();
+    const when = bagWhenFromDraft(saved);
     setFulfilment(safeFulfilment(saved.fulfilment));
     setAddress(saved.address || "");
-    setNeededBy(parseISODate(saved.neededBy) ? saved.neededBy : "");
-    setNeededTime(parseNeededTime(saved.neededTime));
+    setNeededBy(when.date);
+    setNeededTime(when.time);
   }, [open]);
 
   useEffect(() => {
+    if (!open) return;
     saveEnquiryDraft({ fulfilment, address, neededBy, neededTime });
-  }, [fulfilment, address, neededBy, neededTime]);
+  }, [open, fulfilment, address, neededBy, neededTime]);
 
   const whatsappHref = whatsappOrderUrl(
     orderWhatsAppText(cart, total, {
@@ -65,7 +64,6 @@ export function Cart({
       <aside className={`cart ${open ? "open" : ""}`}>
         <div className="cart-head">
           <div>
-            <span className="kicker">YOUR ORDER</span>
             <h2>Sweet things</h2>
           </div>
           <button onClick={() => setOpen(false)}>
@@ -74,62 +72,78 @@ export function Cart({
         </div>
         {cart.length ? (
           <>
-            <div className="cart-items">
-              {cart.map((item) => (
-                <div className="cart-item" key={item.lineId}>
-                  <div className="cart-art">
-                    {item.image ? (
-                      <img src={item.image} alt="" />
-                    ) : (
-                      <DessertArt type={item.art} />
-                    )}
-                  </div>
-                  <div>
-                    <b>{item.name}</b>
-                    <small>
-                      ₹{item.price.toLocaleString("en-IN")}
-                      {item.notes ? ` · ${item.notes}` : ""}
-                    </small>
-                    <div className="qty">
-                      <button onClick={() => changeQty(item.lineId, -1)}>
-                        <Minus size={13} />
-                      </button>
-                      <span>{item.qty}</span>
-                      <button onClick={() => changeQty(item.lineId, 1)}>
-                        <Plus size={13} />
-                      </button>
+            <div className="cart-scroll">
+              <div className="cart-items">
+                {cart.map((item) => (
+                  <div className="cart-item" key={item.lineId}>
+                    <div className="cart-art">
+                      {item.image ? (
+                        <SmartImage src={item.image} alt="" />
+                      ) : (
+                        <DessertArt type={item.art} />
+                      )}
                     </div>
+                    <div>
+                      <b>{item.name}</b>
+                      <small>
+                        ₹{item.price.toLocaleString("en-IN")}
+                        {item.notes ? ` · ${item.notes}` : ""}
+                      </small>
+                      <div className="qty">
+                        <button
+                          type="button"
+                          aria-label={`Decrease ${item.name} quantity`}
+                          onClick={() => changeQty(item.lineId, -1)}
+                        >
+                          <Minus size={13} />
+                        </button>
+                        <span>{item.qty}</span>
+                        <button
+                          type="button"
+                          aria-label={`Increase ${item.name} quantity`}
+                          onClick={() => changeQty(item.lineId, 1)}
+                        >
+                          <Plus size={13} />
+                        </button>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      className="remove"
+                      aria-label={`Remove ${item.name}`}
+                      onClick={() => changeQty(item.lineId, -item.qty)}
+                    >
+                      <X size={16} />
+                    </button>
                   </div>
-                  <button
-                    className="remove"
-                    onClick={() => changeQty(item.lineId, -item.qty)}
-                  >
-                    <X size={16} />
-                  </button>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="cart-details">
+                <NeededByFields
+                  idPrefix="cart"
+                  legend="When"
+                  hint=""
+                  minuteStep={15}
+                  neededBy={neededBy}
+                  onNeededBy={setNeededBy}
+                  neededTime={neededTime}
+                  onNeededTime={setNeededTime}
+                />
+                <FulfilmentFields
+                  idPrefix="cart"
+                  compact
+                  fulfilment={fulfilment}
+                  onFulfilment={setFulfilment}
+                  address={address}
+                  onAddress={setAddress}
+                />
+              </div>
             </div>
             <div className="cart-foot">
               <div className="cart-subtotal">
                 <span>Subtotal</span>
                 <strong>₹{total.toLocaleString("en-IN")}</strong>
               </div>
-              <NeededByFields
-                idPrefix="cart"
-                legend="When"
-                neededBy={neededBy}
-                onNeededBy={setNeededBy}
-                neededTime={neededTime}
-                onNeededTime={setNeededTime}
-              />
-              <FulfilmentFields
-                idPrefix="cart"
-                compact
-                fulfilment={fulfilment}
-                onFulfilment={setFulfilment}
-                address={address}
-                onAddress={setAddress}
-              />
               <a
                 className="primary"
                 href={whatsappHref}
@@ -138,12 +152,6 @@ export function Cart({
               >
                 Order on WhatsApp <ArrowRight size={17} />
               </a>
-              <p className="field-hint">
-                Opens a draft — tap Send in WhatsApp or we won't see the order.
-              </p>
-              <button type="button" className="text-link" onClick={startOrder}>
-                Email instead
-              </button>
             </div>
           </>
         ) : (

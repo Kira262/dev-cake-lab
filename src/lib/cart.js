@@ -1,4 +1,4 @@
-import { mapsLink, pickupAddressText } from "../data/contacts.js";
+import { CONTACTS, mapsLink } from "../data/contacts.js";
 import { NOTES_MAX, clipText } from "./validate.js";
 import { whenNote } from "./schedule.js";
 
@@ -70,10 +70,10 @@ export function saveBag(cart) {
 export function orderMessage(cart, total) {
   if (!cart.length) return "";
   const lines = cart.map((item) => {
-    const extra = item.notes ? ` (notes: ${item.notes})` : "";
-    return `• ${item.name} × ${item.qty}${extra} — ₹${lineTotal(item).toLocaleString("en-IN")}`;
+    const extra = item.notes ? ` (${item.notes})` : "";
+    return `${item.name} × ${item.qty}${extra} — ₹${lineTotal(item).toLocaleString("en-IN")}`;
   });
-  return `I'd like to order:\n${lines.join("\n")}\n\nSubtotal: ₹${total.toLocaleString("en-IN")}\n\n`;
+  return `${lines.join("\n")}\n\nTotal ₹${total.toLocaleString("en-IN")}\n\n`;
 }
 
 export function fulfilmentNote({
@@ -83,17 +83,17 @@ export function fulfilmentNote({
 } = {}) {
   if (fulfilment === "delivery") {
     const where = String(address || "").trim();
-    const lines = [
-      area && area !== "Other"
-        ? `Delivery requested to ${area}.`
-        : "Delivery requested.",
-    ];
-    if (where) lines.push(`Address:\n${where}`);
-    else lines.push("Address to confirm.");
-    lines.push("Please confirm delivery charges for this area.");
-    return lines.join("\n");
+    const zone = area && area !== "Other" ? area : "";
+    const place = [zone, where].filter(Boolean).join(", ");
+    return place
+      ? `Delivery: ${place}`
+      : "Delivery: address to confirm.";
   }
-  return ["Pickup at:", pickupAddressText(), mapsLink()].join("\n");
+  return [
+    `Pickup: ${CONTACTS.addressName}`,
+    `${CONTACTS.addressLines[0]}, Ellisbridge`,
+    mapsLink(),
+  ].join("\n");
 }
 
 export function orderWhatsAppText(cart, total, extras = {}) {

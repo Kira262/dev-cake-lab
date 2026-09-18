@@ -24,7 +24,6 @@ function renderCart() {
       total={lineTotal(cart[0])}
       changeQty={vi.fn()}
       navigate={vi.fn()}
-      startOrder={vi.fn()}
     />,
   );
 }
@@ -41,19 +40,21 @@ describe("Cart fulfilment", () => {
     localStorage.clear();
   });
 
-  it("always offers WhatsApp, with pickup and date to confirm by default", () => {
+  it("always offers WhatsApp, with today and a rounded time by default", () => {
     renderCart();
+    const today = isoDateFromToday();
     const text = whatsappText();
     expect(text).toContain("401, P.D. Apartment");
     expect(text).toContain("https://maps.google.com/?q=");
-    expect(screen.getByText(/401, P\.D\. Apartment/i)).toBeTruthy();
     expect(
       screen.getByRole("link", { name: /open in google maps/i }).getAttribute("href"),
     ).toContain("https://maps.google.com/?q=");
-    expect(
-      screen.getByText(/tap send in whatsapp or we won't see the order/i),
-    ).toBeTruthy();
-    expect(text).toContain("Date to confirm — we can pick a time on WhatsApp.");
+    expect(screen.queryByRole("button", { name: /email instead/i })).toBeNull();
+    expect(screen.queryByText(/401, P\.D\. Apartment/i)).toBeNull();
+    expect(screen.queryByText(/change if you need another slot/i)).toBeNull();
+    expect(text).toContain(`Needed: ${formatDisplayDate(today)}`);
+    expect(text).not.toContain("Date to confirm — we can pick a time on WhatsApp.");
+    expect(screen.getByLabelText(/^date$/i).value).toBe(today);
   });
 
   it("still opens WhatsApp for delivery with no address yet", async () => {
@@ -63,9 +64,8 @@ describe("Cart fulfilment", () => {
     await user.click(screen.getByRole("radio", { name: /^delivery$/i }));
 
     const text = whatsappText();
-    expect(text).toContain("Delivery requested.");
-    expect(text).toContain("Address to confirm.");
-    expect(text).toContain("confirm delivery charges");
+    expect(text).toContain("Delivery: address to confirm.");
+    expect(text).not.toContain("confirm delivery charges");
   });
 
   it("puts the picked date and address into the WhatsApp text", async () => {
@@ -94,6 +94,7 @@ describe("Cart fulfilment", () => {
       `Needed: ${formatDisplayDate(day)}, ${formatDisplayTime("16:30")}.`,
     );
     expect(text).toContain("Bodakdev, near ISRO");
-    expect(text).toContain("confirm delivery charges");
+    expect(text).toContain("Delivery: Bodakdev, near ISRO");
+    expect(text).not.toContain("confirm delivery charges");
   });
 });
