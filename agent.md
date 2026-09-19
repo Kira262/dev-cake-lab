@@ -35,7 +35,7 @@ Keep the site a polished, brand-forward dessert SPA that builds cleanly and depl
 | Phone, email, address, social links | `src/data/contacts.js` |
 | Custom cake weights, shapes, occasions, sponges, flavours | `src/data/customCake.js` |
 | Shop-by-category icons | `src/components/CategoryIcon.jsx` (inline SVG, keyed by `art`) |
-| Custom cake brief / WhatsApp text | `src/lib/customCake.js` |
+| Custom cake brief / WhatsApp text | `src/lib/customCake.js` (`formatCustomCakeBrief`, `customCakeWhatsAppText`) |
 | Cart / short WhatsApp draft, bag persist | `src/lib/cart.js` (`orderMessage`, `fulfilmentNote`, `orderWhatsAppText`) |
 | Remembered name, phone, email, address, date | `src/lib/draft.js` |
 | Needed-by dates, bag today/now | `src/lib/schedule.js` (`isoTimeFromNow`, `bagWhenFromDraft`, `whenNote`) |
@@ -59,6 +59,7 @@ Keep the site a polished, brand-forward dessert SPA that builds cleanly and depl
 - When adding images, place them in `public/assets/`, wire them through `asset()`, and run `node scripts/optimize-images.mjs`.
 - When adding or renaming flavours, edit `CAKE_FLAVOURS` in `src/data/customCake.js`. Keep **Custom** last; `cakeFlavourLabel()` uses that value for the free-text field.
 - Keep the bag WhatsApp draft short: items, `Total ₹…`, `Needed: …`, pickup/delivery, Maps. Do not restore “I'd like to order,” the long address block, or the delivery-charges sentence unless asked.
+- Keep the custom-cake WhatsApp draft short: greeting, needed by, picks, design/message/allergies, then `Pickup: Dev's Cake Lab` (or a compact delivery line). No Topic, 2–4 day lead, street address, or Maps.
 - `/contact` is WhatsApp + mailto aside. FormSubmit email lives on `/custom` only.
 - Prefer `npm test` and `npm run build` locally before claiming a Pages, custom-cake, or contact-form fix is done.
 - If you change what custom-cake email may fetch, update `connect-src` in `index.html`.

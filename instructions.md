@@ -153,7 +153,7 @@ Current picks:
 - Needed-by date and time (required, 2–4 day lead)
 - Pickup or delivery, design notes, message on cake, allergies
 
-The brief is ready when size + occasion are set, or design notes are at least 6 characters. **WhatsApp this cake** opens a draft; quote and the usual 50% advance happen in chat, not on the site. **Email instead** is only on this page (FormSubmit). Contact no longer sends email.
+The brief is ready when size + occasion are set, or design notes are at least 6 characters. **WhatsApp this cake** opens a short draft: needed by, picks, design/message/allergies, then pickup as the shop name only. Do not add Topic, the 2–4 day lead line, the street address, or Maps. **Email instead** is only on this page (FormSubmit). Contact no longer sends email.
 
 Needed-by on `/custom` stays empty until they pick a date (2–4 day lead). Do not copy the bag’s today/now defaults onto this form.
 

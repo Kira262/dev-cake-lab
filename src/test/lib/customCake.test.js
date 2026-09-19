@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { formatDisplayDate, formatDisplayTime } from "../../lib/schedule.js";
 import {
   customCakeBriefReady,
+  customCakeWhatsAppText,
   formatCustomCakeBrief,
 } from "../../lib/customCake.js";
 
@@ -24,7 +26,9 @@ describe("formatCustomCakeBrief", () => {
     expect(text).toContain("Pale pink roses");
     expect(text).toContain("Message on cake: Happy birthday Aya");
     expect(text).toContain("Nut-free");
-    expect(text).toContain("quote on WhatsApp");
+    expect(text).not.toContain("quote on WhatsApp");
+    expect(text).not.toMatch(/\n\nMessage on cake:/);
+    expect(text).not.toMatch(/\n\nAllergies /);
   });
 
   it("uses the custom flavour text", () => {
@@ -42,6 +46,62 @@ describe("formatCustomCakeBrief", () => {
       occasion: "Wedding",
     });
     expect(text).toContain("Weight: 3 kg");
+  });
+});
+
+describe("customCakeWhatsAppText", () => {
+  it("writes a short pickup draft without topic, lead time, or maps", () => {
+    const text = customCakeWhatsAppText({
+      neededBy: "2026-09-23",
+      neededTime: "18:30",
+      weightId: "2kg",
+      shapeId: "tall",
+      occasion: "Anniversary",
+      sponge: "Funfetti",
+      flavour: "Chocolate ganache (white)",
+      design: "Pale pink roses, gold leaf",
+      cakeMessage: "Happy anniversary",
+      allergies: "Nut-free",
+    });
+    const when = `${formatDisplayDate("2026-09-23")}, ${formatDisplayTime("18:30")}`;
+    expect(text).toBe(
+      [
+        "Hi, I'd like a custom cake.",
+        `Needed by: ${when}.`,
+        "Occasion: Anniversary",
+        "Weight: 2 kg",
+        "Shape: Tall cake",
+        "Sponge: Funfetti",
+        "Flavour / filling: Chocolate ganache (white)",
+        "",
+        "Design:",
+        "Pale pink roses, gold leaf",
+        "Message on cake: Happy anniversary",
+        "Allergies / special requests: Nut-free",
+        "Pickup: Dev's Cake Lab",
+        "",
+        "Please quote on WhatsApp. I'll send reference photos in this chat.",
+      ].join("\n"),
+    );
+    expect(text).not.toContain("Topic:");
+    expect(text).not.toContain("2–4 days");
+    expect(text).not.toContain("401");
+    expect(text).not.toContain("maps.google");
+  });
+
+  it("uses a compact delivery line in the same spot as pickup", () => {
+    const text = customCakeWhatsAppText({
+      neededBy: "2026-09-23",
+      neededTime: "18:30",
+      occasion: "Anniversary",
+      weightId: "2kg",
+      fulfilment: "delivery",
+      area: "Bodakdev",
+      address: "near ISRO",
+    });
+    expect(text).toContain("Delivery: Bodakdev, near ISRO");
+    expect(text).not.toContain("Pickup:");
+    expect(text).not.toContain("401");
   });
 });
 

@@ -45,7 +45,7 @@ describe("ContactPage enquiry form", () => {
 
   it("prefills the cart message and still offers WhatsApp", () => {
     const total = lineTotal(cart[0]);
-    render(<ContactPage cart={cart} total={total} orderTicket={1} />);
+    render(<ContactPage cart={cart} total={total} />);
 
     expect(
       screen.getByRole("textbox", { name: /tell us more/i }).value,
@@ -54,6 +54,24 @@ describe("ContactPage enquiry form", () => {
     expect(
       screen.getByRole("link", { name: /whatsapp this enquiry/i }),
     ).toBeTruthy();
+  });
+
+  it("refreshes the message when the bag changes", () => {
+    const total = lineTotal(cart[0]);
+    const { rerender } = render(<ContactPage cart={cart} total={total} />);
+    const next = [
+      {
+        name: "Nutella Cheesecake",
+        qty: 2,
+        price: 270,
+        notes: "",
+      },
+    ];
+    const nextTotal = lineTotal(next[0]);
+    rerender(<ContactPage cart={next} total={nextTotal} />);
+    expect(
+      screen.getByRole("textbox", { name: /tell us more/i }).value,
+    ).toContain(orderMessage(next, nextTotal).trim());
   });
 
   it("does not block WhatsApp when the bag asked for delivery", () => {

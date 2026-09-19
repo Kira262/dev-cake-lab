@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { ArrowRight, Mail, Phone } from "lucide-react";
+import { InstagramIcon } from "../components/InstagramIcon.jsx";
 import { CONTACTS, whatsappOrderUrl } from "../data/contacts.js";
 import { orderMessage } from "../lib/cart.js";
 import { readEnquiryDraft } from "../lib/draft.js";
@@ -9,16 +10,16 @@ import { MESSAGE_MAX, validateMessage } from "../lib/validate.js";
 export function ContactPage({
   cart = [],
   total = 0,
-  orderTicket = 0,
   navigate,
 }) {
   const draft = readEnquiryDraft();
   const [attempted, setAttempted] = useState(false);
-  const [message, setMessage] = useState(() => orderMessage(cart, total));
+  const bagText = orderMessage(cart, total);
+  const [message, setMessage] = useState(() => bagText);
 
   useEffect(() => {
-    setMessage(orderMessage(cart, total));
-  }, [orderTicket]);
+    setMessage(bagText);
+  }, [bagText]);
 
   const topic = cart.length ? "Menu order" : "Enquiry";
   const messageResult = validateMessage(message);
@@ -130,7 +131,9 @@ export function ContactPage({
             </p>
           </div>
           <div>
-            <span className="social-icon">◎</span>
+            <span className="social-icon">
+              <InstagramIcon size={18} />
+            </span>
             <h3>Instagram</h3>
             <p>
               <a

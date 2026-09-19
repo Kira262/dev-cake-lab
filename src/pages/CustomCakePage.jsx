@@ -16,10 +16,11 @@ import {
   cakeShapeLabel,
   cakeWeightLabel,
   customCakeBriefReady,
+  customCakeWhatsAppText,
   formatCustomCakeBrief,
 } from "../lib/customCake.js";
 import { readEnquiryDraft, saveEnquiryDraft } from "../lib/draft.js";
-import { enquiryWhatsAppText, submitEnquiry } from "../lib/enquiry.js";
+import { submitEnquiry } from "../lib/enquiry.js";
 import { parseNeededTime } from "../lib/schedule.js";
 import {
   FULFILMENT,
@@ -135,16 +136,13 @@ export function CustomCakePage() {
   const canWhatsApp =
     fulfilmentReady(fulfilment, address) && dateOk && briefReady;
   const whatsappHref = whatsappOrderUrl(
-    enquiryWhatsAppText({
-      name: name.trim(),
-      phone: phone.trim(),
-      topic: TOPIC,
-      message,
+    customCakeWhatsAppText({
+      ...brief,
+      neededBy,
+      neededTime,
       fulfilment,
       address,
       area,
-      neededBy,
-      time: neededTime,
     }),
   );
 

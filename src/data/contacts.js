@@ -34,18 +34,3 @@ export function whatsappOrderUrl(text = "") {
   if (body) url.searchParams.set("text", body);
   return url.toString();
 }
-
-export function gmailComposeUrl({
-  to = CONTACTS.email,
-  subject = "",
-  body = "",
-} = {}) {
-  const params = new URLSearchParams({
-    view: "cm",
-    fs: "1",
-    to,
-  });
-  if (subject) params.set("su", subject);
-  if (body) params.set("body", body);
-  return `https://mail.google.com/mail/?${params.toString()}`;
-}

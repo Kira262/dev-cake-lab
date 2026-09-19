@@ -20,7 +20,7 @@ A Vite + React marketing and ordering front end for **Dev's Cake Lab**, a desser
 - Shop (`/menu`): filter chips + search, product cards, custom-cake CTA
 - Custom cakes (`/custom`): paper-card brief with olive chips for weight, occasion, sponge, and flavour; tall/wide shape cards; sticky “Your cake” summary; WhatsApp quote; **Email instead** via FormSubmit
 - Visit: location and hours at P.D. Apartment, Ellisbridge, Ahmedabad, with a sandboxed Google Maps embed
-- Contact: WhatsApp-only — message box (bag can prefill it), **WhatsApp this enquiry**, Call / Email mailto / Instagram. Custom cakes go to `/custom`
+- Contact: WhatsApp-only — message box (bag prefills it and updates if the bag changes), **WhatsApp this enquiry**, Call / Email mailto / Instagram. Custom cakes go to `/custom`
 - Cart drawer: qty 1–20; bag remembered; opens with **today** and now rounded up to 15 minutes unless a future draft date exists; When + Pickup; **Order on WhatsApp** pinned; short chat draft (items, total, needed, pickup/delivery, Maps)
 - Client routing with production base-path support for GitHub Pages
 
@@ -40,7 +40,6 @@ A Vite + React marketing and ordering front end for **Dev's Cake Lab**, a desser
 
 - New catalog photos still need a JPEG/PNG in `public/assets/` plus `node scripts/optimize-images.mjs` for WebP.
 - Custom-cake email: the first live send requires clicking FormSubmit’s activation email in `devscakelab@gmail.com`. Delivery then depends on that third-party relay.
-- `/contact` prefills the message from the bag on load. Editing the bag afterward does not refresh that textarea (App no longer bumps `orderTicket`).
 
 ## Brand
 

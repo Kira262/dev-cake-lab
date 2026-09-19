@@ -56,7 +56,11 @@ describe("CustomCakePage", () => {
     const text = new URL(href).searchParams.get("text");
     expect(text).toContain("custom cake");
     expect(text).toContain("Birthday for 12");
-    expect(text).toContain("401, P.D. Apartment");
+    expect(text).toContain("Pickup: Dev's Cake Lab");
+    expect(text).not.toContain("Topic:");
+    expect(text).not.toContain("401, P.D. Apartment");
+    expect(text).not.toContain("maps.google");
+    expect(text).not.toContain("2–4 days");
   });
 
   it("emails the custom brief after revealing contact fields", async () => {

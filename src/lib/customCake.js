@@ -1,7 +1,9 @@
+import { CONTACTS } from "../data/contacts.js";
 import {
   CAKE_SHAPES,
   CAKE_WEIGHTS,
 } from "../data/customCake.js";
+import { formatDisplayDate, formatDisplayTime } from "./schedule.js";
 
 export function cakeWeightLabel({ weightId = "", customWeight = "" } = {}) {
   if (weightId === "custom") {
@@ -55,23 +57,62 @@ export function formatCustomCakeBrief({
   if (sponge) lines.push(`Sponge: ${sponge}`);
   const flavourLabel = cakeFlavourLabel({ flavour, customFlavour });
   if (flavourLabel) lines.push(`Flavour / filling: ${flavourLabel}`);
+  const notes = [];
   if (String(design || "").trim()) {
-    lines.push("", "Design:", String(design).trim());
+    notes.push("Design:", String(design).trim());
   }
   if (String(cakeMessage || "").trim()) {
-    lines.push("", `Message on cake: ${String(cakeMessage).trim()}`);
+    notes.push(`Message on cake: ${String(cakeMessage).trim()}`);
   }
   if (String(allergies || "").trim()) {
-    lines.push(
-      "",
-      `Allergies / special requests: ${String(allergies).trim()}`,
-    );
+    notes.push(`Allergies / special requests: ${String(allergies).trim()}`);
   }
-  if (lines.length) {
-    lines.push(
-      "",
-      "Please quote on WhatsApp. I'll send reference photos in this chat.",
-    );
+  if (notes.length) {
+    if (lines.length) lines.push("");
+    lines.push(...notes);
   }
+  return lines.join("\n");
+}
+
+function customCakeFulfilmentNote({
+  fulfilment = "pickup",
+  address = "",
+  area = "",
+} = {}) {
+  if (fulfilment === "delivery") {
+    const where = String(address || "").trim();
+    const zone = area && area !== "Other" ? area : "";
+    const place = [zone, where].filter(Boolean).join(", ");
+    return place
+      ? `Delivery: ${place}`
+      : "Delivery: address to confirm.";
+  }
+  return `Pickup: ${CONTACTS.addressName}`;
+}
+
+export function customCakeWhatsAppText({
+  neededBy = "",
+  neededTime = "",
+  time = "",
+  fulfilment = "pickup",
+  address = "",
+  area = "",
+  ...brief
+} = {}) {
+  const lines = ["Hi, I'd like a custom cake."];
+  const clock = formatDisplayTime(neededTime || time);
+  if (neededBy) {
+    const when = clock
+      ? `${formatDisplayDate(neededBy)}, ${clock}`
+      : formatDisplayDate(neededBy);
+    lines.push(`Needed by: ${when}.`);
+  }
+  const body = formatCustomCakeBrief(brief);
+  if (body) lines.push(body);
+  lines.push(customCakeFulfilmentNote({ fulfilment, address, area }));
+  lines.push(
+    "",
+    "Please quote on WhatsApp. I'll send reference photos in this chat.",
+  );
   return lines.join("\n");
 }
