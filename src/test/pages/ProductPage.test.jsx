@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { ProductPage } from "../../pages/ProductPage.jsx";
@@ -15,8 +15,7 @@ const product = {
 };
 
 describe("ProductPage caps", () => {
-  it("has no icing message field and limits notes and quantity", async () => {
-    const user = userEvent.setup({ delay: null });
+  it("has no icing message field and limits notes and quantity", () => {
     const add = vi.fn();
     const scrollTo = vi.spyOn(window, "scrollTo").mockImplementation(() => {});
     render(<ProductPage product={product} add={add} navigate={vi.fn()} />);
@@ -34,7 +33,7 @@ describe("ProductPage caps", () => {
 
     const increase = screen.getByRole("button", { name: /increase quantity/i });
     for (let i = 0; i < MAX_LINE_QTY + 5; i += 1) {
-      await user.click(increase);
+      fireEvent.click(increase);
     }
     expect(screen.getByText(`₹${product.price.toLocaleString("en-IN")} × ${MAX_LINE_QTY}`)).toBeTruthy();
     scrollTo.mockRestore();
@@ -62,6 +61,34 @@ describe("ProductPage caps", () => {
       expect.objectContaining({
         qty: 4,
         notes: "Flavour: Vanilla × 2, Chocolate × 2",
+      }),
+    );
+  });
+
+  it("lets you pick milk, dark, or both for ganache brownies", async () => {
+    const user = userEvent.setup({ delay: null });
+    const add = vi.fn();
+    vi.spyOn(window, "scrollTo").mockImplementation(() => {});
+    const brownie = {
+      ...product,
+      name: "Ganache Brownie — Milk or Dark",
+      type: "Brownies",
+      price: 77,
+      flavours: ["Milk", "Dark"],
+      image: "",
+      gallery: [],
+    };
+    render(<ProductPage product={brownie} add={add} navigate={vi.fn()} />);
+
+    await user.click(screen.getByRole("button", { name: /^both$/i }));
+    await user.click(screen.getByRole("button", { name: /increase milk quantity/i }));
+    await user.click(screen.getByRole("button", { name: /add to bag/i }));
+
+    expect(add).toHaveBeenCalledWith(
+      brownie,
+      expect.objectContaining({
+        qty: 3,
+        notes: "Flavour: Milk × 2, Dark × 1",
       }),
     );
   });

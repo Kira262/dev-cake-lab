@@ -37,7 +37,8 @@ describe("public/assets", () => {
     const onDisk = new Set(readdirSync(ASSETS_DIR));
     const missing = [];
     for (const product of products) {
-      const hero = product.image.split("/").pop();
+      expect(product.image, `${product.name} needs a photo`).toBeTruthy();
+      const hero = decodeURIComponent(product.image.split("/").pop());
       const stem = hero.replace(/\.[^.]+$/, "");
       const detail = `${stem}-detail.jpg`;
       if (!onDisk.has(hero)) missing.push(hero);

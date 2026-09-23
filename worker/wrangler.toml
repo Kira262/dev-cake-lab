@@ -1,0 +1,12 @@
+name = "dev-cake-lab-admin"
+main = "admin.js"
+compatibility_date = "2026-09-21"
+
+[ai]
+binding = "AI"
+
+[vars]
+GITHUB_REPO = "kira262/dev-cake-lab"
+GITHUB_BRANCH = "main"
+GITHUB_PATH = "public/data/extra-products.json"
+CATALOG_MAX_ID = "30"

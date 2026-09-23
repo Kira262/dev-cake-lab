@@ -57,7 +57,7 @@ describe("customCakeWhatsAppText", () => {
       weightId: "2kg",
       shapeId: "tall",
       occasion: "Anniversary",
-      sponge: "Funfetti",
+      sponge: "Red velvet",
       flavour: "Chocolate ganache (white)",
       design: "Pale pink roses, gold leaf",
       cakeMessage: "Happy anniversary",
@@ -71,7 +71,7 @@ describe("customCakeWhatsAppText", () => {
         "Occasion: Anniversary",
         "Weight: 2 kg",
         "Shape: Tall cake",
-        "Sponge: Funfetti",
+        "Sponge: Red velvet",
         "Flavour / filling: Chocolate ganache (white)",
         "",
         "Design:",
@@ -80,7 +80,7 @@ describe("customCakeWhatsAppText", () => {
         "Allergies / special requests: Nut-free",
         "Pickup: Dev's Cake Lab",
         "",
-        "Please quote on WhatsApp. I'll send reference photos in this chat.",
+        "Please quote on WhatsApp. After we finalise, I'll pay 50% advance. I'll send reference photos in this chat.",
       ].join("\n"),
     );
     expect(text).not.toContain("Topic:");

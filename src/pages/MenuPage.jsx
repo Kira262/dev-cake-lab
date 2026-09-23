@@ -1,11 +1,12 @@
 import { useMemo, useRef, useEffect } from "react";
 import { ArrowRight, Search } from "lucide-react";
-import { categoryNames, products } from "../data/catalog.js";
+import { categoryNames, products as catalogProducts } from "../data/catalog.js";
 import { menuPath } from "../lib/routes.js";
 import { ProductCard } from "../components/ProductCard.jsx";
 
 export function MenuPage({
   add,
+  products = catalogProducts,
   query,
   setQuery,
   filter,
@@ -21,7 +22,7 @@ export function MenuPage({
           (filter === "All" || p.type === filter) &&
           p.name.toLowerCase().includes(query.toLowerCase()),
       ),
-    [filter, query],
+    [products, filter, query],
   );
   const filters = ["All", ...categoryNames];
 
@@ -68,8 +69,9 @@ export function MenuPage({
           <div className="empty-state custom-cake-cta">
             <h3>Custom cakes, made for your date</h3>
             <p>
-              Give us 2–4 days. Tell us the occasion, flavour and size — we will
-              sketch something worth celebrating.
+              Give us 2–4 days. Tell us the occasion, flavour and size — we
+              quote on WhatsApp, then take 50% advance once the cake is
+              finalised.
             </p>
             <button className="primary" onClick={() => navigate("/custom")}>
               Start a custom cake brief <ArrowRight size={17} />

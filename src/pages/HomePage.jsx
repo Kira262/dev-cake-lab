@@ -1,12 +1,12 @@
 import { ArrowRight } from "lucide-react";
-import { products, reviews } from "../data/catalog.js";
+import { bestSellers as catalogBestSellers, reviews } from "../data/catalog.js";
 import { CatHero } from "../components/CatHero.jsx";
 import { CategoryCarousel } from "../components/CategoryCarousel.jsx";
 import { FAQ } from "../components/FAQ.jsx";
 import { ProductCard } from "../components/ProductCard.jsx";
 import { TypewriterWord } from "../components/TypewriterWord.jsx";
 
-export function HomePage({ navigate, add }) {
+export function HomePage({ navigate, add, bestSellers = catalogBestSellers }) {
   return (
     <main id="main-content">
       <section className="hero wrap">
@@ -20,8 +20,9 @@ export function HomePage({ navigate, add }) {
             </i>
           </h1>
           <p>
-            Cheesecakes, cookie lava tins, cake bowls and cupcakes made with real
-            butter, good chocolate and a ridiculous amount of care.
+            Cheesecakes, cookies, cookie lava tins, cake bowls, cupcakes and
+            brownies made with real butter, good chocolate and a ridiculous
+            amount of care.
           </p>
           <div className="hero-actions">
             <button className="primary" onClick={() => navigate("/menu")}>
@@ -46,8 +47,8 @@ export function HomePage({ navigate, add }) {
             <span className="kicker">SOMETHING FOR EVERY SWEET TOOTH</span>
             <h2>Shop by category</h2>
             <p>
-              Cheesecakes, cookie lava tins, cake bowls and cupcakes — pick a
-              category and browse.
+              Cheesecakes, cookies, cookie lava tins, cake bowls, cupcakes and
+              brownies — pick a category and browse.
             </p>
           </div>
           <CategoryCarousel navigate={navigate} />
@@ -66,7 +67,7 @@ export function HomePage({ navigate, add }) {
           </button>
         </div>
         <div className="products">
-          {products.slice(0, 4).map((p, i) => (
+          {bestSellers.map((p, i) => (
             <ProductCard
               key={p.id}
               product={p}

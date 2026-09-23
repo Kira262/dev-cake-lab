@@ -112,7 +112,7 @@ export function customCakeWhatsAppText({
   lines.push(customCakeFulfilmentNote({ fulfilment, address, area }));
   lines.push(
     "",
-    "Please quote on WhatsApp. I'll send reference photos in this chat.",
+    "Please quote on WhatsApp. After we finalise, I'll pay 50% advance. I'll send reference photos in this chat.",
   );
   return lines.join("\n");
 }

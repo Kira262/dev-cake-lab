@@ -266,9 +266,9 @@ export function CustomCakePage() {
           Made for your <i>date.</i>
         </h1>
         <p>
-          Pick the size and flavour here. We quote, tweak the design, and take
-          payment on WhatsApp — send reference photos in the chat after you tap
-          Send.
+          Pick the size and flavour here. We quote on WhatsApp, finalise the
+          design, then take a 50% advance there — send reference photos in the
+          chat after you tap Send.
         </p>
         <div className="hero-proof">
           <span>2–4 DAYS</span>
@@ -476,8 +476,8 @@ export function CustomCakePage() {
           </label>
 
           <p className="cake-quote-note">
-            Orders are confirmed after we quote on WhatsApp. Advance (usually
-            50%) is taken there — not on this site.
+            Orders are confirmed after we quote on WhatsApp. Once the cake is
+            finalised, pay 50% advance there — not on this site.
           </p>
 
           {emailMode && (
@@ -565,8 +565,8 @@ export function CustomCakePage() {
             <MessageCircle size={18} />
             <h3>Quote</h3>
             <p>
-              No price on the site. Send the brief and we'll quote on WhatsApp,
-              then take a 50% advance there.
+              No price on the site. Send the brief and we'll quote on WhatsApp.
+              After we finalise, pay 50% advance there.
             </p>
           </div>
           <div>

@@ -27,20 +27,18 @@ export const CAKE_SPONGES = [
   "Vanilla",
   "Chocolate",
   "Red velvet",
-  "Funfetti",
 ];
 
 export const CAKE_FLAVOURS = [
-  "Fresh cream",
+  "Black forest",
+  "White forest",
   "Chocolate ganache (white)",
   "Chocolate ganache (milk)",
   "Chocolate ganache (dark)",
   "Belgian chocolate",
   "Nutella hazelnut",
   "Blueberry",
-  "Strawberry",
   "Orange",
-  "Mango",
   "Coffee",
   "Lotus Biscoff",
   "Custom",

@@ -11,6 +11,10 @@ const ITEMS = [
     a: "Pickup is free at 401, P.D. Apartment, Ellisbridge. Open daily 11:00 AM–1:00 AM. Delivery charges depend on your area; we quote on WhatsApp after we see the address. We do not calculate fees on the site.",
   },
   {
+    q: "How do custom cake quotes and payment work?",
+    a: "There is no price on the site. Send a brief and we quote on WhatsApp. After we finalise the cake, pay a 50% advance there — the rest when you collect.",
+  },
+  {
     q: "How do I store my cake or desserts?",
     a: "Most cakes should be refrigerated and brought to room temperature before serving.",
   },

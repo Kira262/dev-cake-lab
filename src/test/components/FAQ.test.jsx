@@ -9,6 +9,9 @@ describe("FAQ", () => {
     render(<FAQ />);
 
     expect(screen.getByText(/2–4 days/i)).toBeTruthy();
+    expect(screen.getByRole("button", { name: /quotes and payment/i })).toBeTruthy();
+    await user.click(screen.getByRole("button", { name: /quotes and payment/i }));
+    expect(screen.getByText(/50% advance/i)).toBeTruthy();
     await user.click(screen.getByRole("button", { name: /pickup and delivery/i }));
     expect(screen.getByText(/charges depend on your area/i)).toBeTruthy();
     expect(screen.getByText(/401, P\.D\. Apartment/i)).toBeTruthy();

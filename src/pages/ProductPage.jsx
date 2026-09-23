@@ -4,6 +4,7 @@ import { DIET_NOTE } from "../data/catalog.js";
 import { MAX_LINE_QTY } from "../lib/cart.js";
 import { scrollToTop } from "../lib/scroll.js";
 import { NOTES_MAX } from "../lib/validate.js";
+import { DessertArt } from "../components/DessertArt.jsx";
 import { SmartImage } from "../components/SmartImage.jsx";
 
 function QtyStepper({ value, onChange, label }) {
@@ -28,41 +29,50 @@ function QtyStepper({ value, onChange, label }) {
   );
 }
 
-export function flavourOrderNote(choice, vanillaQty, chocolateQty) {
+export function flavourOrderNote(flavours, choice, firstQty, secondQty) {
+  const first = flavours[0] || "";
+  const second = flavours[1] || "";
   if (choice === "both") {
-    return `Vanilla × ${vanillaQty}, Chocolate × ${chocolateQty}`;
+    return `${first} × ${firstQty}, ${second} × ${secondQty}`;
   }
-  if (choice === "chocolate") return "Chocolate";
-  return "Vanilla";
+  if (choice === "second") return second;
+  return first;
 }
 
 export function ProductPage({ product, add, navigate }) {
-  const gallery = product.gallery?.length ? product.gallery : [product.image];
-  const flavoured = Boolean(product.flavours?.length);
+  const gallery = product.gallery?.length
+    ? product.gallery
+    : product.image
+      ? [product.image]
+      : [];
+  const flavours = product.flavours || [];
+  const flavoured = flavours.length >= 2;
+  const firstFlavour = flavours[0] || "";
+  const secondFlavour = flavours[1] || "";
   const [photo, setPhoto] = useState(0);
   const [qty, setQty] = useState(1);
-  const [vanillaQty, setVanillaQty] = useState(1);
-  const [chocolateQty, setChocolateQty] = useState(1);
-  const [choice, setChoice] = useState("vanilla");
+  const [firstQty, setFirstQty] = useState(1);
+  const [secondQty, setSecondQty] = useState(1);
+  const [choice, setChoice] = useState("first");
   const [notes, setNotes] = useState("");
 
-  const pieces =
-    flavoured && choice === "both" ? vanillaQty + chocolateQty : qty;
+  const pieces = flavoured && choice === "both" ? firstQty + secondQty : qty;
   const linePrice = product.price * pieces;
+  const photoSrc = gallery[photo];
 
   useEffect(() => {
     setPhoto(0);
     setQty(1);
-    setVanillaQty(1);
-    setChocolateQty(1);
-    setChoice("vanilla");
+    setFirstQty(1);
+    setSecondQty(1);
+    setChoice("first");
     setNotes("");
     scrollToTop();
   }, [product.slug, product.name]);
 
   const addToBag = () => {
     const flavour = flavoured
-      ? flavourOrderNote(choice, vanillaQty, chocolateQty)
+      ? flavourOrderNote(flavours, choice, firstQty, secondQty)
       : "";
     const extra = notes.trim();
     const combined = [flavour && `Flavour: ${flavour}`, extra]
@@ -83,11 +93,11 @@ export function ProductPage({ product, add, navigate }) {
         <div className="product-page-grid">
           <div className="product-gallery">
             <div className="product-gallery-main">
-              <SmartImage
-                src={gallery[photo]}
-                alt={product.name}
-                priority
-              />
+              {photoSrc ? (
+                <SmartImage src={photoSrc} alt={product.name} priority />
+              ) : (
+                <DessertArt type={product.art} large />
+              )}
               {product.badge && <span className="badge">{product.badge}</span>}
             </div>
             {gallery.length > 1 && (
@@ -124,23 +134,23 @@ export function ProductPage({ product, add, navigate }) {
                 <div className="flavour-picks" role="group" aria-label="Flavour">
                   <button
                     type="button"
-                    className={choice === "vanilla" ? "active" : ""}
+                    className={choice === "first" ? "active" : ""}
                     onClick={() => {
-                      setChoice("vanilla");
-                      setQty(vanillaQty);
+                      setChoice("first");
+                      setQty(firstQty);
                     }}
                   >
-                    Vanilla
+                    {firstFlavour}
                   </button>
                   <button
                     type="button"
-                    className={choice === "chocolate" ? "active" : ""}
+                    className={choice === "second" ? "active" : ""}
                     onClick={() => {
-                      setChoice("chocolate");
-                      setQty(chocolateQty);
+                      setChoice("second");
+                      setQty(secondQty);
                     }}
                   >
-                    Chocolate
+                    {secondFlavour}
                   </button>
                   <button
                     type="button"
@@ -155,19 +165,19 @@ export function ProductPage({ product, add, navigate }) {
             {flavoured && choice === "both" ? (
               <>
                 <div className="flavour-qty-row">
-                  <span>Vanilla</span>
+                  <span>{firstFlavour}</span>
                   <QtyStepper
-                    label="vanilla quantity"
-                    value={vanillaQty}
-                    onChange={setVanillaQty}
+                    label={`${firstFlavour.toLowerCase()} quantity`}
+                    value={firstQty}
+                    onChange={setFirstQty}
                   />
                 </div>
                 <div className="flavour-qty-row">
-                  <span>Chocolate</span>
+                  <span>{secondFlavour}</span>
                   <QtyStepper
-                    label="chocolate quantity"
-                    value={chocolateQty}
-                    onChange={setChocolateQty}
+                    label={`${secondFlavour.toLowerCase()} quantity`}
+                    value={secondQty}
+                    onChange={setSecondQty}
                   />
                 </div>
               </>
@@ -177,8 +187,8 @@ export function ProductPage({ product, add, navigate }) {
                 value={qty}
                 onChange={(next) => {
                   setQty(next);
-                  if (choice === "chocolate") setChocolateQty(next);
-                  else setVanillaQty(next);
+                  if (choice === "second") setSecondQty(next);
+                  else setFirstQty(next);
                 }}
               />
             )}

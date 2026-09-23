@@ -3,13 +3,27 @@ import { asset } from "../lib/paths.js";
 export const DIET_NOTE = "less-sweet on request.";
 
 export const categories = [
-  ["Cheesecakes", "300 g · creamy layers", "cake"],
+  ["Cheesecakes", "250 g · creamy layers", "cake"],
   ["Cookie Lava Tins", "300–400 g dessert tins", "tin"],
-  ["Cookies", "10–20 g per piece", "cookie"],
+  ["Cookies", "45 g per piece", "cookie"],
   ["Cake Bowls", "300 g layered bowls", "jar"],
   ["Cupcakes", "Classic to Biscoff swirls", "cupcake"],
+  ["Brownies", "100–120 g squares", "brownie"],
   ["Custom Cakes", "Made for your celebration", "signature"],
 ];
+
+function slugFromName(name) {
+  return String(name || "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+function productSlug(product) {
+  if (!product.image) return slugFromName(product.name);
+  const file = product.image.split("/").pop();
+  return file.replace(/\.[^.]+$/, "");
+}
 
 export const products = [
   {
@@ -28,7 +42,8 @@ export const products = [
     type: "Cheesecakes",
     price: 290,
     note: "250 g · blueberry cream cheesecake",
-    badge: "",
+    badge: "BESTSELLER",
+    bestSeller: 2,
     art: "jar",
     image: asset("blueberry-cheesecake.jpg"),
   },
@@ -39,6 +54,7 @@ export const products = [
     price: 350,
     note: "250 g · Biscoff spread & biscuit base",
     badge: "BESTSELLER",
+    bestSeller: 1,
     art: "chocolate",
     image: asset("biscoff-cheesecake.jpg"),
   },
@@ -58,7 +74,8 @@ export const products = [
     type: "Cookie Lava Tins",
     price: 380,
     note: "300–400 g · Nutella cookie lava tin",
-    badge: "",
+    badge: "BESTSELLER",
+    bestSeller: 3,
     art: "cookie",
     image: asset("nutella-cookie-tin.jpg"),
   },
@@ -73,14 +90,92 @@ export const products = [
     image: asset("biscoff-cookie-tin.jpg"),
   },
   {
+    id: 18,
+    name: "Choco Chip Cookies",
+    type: "Cookies",
+    price: 25,
+    note: "45 g · per piece",
+    badge: "",
+    art: "cookie",
+    image: asset("choco-chip-cookies.jpg"),
+    unit: "per piece",
+  },
+  {
+    id: 19,
+    name: "Double Dark Cookies",
+    type: "Cookies",
+    price: 30,
+    note: "45 g · per piece",
+    badge: "",
+    art: "cookie",
+    image: asset("double-dark-cookies.jpg"),
+    unit: "per piece",
+  },
+  {
+    id: 20,
+    name: "Milk Chocolate Chunk Cookies",
+    type: "Cookies",
+    price: 35,
+    note: "45 g · per piece",
+    badge: "",
+    art: "cookie",
+    image: asset("milk-chocolate-chunk-cookies.jpg"),
+    unit: "per piece",
+  },
+  {
+    id: 21,
+    name: "Double Dark Chunk Cookies",
+    type: "Cookies",
+    price: 45,
+    note: "45 g · per piece",
+    badge: "",
+    art: "cookie",
+    image: asset("double-dark-chunk-cookies.jpg"),
+    unit: "per piece",
+  },
+  {
     id: 7,
     name: "Nutella Cookies",
     type: "Cookies",
-    price: 25,
-    note: "10–20 g · per piece",
+    price: 50,
+    note: "45 g · per piece",
     badge: "",
     art: "cookie",
     image: asset("nutella-cookies.jpg"),
+    unit: "per piece",
+  },
+  {
+    id: 22,
+    name: "Oreo Chunk Cookies",
+    type: "Cookies",
+    price: 50,
+    note: "45 g · per piece",
+    badge: "",
+    art: "cookie",
+    image: asset("oreo-chunk-cookies.jpg"),
+    unit: "per piece",
+  },
+  {
+    id: 23,
+    name: "Biscoff Chunk Cookies",
+    type: "Cookies",
+    price: 55,
+    note: "45 g · per piece",
+    badge: "",
+    art: "cookie",
+    image: asset("biscoff-chunk-cookies.jpg"),
+    unit: "per piece",
+  },
+  {
+    id: 24,
+    name: "Red Velvet Cookies",
+    type: "Cookies",
+    price: 60,
+    note: "45 g · per piece",
+    badge: "BESTSELLER",
+    bestSeller: 4,
+    art: "cookie",
+    image: asset("red-velvet-cookies.jpg"),
     unit: "per piece",
   },
   {
@@ -184,13 +279,73 @@ export const products = [
     art: "cupcake",
     image: asset("biscoff-cupcake.jpg"),
   },
+  {
+    id: 25,
+    name: "Chocolate Brownie",
+    type: "Brownies",
+    price: 70,
+    note: "100–120 g · classic chocolate brownie",
+    badge: "",
+    art: "brownie",
+    image: asset("chocolate-brownie.jpg"),
+  },
+  {
+    id: 26,
+    name: "Ganache Brownie — Milk or Dark",
+    type: "Brownies",
+    price: 77,
+    note: "100–120 g · milk or dark ganache",
+    badge: "",
+    art: "brownie",
+    image: asset("ganache-brownie.jpg"),
+    flavours: ["Milk", "Dark"],
+  },
+  {
+    id: 27,
+    name: "Dark Chocolate Brownie",
+    type: "Brownies",
+    price: 80,
+    note: "100–120 g · dark chocolate brownie",
+    badge: "",
+    art: "brownie",
+    image: asset("dark-chocolate-brownie.jpg"),
+  },
+  {
+    id: 28,
+    name: "Cookie Dough Chocolate Brownie",
+    type: "Brownies",
+    price: 90,
+    note: "100–120 g · cookie dough chocolate brownie",
+    badge: "",
+    art: "brownie",
+    image: asset("cookie-dough-chocolate-brownie.jpg"),
+  },
+  {
+    id: 29,
+    name: "Nutella Fudgy Brownie",
+    type: "Brownies",
+    price: 90,
+    note: "100–120 g · Nutella fudgy brownie",
+    badge: "",
+    art: "brownie",
+    image: asset("nutella-fudgy-brownie.jpg"),
+  },
+  {
+    id: 30,
+    name: "Biscoff Fudgy Brownie",
+    type: "Brownies",
+    price: 100,
+    note: "100–120 g · Biscoff fudgy brownie",
+    badge: "",
+    art: "brownie",
+    image: asset("biscoff-fudgy-brownie.jpg"),
+  },
 ].map((p) => {
-  const file = p.image.split("/").pop();
-  const stem = file.replace(/\.[^.]+$/, "");
+  const slug = productSlug(p);
   return {
     ...p,
-    slug: stem,
-    gallery: [p.image, asset(`${stem}-detail.jpg`)],
+    slug,
+    gallery: p.image ? [p.image, asset(`${slug}-detail.jpg`)] : [],
   };
 });
 
@@ -210,3 +365,6 @@ export const reviews = [
 ];
 
 export const categoryNames = categories.map((c) => c[0]);
+export const bestSellers = products
+  .filter((p) => p.bestSeller)
+  .sort((a, b) => a.bestSeller - b.bestSeller);

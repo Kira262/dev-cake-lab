@@ -122,6 +122,28 @@ function Cupcake() {
   );
 }
 
+function Brownie() {
+  return (
+    <svg {...SVG}>
+      <path
+        d="M12 24h40v22a6 6 0 0 1-6 6H18a6 6 0 0 1-6-6z"
+        fill="var(--brown)"
+        stroke="var(--ink)"
+        strokeWidth="2"
+      />
+      <path
+        d="M12 24c4 4 8 4 13 0s10 4 14 0 9 4 13 0"
+        stroke="var(--gold)"
+        strokeWidth="3"
+      />
+      <circle cx="24" cy="38" r="2.4" fill="var(--ink)" />
+      <circle cx="34" cy="34" r="2.4" fill="var(--ink)" />
+      <circle cx="42" cy="41" r="2.4" fill="var(--ink)" />
+      <path d="M18 18h8v6h-8z" fill="var(--gold)" stroke="var(--brown)" strokeWidth="1.6" />
+    </svg>
+  );
+}
+
 function CustomCake() {
   return (
     <svg {...SVG}>
@@ -165,6 +187,7 @@ const ICONS = {
   cookie: Cookie,
   jar: CakeBowl,
   cupcake: Cupcake,
+  brownie: Brownie,
   signature: CustomCake,
 };
 

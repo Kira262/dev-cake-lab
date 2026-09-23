@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Check } from "lucide-react";
-import { products } from "./data/catalog.js";
+import { products as catalogProducts } from "./data/catalog.js";
 import {
   makeLineId,
   lineTotal,
@@ -8,7 +8,14 @@ import {
   hydrateBag,
   readBag,
   saveBag,
+  serializeBag,
 } from "./lib/cart.js";
+import {
+  bestSellersFrom,
+  fetchExtraProducts,
+  mergeCatalog,
+  removeProduct,
+} from "./lib/extraProducts.js";
 import { NOTES_MAX, clipText } from "./lib/validate.js";
 import { toLocation } from "./lib/paths.js";
 import { readMenuType, readPath, readProductSlug } from "./lib/routes.js";
@@ -16,6 +23,7 @@ import { scrollToTop } from "./lib/scroll.js";
 import { Cart } from "./components/Cart.jsx";
 import { Footer } from "./components/Footer.jsx";
 import { Header } from "./components/Header.jsx";
+import { AdminPage } from "./pages/AdminPage.jsx";
 import { ContactPage } from "./pages/ContactPage.jsx";
 import { CustomCakePage } from "./pages/CustomCakePage.jsx";
 import { HomePage } from "./pages/HomePage.jsx";
@@ -26,7 +34,8 @@ import { VisitPage } from "./pages/VisitPage.jsx";
 export default function App() {
   const [route, setRoute] = useState(readPath);
   const [menuType, setMenuType] = useState(readMenuType);
-  const [cart, setCart] = useState(() => hydrateBag(readBag(), products));
+  const [products, setProducts] = useState(catalogProducts);
+  const [cart, setCart] = useState(() => hydrateBag(readBag(), catalogProducts));
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
@@ -51,6 +60,35 @@ export default function App() {
     window.addEventListener("popstate", onPop);
     return () => window.removeEventListener("popstate", onPop);
   }, []);
+
+  useEffect(() => {
+    let alive = true;
+    fetchExtraProducts().then((extras) => {
+      if (!alive) return;
+      const merged = mergeCatalog(catalogProducts, extras);
+      setProducts(merged);
+      setCart((items) => hydrateBag(serializeBag(items), merged));
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const applyPublished = (product) => {
+    setProducts((current) => {
+      const merged = mergeCatalog(current, [product]);
+      setCart((items) => hydrateBag(serializeBag(items), merged));
+      return merged;
+    });
+  };
+
+  const applyDeleted = (slug) => {
+    setProducts((current) => {
+      const next = removeProduct(current, slug);
+      setCart((items) => hydrateBag(serializeBag(items), next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     saveBag(cart);
@@ -115,6 +153,7 @@ export default function App() {
     ) : route === "/menu" || (productSlug && !activeProduct) ? (
       <MenuPage
         add={add}
+        products={products}
         query={query}
         setQuery={setQuery}
         filter={menuType}
@@ -132,8 +171,18 @@ export default function App() {
       <CustomCakePage />
     ) : route === "/visit" ? (
       <VisitPage />
+    ) : route === "/admin" ? (
+      <AdminPage
+        products={products}
+        onPublished={applyPublished}
+        onDeleted={applyDeleted}
+      />
     ) : (
-      <HomePage navigate={navigate} add={add} />
+      <HomePage
+        navigate={navigate}
+        add={add}
+        bestSellers={bestSellersFrom(products)}
+      />
     );
 
   return (
