@@ -16,7 +16,7 @@ describe("index.html CSP", () => {
     expect(html).toContain("https://formsubmit.co");
     expect(html).toContain("https://*.workers.dev");
     expect(html).toContain("https://*.cakelab.workers.dev");
-    expect(html).toContain("https://dev-cake-lab-admin.cakelab.workers.dev");
+    expect(html).toContain("https://cakelab-admin-api.cakelab.workers.dev");
     expect(html).not.toContain("http://localhost:3001");
   });
 });

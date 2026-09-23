@@ -156,8 +156,12 @@ function toProduct(body, id) {
 
 export default {
   async fetch(request, env) {
+    const url = new URL(request.url);
     if (request.method === "OPTIONS") {
       return new Response(null, { status: 204, headers: CORS });
+    }
+    if (request.method === "GET" && (url.pathname === "/" || url.pathname === "")) {
+      return json({ ok: true, service: "cakelab-admin-api" });
     }
     if (request.method !== "POST") {
       return json({ error: "POST only." }, 405);
@@ -166,7 +170,6 @@ export default {
       return json({ error: "Wrong password." }, 401);
     }
 
-    const url = new URL(request.url);
     if (url.pathname === "/unlock") {
       return json({ ok: true });
     }
