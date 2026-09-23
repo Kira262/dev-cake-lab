@@ -1,5 +1,19 @@
 {
-  "items": [],
+  "items": [
+    {
+      "id": 22,
+      "name": "Oreo Chunk Cookies",
+      "type": "Cookies",
+      "price": 55,
+      "note": "45 g · per piece",
+      "badge": "",
+      "art": "cookie",
+      "image": "/dev-cake-lab/assets/oreo-chunk-cookies.jpg",
+      "detailImage": "/dev-cake-lab/assets/oreo-chunk-cookies-detail.jpg",
+      "slug": "oreo-chunk-cookies",
+      "unit": "per piece"
+    }
+  ],
   "deletedSlugs": [
     "biscoff"
   ]
