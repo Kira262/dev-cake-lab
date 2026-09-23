@@ -1,6 +1,7 @@
 name = "dev-cake-lab-admin"
 main = "admin.js"
 compatibility_date = "2026-09-21"
+workers_dev = true
 
 [ai]
 binding = "AI"

@@ -1,14 +1,19 @@
 import { ADMIN_API } from "../data/admin.js";
 
 async function adminPost(path, password, body = {}) {
-  const res = await fetch(`${ADMIN_API}${path}`, {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-admin-password": password,
-    },
-    body: JSON.stringify(body),
-  });
+  let res;
+  try {
+    res = await fetch(`${ADMIN_API}${path}`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        "x-admin-password": password,
+      },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new Error("Could not reach the admin desk. Check the Worker is deployed.");
+  }
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
     throw new Error(data.error || "Admin request failed.");

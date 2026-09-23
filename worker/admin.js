@@ -2,6 +2,7 @@ const CORS = {
   "access-control-allow-origin": "*",
   "access-control-allow-headers": "content-type, x-admin-password",
   "access-control-allow-methods": "POST, OPTIONS",
+  "access-control-max-age": "86400",
 };
 
 function json(data, status = 200) {
