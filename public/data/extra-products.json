@@ -5,13 +5,26 @@
       "name": "Oreo Chunk Cookies",
       "type": "Cookies",
       "price": 55,
-      "note": "45 g · per piece",
+      "note": "45 g Â· per piece",
       "badge": "",
       "art": "cookie",
       "image": "/dev-cake-lab/assets/oreo-chunk-cookies.jpg",
       "detailImage": "/dev-cake-lab/assets/oreo-chunk-cookies-detail.jpg",
       "slug": "oreo-chunk-cookies",
       "unit": "per piece"
+    },
+    {
+      "id": 3,
+      "name": "Biscoff Cheesecake",
+      "type": "Cheesecakes",
+      "price": 450,
+      "note": "250 g · Biscoff spread & biscuit base",
+      "badge": "BESTSELLER",
+      "art": "chocolate",
+      "image": "/dev-cake-lab/assets/biscoff-cheesecake.jpg",
+      "detailImage": "/dev-cake-lab/assets/biscoff-cheesecake-detail.jpg",
+      "slug": "biscoff-cheesecake",
+      "bestSeller": 1
     }
   ],
   "deletedSlugs": [
