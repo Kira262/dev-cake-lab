@@ -1,4 +1,5 @@
 import { categories, categoryNames } from "../data/catalog.js";
+import { asset } from "./paths.js";
 
 export const SHOP_CATEGORIES = categories.filter(
   ([name]) => name !== "Custom Cakes",
@@ -62,7 +63,9 @@ export function parseExtrasPayload(data) {
 
 export async function fetchExtraProducts() {
   try {
-    const res = await fetch(`${extraProductsUrl()}?t=${Date.now()}`);
+    const res = await fetch(`${extraProductsUrl()}?t=${Date.now()}`, {
+      cache: "no-store",
+    });
     if (!res.ok) return { items: [], deletedSlugs: [] };
     return parseExtrasPayload(await res.json());
   } catch {
@@ -70,9 +73,27 @@ export async function fetchExtraProducts() {
   }
 }
 
+export function withSavedEdit(catalog, extras, saved, deletedSlugs = []) {
+  const loaded = mergeCatalog(catalog, extras);
+  const edits = (Array.isArray(saved) ? saved : saved ? [saved] : []).filter(Boolean);
+  const withEdits = edits.length ? mergeCatalog(loaded, edits) : loaded;
+  return (deletedSlugs || []).reduce(
+    (list, slug) => removeProduct(list, slug),
+    withEdits,
+  );
+}
+
 export function nextProductId(list) {
   const ids = (list || []).map((item) => Number(item.id) || 0);
   return (ids.length ? Math.max(...ids) : 0) + 1;
+}
+
+export function shopPhotoUrl(src) {
+  const value = String(src || "").trim();
+  if (!value || value.startsWith("data:") || value.startsWith("blob:")) return value;
+  if (/^https?:\/\//i.test(value)) return value;
+  const file = value.split("?")[0].split("#")[0].split("/").pop();
+  return file ? asset(file) : value;
 }
 
 export function normalizeExtraProduct(raw, fallbackId) {
@@ -80,8 +101,8 @@ export function normalizeExtraProduct(raw, fallbackId) {
   const name = String(raw.name || "").trim();
   if (!name) return null;
   const defaults = categoryDefaults(raw.type, name);
-  const image = String(raw.image || "").trim();
-  const detail = String(raw.detailImage || "").trim();
+  const image = shopPhotoUrl(raw.image);
+  const detail = shopPhotoUrl(raw.detailImage);
   const gallery = [...new Set([image, detail].filter(Boolean))];
   const flavours = Array.isArray(raw.flavours)
     ? raw.flavours.map((item) => String(item || "").trim()).filter(Boolean).slice(0, 2)

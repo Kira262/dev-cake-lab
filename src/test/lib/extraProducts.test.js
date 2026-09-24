@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { asset } from "../../lib/paths.js";
 import {
   bestSellersFrom,
   categoryDefaults,
@@ -8,7 +9,9 @@ import {
   normalizeExtraProduct,
   parseExtrasPayload,
   removeProduct,
+  shopPhotoUrl,
   slugFromName,
+  withSavedEdit,
 } from "../../lib/extraProducts.js";
 
 const base = [
@@ -47,6 +50,25 @@ describe("normalizeExtraProduct", () => {
       normalizeExtraProduct({ name: "Party cake", type: "Custom Cakes" }, 31),
     ).toBeNull();
     expect(normalizeExtraProduct({ type: "Brownies" }, 31)).toBeNull();
+  });
+
+  it("loads a Pages photo path from the current site base", () => {
+    expect(shopPhotoUrl("/dev-cake-lab/assets/biscoff-cheesecake.jpg")).toBe(
+      asset("biscoff-cheesecake.jpg"),
+    );
+    const extra = normalizeExtraProduct(
+      {
+        name: "Biscoff Cheesecake",
+        type: "Cheesecakes",
+        price: 450,
+        slug: "biscoff-cheesecake",
+        image: "/dev-cake-lab/assets/biscoff-cheesecake.jpg",
+        detailImage: "/dev-cake-lab/assets/biscoff-cheesecake-detail.jpg",
+      },
+      3,
+    );
+    expect(extra.image).toBe(asset("biscoff-cheesecake.jpg"));
+    expect(extra.gallery[1]).toBe(asset("biscoff-cheesecake-detail.jpg"));
   });
 
   it("builds a slug and gallery from data URLs", () => {
@@ -122,6 +144,54 @@ describe("mergeCatalog", () => {
     expect(
       mergeCatalog(base, { items: [], deletedSlugs: ["biscoff-cheesecake"] }),
     ).toEqual([]);
+  });
+
+  it("keeps a saved price when the catalog file is still 350", () => {
+    const saved = {
+      name: "Biscoff Cheesecake",
+      type: "Cheesecakes",
+      price: 450,
+      slug: "biscoff-cheesecake",
+      image: "/assets/biscoff-cheesecake.jpg",
+    };
+    const merged = withSavedEdit(base, { items: [], deletedSlugs: [] }, saved);
+    expect(merged[0].price).toBe(450);
+  });
+
+  it("keeps every saved price when the loaded file is stale", () => {
+    const merged = withSavedEdit(
+      base,
+      {
+        items: [
+          {
+            name: "Biscoff Cheesecake",
+            type: "Cheesecakes",
+            price: 350,
+            slug: "biscoff-cheesecake",
+            image: "/assets/biscoff-cheesecake.jpg",
+          },
+        ],
+        deletedSlugs: [],
+      },
+      [
+        {
+          name: "Biscoff Cheesecake",
+          type: "Cheesecakes",
+          price: 450,
+          slug: "biscoff-cheesecake",
+          image: "/assets/biscoff-cheesecake.jpg",
+        },
+        {
+          name: "Walnut Brownie",
+          type: "Brownies",
+          price: 99,
+          slug: "walnut-brownie",
+          image: "/assets/walnut-brownie.jpg",
+        },
+      ],
+    );
+    expect(merged.find((item) => item.slug === "biscoff-cheesecake").price).toBe(450);
+    expect(merged.find((item) => item.slug === "walnut-brownie").price).toBe(99);
   });
 
   it("still accepts a bare extras array", () => {

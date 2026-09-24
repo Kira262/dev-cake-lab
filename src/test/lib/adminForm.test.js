@@ -3,6 +3,7 @@ import {
   adminGenerateReady,
   adminPublishReady,
   draftToProduct,
+  readImageFile,
 } from "../../lib/adminForm.js";
 
 const draft = {
@@ -28,6 +29,13 @@ describe("admin draft gates", () => {
   it("needs both photo previews before publish", () => {
     expect(adminPublishReady({ ...draft, hero: "", detail: "" })).toBe(false);
     expect(adminPublishReady(draft)).toBe(true);
+  });
+});
+
+describe("readImageFile", () => {
+  it("rejects a file that is not a photo", async () => {
+    const file = new File(["hi"], "notes.txt", { type: "text/plain" });
+    await expect(readImageFile(file)).rejects.toThrow(/jpg, png, or webp/i);
   });
 });
 

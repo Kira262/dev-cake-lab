@@ -13,6 +13,7 @@ import {
   adminPublishReady,
   draftToProduct,
   productDraftPhotos,
+  readImageFile,
 } from "../lib/adminForm.js";
 import { brandProductPhoto } from "../lib/brandImage.js";
 import {
@@ -143,20 +144,38 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
     setDone("");
     setBusy("generate");
     try {
-      const photos = await generatePhotos(password, {
+      const logo = asset("dev-cake-logo.png");
+      const payload = {
         name: name.trim(),
         type,
         note: note.trim(),
-      });
-      const logo = asset("dev-cake-logo.png");
-      const [brandedHero, brandedDetail] = await Promise.all([
-        brandProductPhoto(photos.hero, logo),
-        brandProductPhoto(photos.detail, logo),
-      ]);
-      setHero(brandedHero);
-      setDetail(brandedDetail);
+        flavours: [flavourOne, flavourTwo]
+          .map((item) => item.trim())
+          .filter(Boolean),
+      };
+      const heroPhoto = await generatePhotos(password, { ...payload, shot: "hero" });
+      setHero(await brandProductPhoto(heroPhoto.hero, logo));
+      const detailPhoto = await generatePhotos(password, { ...payload, shot: "detail" });
+      setDetail(await brandProductPhoto(detailPhoto.detail, logo));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not generate photos.");
+    } finally {
+      setBusy("");
+    }
+  };
+
+  const upload = async (slot, file) => {
+    if (!file) return;
+    setError("");
+    setDone("");
+    setBusy(`upload:${slot}`);
+    try {
+      const raw = await readImageFile(file);
+      const branded = await brandProductPhoto(raw, asset("dev-cake-logo.png"));
+      if (slot === "hero") setHero(branded);
+      else setDetail(branded);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not upload that photo.");
     } finally {
       setBusy("");
     }
@@ -267,7 +286,7 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
         </h1>
         <p>
           The list is the live shop. Create a new item, edit an existing one, or
-          delete it. Generate photos only when you want new pictures.
+          delete it. Generate photos, or upload your own.
         </p>
       </section>
       <section className="wrap contact custom-cake">
@@ -297,7 +316,7 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
 
           {type && (
             <>
-              <label>
+              <label className="admin-edit-field">
                 Name
                 <input
                   type="text"
@@ -307,7 +326,7 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
                   onChange={(e) => setName(e.target.value)}
                 />
               </label>
-              <label>
+              <label className="admin-edit-field">
                 Price (₹)
                 <input
                   type="number"
@@ -382,6 +401,20 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
                     <div className="admin-photo-empty">Hero</div>
                   )}
                   <figcaption>Shop card</figcaption>
+                  <label className="admin-upload">
+                    {busy === "upload:hero" ? "Uploading…" : "Upload"}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-label="Upload shop card"
+                      disabled={Boolean(busy)}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        event.target.value = "";
+                        upload("hero", file);
+                      }}
+                    />
+                  </label>
                 </figure>
                 <figure>
                   {detail ? (
@@ -390,6 +423,20 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
                     <div className="admin-photo-empty">Detail</div>
                   )}
                   <figcaption>Close-up</figcaption>
+                  <label className="admin-upload">
+                    {busy === "upload:detail" ? "Uploading…" : "Upload"}
+                    <input
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      aria-label="Upload close-up"
+                      disabled={Boolean(busy)}
+                      onChange={(event) => {
+                        const file = event.target.files?.[0];
+                        event.target.value = "";
+                        upload("detail", file);
+                      }}
+                    />
+                  </label>
                 </figure>
               </div>
 

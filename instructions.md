@@ -21,69 +21,47 @@ Other scripts:
 ```bash
 npm run build    # production build into dist/
 npm run preview  # preview the production build locally
-npm test         # Vitest: validation, enquiry send, pages, CSP, assets
+npm test         # Vitest suite in src/test/
 ```
 
 ## Project layout
 
 ```text
 src/
-  App.jsx              App shell: cart, routing, page switch
+  App.jsx              App shell: cart, routing, extras merge, page switch
   main.jsx             React entry
   styles.css           All styles
   components/          Header, Footer, Cart, ProductCard, SmartImage, CatHero, …
-  pages/               Home, Menu (Shop), Product, Custom cake, Visit, Contact
+  pages/               Home, Menu, Product, Custom cake, Visit, Contact, Admin
   data/
-    catalog.js         Categories, products, reviews
+    catalog.js         Baked categories, products, reviews
     contacts.js        Phone, email, address, social links
     customCake.js      Weights, shapes, occasions, sponges, flavours
+    admin.js           Admin API base URL and badge list
   lib/
     paths.js           asset(), appPath(), toLocation(), webpFromUrl()
     routes.js          Route helpers, nav active state
-    cart.js            Line IDs, totals, bag persist (localStorage), short WhatsApp draft
-    draft.js           Remembered name, phone, email, address, date (localStorage)
+    cart.js            Line IDs, totals, bag persist, short WhatsApp draft
+    draft.js           Remembered name, phone, email, address, date
     schedule.js        Date/time helpers, bag today/now defaults
     validate.js        Name / email / phone / address / date rules
     enquiry.js         Header Enquire text + FormSubmit (custom cake email)
     customCake.js      Brief labels and WhatsApp text
-  test/
-    setup.js           Testing Library cleanup
-    csp.test.js        Content-Security-Policy checks
-    data/              contacts tests
-    lib/               cart, draft, customCake, enquiry, routes, schedule, validate
-    pages/             Contact, CustomCake, Product, Visit
-    components/        Cart, Header, FAQ, CategoryCarousel, ProductCard
-public/assets/         Logo and product photos (JPEG/PNG + WebP)
+    extraProducts.js   Load and merge extra-products.json
+    adminApi.js        Admin password header and Worker calls
+    adminForm.js       Generate / publish readiness
+    brandImage.js      Stamp the logo onto a generated photo
+  test/                Vitest (mirrors data/, lib/, pages/, components/)
+public/
+  assets/              Logo and product photos (JPEG/PNG + WebP)
+  data/
+    extra-products.json  Live price, photo, and delete overrides
+worker/
+  admin.js             Admin API: unlock, generate, publish, delete
+  wrangler.toml        Worker name, AI binding, GitHub path
 scripts/               optimize-images.mjs
 index.html             HTML shell + CSP
 ```
-
-| Path                                 | Purpose                                                      |
-| ------------------------------------ | ------------------------------------------------------------ |
-| `src/App.jsx`                        | App shell: cart state, routing, page switch                  |
-| `src/pages/`                         | Home, Menu (Shop), Product, Custom cake, Visit, Contact      |
-| `src/components/`                    | Header, Footer, Cart, ProductCard, etc.                      |
-| `src/data/catalog.js`                | Categories, products, reviews                                |
-| `src/data/contacts.js`               | Phone, email, address, social links                          |
-| `src/data/customCake.js`             | Weights, shapes, occasions, sponges, flavours                |
-| `src/lib/customCake.js`              | Brief labels and WhatsApp text                               |
-| `src/lib/paths.js`                   | `asset()`, `appPath()`, `toLocation()`, `webpFromUrl()`      |
-| `src/lib/routes.js`                  | Route helpers, nav active state                              |
-| `src/lib/cart.js`                    | Cart line IDs, totals, qty clamp, short WhatsApp draft, bag persist |
-| `src/lib/draft.js`                   | Remembered enquiry / delivery details                        |
-| `src/lib/schedule.js`                | Needed-by dates, `isoTimeFromNow`, `bagWhenFromDraft`        |
-| `src/lib/validate.js`                | Enquiry field validation and length caps                     |
-| `src/lib/enquiry.js`                 | Header Enquire starter + FormSubmit (custom cake email)      |
-| `src/components/SmartImage.jsx`      | WebP `<picture>` with JPEG/PNG fallback                      |
-| `src/test/`                          | Vitest suite (mirrors `data/`, `lib/`, `pages/`, `components/`) |
-| `src/styles.css`                     | All styles                                                   |
-| `src/main.jsx`                       | React entry                                                  |
-| `index.html`                         | HTML shell and Content-Security-Policy                       |
-| `public/assets/`                     | Logo and product photos (JPEG/PNG + WebP)                    |
-| `scripts/optimize-images.mjs`        | Write WebP copies; shrink oversized JPEGs                    |
-| `public/.nojekyll`                   | Disables Jekyll on GitHub Pages                              |
-| `vite.config.js`                     | Vite + React; production `base` is `/dev-cake-lab/`          |
-| `.github/workflows/deploy-pages.yml` | `npm test`, build, deploy to GitHub Pages                    |
 
 ## Routing and base path
 
@@ -103,43 +81,57 @@ Routes:
 - `/custom` — custom cake brief
 - `/visit` — location / hours
 - `/contact` — WhatsApp enquiry (cart can prefill the message)
+- `/admin` — hidden staff desk (not in the nav)
 
 When changing routes or links, always go through `navigate()` / `toLocation()` so GitHub Pages under `/dev-cake-lab/` keeps working.
 
+## Menu data
+
+Baked products and prices live in `src/data/catalog.js`. The shop does not paint that list first. It waits for `public/data/extra-products.json`, then merges by slug. An extras price, photo, or delete replaces the catalog row. Edits made in this browser session are reapplied after that fetch so a stale file cannot put the catalog price back.
+
 ## Assets
 
-Put images in `public/assets/` and reference them with `asset("filename.ext")`. Product photos and the logo go through `SmartImage` (WebP `<source>` + JPEG/PNG `<img>`). After adding new photos, run `node scripts/optimize-images.mjs` to write WebP copies (and shrink oversized JPEGs).
+Put catalog images in `public/assets/` and reference them with `asset("filename.ext")`. Product photos and the logo go through `SmartImage` (WebP `<source>` + JPEG/PNG `<img>`). After adding new catalog photos, run `node scripts/optimize-images.mjs` to write WebP copies (and shrink oversized JPEGs).
 
-Expected product / brand files include:
+Expected brand files include `dev-cake-logo.png`. Per-product hero and `*-detail.jpg` names are in `src/data/catalog.js`. `npm test` fails CI if a referenced catalog file is missing.
 
-- `dev-cake-logo.png`
-- Per-product hero and `*-detail.jpg` photos (see `src/data/catalog.js`)
+## Admin
 
-Missing files will 404 in the browser (broken logos and product photos). `npm test` includes an asset audit that fails CI if any referenced file is absent.
+Open `/admin` on the Vite dev server. The page is not linked from the header. The header on this route is not sticky, so it does not cover the form.
+
+The API defaults to `https://cakelab-admin-api.cakelab.workers.dev`. Set `VITE_ADMIN_API` to point elsewhere. Calls send `x-admin-password`. Endpoints are `POST /unlock`, `/generate`, `/publish`, and `/delete`.
+
+**Generate photos** sends two requests, `shot: "hero"` then `shot: "detail"`. Each call makes one image with `@cf/black-forest-labs/flux-2-klein-4b`. The browser then stamps the logo (`brandProductPhoto`). **Publish** and **Delete** write `public/data/extra-products.json` on GitHub `main`.
+
+Deploy the Worker from `worker/`:
+
+```bash
+npx wrangler deploy
+```
+
+`ADMIN_PASSWORD` and `GITHUB_TOKEN` are Wrangler secrets, not files in this repo. CSP `connect-src` in `index.html` must keep the `workers.dev` hosts.
 
 ## Persistence
 
-Cart and enquiry drafts stay in this browser via `localStorage` (`devCakeLab.bag`, `devCakeLab.enquiryDraft`). Clearing site data empties the bag. There is no backend session to host.
+Cart and enquiry drafts stay in this browser via `localStorage` (`devCakeLab.bag`, `devCakeLab.enquiryDraft`). Clearing site data empties the bag. Published menu changes are the extras file, not `localStorage`.
 
-## Hero note (do not put back inside `.cat-hero`)
+## Hero note
 
-The badge **A LITTLE CAT. A LOT OF CAKE.** must stay on `.cat-hero-shell`, **outside** `.cat-hero`.
-
-`.cat-hero` uses `overflow: hidden` for the rounded illustration. Text inside that layer gets clipped. The shell + sibling note structure is the permanent fix.
+The badge **A LITTLE CAT. A LOT OF CAKE.** sits on `.cat-hero-shell`, outside `.cat-hero`. `.cat-hero` uses `overflow: hidden` for the rounded illustration, so text inside that layer gets clipped.
 
 ## Shop by category strip
 
-The looping strip is `src/components/CategoryCarousel.jsx`. Its icons are inline SVGs in `src/components/CategoryIcon.jsx`, keyed by the `art` value in `src/data/catalog.js` (`cake`, `tin`, `cookie`, `jar`, `cupcake`, `signature`). They use brand CSS variables, so add new icons there rather than as files under `public/assets/`.
+The looping strip is `src/components/CategoryCarousel.jsx`. Icons are inline SVGs in `src/components/CategoryIcon.jsx`, keyed by the `art` value in `src/data/catalog.js` (`cake`, `tin`, `cookie`, `jar`, `cupcake`, `signature`). Add new icons there rather than under `public/assets/`.
 
 Touch rules, so a phone swipe drags instead of opening the card under the finger:
 
-- `.category-grid` must keep `touch-action: pan-y`. Horizontal gestures belong to the pointer handlers; the page still scrolls vertically.
-- `pointercancel` clears drag state only. Never navigate from it — that is what made a swipe open a category on iOS/Android.
+- `.category-grid` keeps `touch-action: pan-y`.
+- `pointercancel` clears drag state only. It does not navigate.
 - A pointer that moved less than 10px counts as a tap and opens the category from `pointerup`. After a real drag, the trailing `click` is swallowed.
 
 ## Custom cakes (`/custom`)
 
-Structured brief for celebration cakes. Home, Shop (Custom Cakes chip), Contact, and the footer all link here. Do not fold this back into the short contact form.
+Structured brief for celebration cakes. Home, Shop (Custom Cakes chip), Contact, and the footer all link here.
 
 Edit options in `src/data/customCake.js`. Format the WhatsApp/email brief in `src/lib/customCake.js`. Page UI is `src/pages/CustomCakePage.jsx`; look is `.custom-hero`, `.cake-form`, `.cake-pills`, `.cake-shape`, `.cake-summary` in `src/styles.css`.
 
@@ -153,33 +145,19 @@ Current picks:
 - Needed-by date and time (required, 2–4 day lead)
 - Pickup or delivery, design notes, message on cake, allergies
 
-The brief is ready when size + occasion are set, or design notes are at least 6 characters. **WhatsApp this cake** opens a short draft: needed by, picks, design/message/allergies, then pickup as the shop name only. Do not add Topic, the 2–4 day lead line, the street address, or Maps. **Email instead** is only on this page (FormSubmit). Contact no longer sends email.
+The brief is ready when size + occasion are set, or design notes are at least 6 characters. **WhatsApp this cake** opens a short draft: needed by, picks, design/message/allergies, then pickup as the shop name only. **Email instead** is only on this page (FormSubmit). Contact does not send email.
 
-Needed-by on `/custom` stays empty until they pick a date (2–4 day lead). Do not copy the bag’s today/now defaults onto this form.
+Needed-by on `/custom` stays empty until they pick a date. Do not copy the bag’s today/now defaults onto this form.
 
 ## Contact / cart behaviour
 
 - Cart lives in `App` state and persists in `localStorage` (`src/lib/cart.js`). Line qty is clamped to 1–20. Packing notes max 300. Menu items have no icing-message field.
 - Opening the bag hydrates date/time with `bagWhenFromDraft`: a saved ISO date **today or later** is kept; otherwise **today** and now rounded **up to the next 15 minutes**. Contact and custom cakes do not get those defaults.
-- The drawer is a flex column: items + When/Pickup scroll in `.cart-scroll`; **Order on WhatsApp** stays pinned in `.cart-foot`. `.cart` uses `overflow: hidden` so the button cannot paint off-screen. There is no Email instead in the bag.
-- When + Pickup sit in one paper card. Minutes step by 15. Compact pickup is shop name + Maps (full address still goes into WhatsApp). Delivery is one Area / address field.
+- The drawer is a flex column: items + When/Pickup scroll in `.cart-scroll`; **Order on WhatsApp** stays pinned in `.cart-foot`. There is no Email instead in the bag.
+- When + Pickup sit in one paper card. Minutes step by 15. Compact pickup is shop name + Maps. Delivery is one Area / address field.
 - Phone: header shows bag + hamburger; a sticky **Enquire** pill (`.mobile-enquire`) is the empty WhatsApp starter. Desktop header has Enquire too.
-- **Order on WhatsApp** builds a short draft in `orderWhatsAppText` (`src/lib/cart.js`):
-
-```text
-Nutella Cheesecake × 1 — ₹270
-Biscoff Cheesecake × 1 — ₹350
-Total ₹620
-
-Needed: 18 Sept 2026, 3:15 PM.
-
-Pickup: Dev's Cake Lab
-401, P.D. Apartment, Opp Mira Madhav Flat, Ellisbridge
-https://maps.google.com/?q=…
-```
-
-  Delivery is one line (`Delivery: Bodakdev, near ISRO` or `Delivery: address to confirm.`). If there is no date, `whenNote` is `Date to confirm.`
-- `/contact` is WhatsApp-only: a **Tell us more** box (prefilled from the bag on load), **WhatsApp this enquiry**, and a Call / Email (`mailto:`) / Instagram aside. No date, pickup, or FormSubmit on this page. Custom cakes still go to `/custom`.
+- **Order on WhatsApp** builds a short draft in `orderWhatsAppText` (`src/lib/cart.js`): items, `Total ₹…`, `Needed: …`, then pickup (shop name, address, Maps) or one delivery line. If there is no date, `whenNote` is `Date to confirm.`
+- `/contact` is WhatsApp-only: a **Tell us more** box (prefilled from the bag on load), **WhatsApp this enquiry**, and a Call / Email (`mailto:`) / Instagram aside. Custom cakes still go to `/custom`.
 - Custom cake **Email instead** POSTs to FormSubmit (`https://formsubmit.co/ajax/devscakelab@gmail.com`). The first live send needs the activation email in that inbox. CSP `connect-src` must include `https://formsubmit.co`.
 
 ## Deploy (GitHub Pages)
@@ -190,11 +168,11 @@ https://maps.google.com/?q=…
 
 Live site: [kira262.github.io/dev-cake-lab](https://kira262.github.io/dev-cake-lab/)
 
-Do not point Pages at the source `index.html`; it must use the Vite build from Actions.
+The Worker is a separate deploy (`npx wrangler deploy` from `worker/`). Pushing the site does not update the Worker, and deploying the Worker does not update the Pages bundle.
 
 ## Style / content edits
 
 - Brand look lives in CSS variables and `src/styles.css`.
-- Menu items and prices are in `src/data/catalog.js`.
+- Default menu items and prices are in `src/data/catalog.js`. Live overrides are in `public/data/extra-products.json`.
 - Contact details are in `src/data/contacts.js`.
 - Custom cake weights, sponges, and flavours are in `src/data/customCake.js`.

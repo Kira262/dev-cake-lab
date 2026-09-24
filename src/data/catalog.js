@@ -59,6 +59,16 @@ export const products = [
     image: asset("biscoff-cheesecake.jpg"),
   },
   {
+    id: 31,
+    name: "Oreo Cheesecake",
+    type: "Cheesecakes",
+    price: 350,
+    note: "250 g · Oreo cream cheesecake",
+    badge: "",
+    art: "chocolate",
+    image: asset("oreo-cheesecake.jpg"),
+  },
+  {
     id: 4,
     name: "Ganache Cookie Lava Tin",
     type: "Cookie Lava Tins",

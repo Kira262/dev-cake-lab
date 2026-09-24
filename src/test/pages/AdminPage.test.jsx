@@ -3,8 +3,10 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   deleteProduct,
+  generatePhotos,
   publishProduct,
 } from "../../lib/adminApi.js";
+import { brandProductPhoto } from "../../lib/brandImage.js";
 import { AdminPage } from "../../pages/AdminPage.jsx";
 
 vi.mock("../../lib/adminApi.js", () => ({
@@ -62,12 +64,56 @@ describe("AdminPage", () => {
 
     await user.type(screen.getByLabelText(/^name$/i), "Walnut Brownie");
     await user.type(screen.getByLabelText(/price/i), "85");
+    await user.type(screen.getByLabelText(/flavour one/i), "Milk");
+    await user.type(screen.getByLabelText(/flavour two/i), "Dark");
     expect(generate.disabled).toBe(false);
     expect(publish.disabled).toBe(true);
 
     await user.click(generate);
     expect(await screen.findByAltText(/hero preview/i)).toBeTruthy();
     expect(publish.disabled).toBe(false);
+    expect(generatePhotos).toHaveBeenNthCalledWith(1, "secret", {
+      name: "Walnut Brownie",
+      type: "Brownies",
+      note: "100–120 g · Walnut Brownie",
+      flavours: ["Milk", "Dark"],
+      shot: "hero",
+    });
+    expect(generatePhotos).toHaveBeenNthCalledWith(2, "secret", {
+      name: "Walnut Brownie",
+      type: "Brownies",
+      note: "100–120 g · Walnut Brownie",
+      flavours: ["Milk", "Dark"],
+      shot: "detail",
+    });
+
+    const price = screen.getByLabelText(/price/i);
+    expect(price.disabled).toBe(false);
+    await user.clear(price);
+    await user.type(price, "90");
+    expect(price.value).toBe("90");
+  });
+
+  it("uploads a shop card and a close-up without generating", async () => {
+    const user = userEvent.setup();
+    render(<AdminPage products={[]} onPublished={vi.fn()} />);
+
+    await unlock(user);
+    await user.click(screen.getByRole("button", { name: /^cheesecakes$/i }));
+    await user.upload(
+      screen.getByLabelText(/upload shop card/i),
+      new File(["hero"], "oreo.jpg", { type: "image/jpeg" }),
+    );
+    expect(await screen.findByAltText(/hero preview/i)).toBeTruthy();
+    expect(brandProductPhoto).toHaveBeenCalled();
+
+    await user.upload(
+      screen.getByLabelText(/upload close-up/i),
+      new File(["detail"], "oreo-detail.png", { type: "image/png" }),
+    );
+    expect(await screen.findByAltText(/detail preview/i)).toBeTruthy();
+    expect(generatePhotos).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: /publish to shop/i }).disabled).toBe(true);
   });
 
   it("lists catalog products and lets you save an edit without generating photos", async () => {

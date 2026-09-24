@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { products as catalogProducts } from "./data/catalog.js";
 import {
@@ -15,6 +15,7 @@ import {
   fetchExtraProducts,
   mergeCatalog,
   removeProduct,
+  withSavedEdit,
 } from "./lib/extraProducts.js";
 import { NOTES_MAX, clipText } from "./lib/validate.js";
 import { toLocation } from "./lib/paths.js";
@@ -34,7 +35,9 @@ import { VisitPage } from "./pages/VisitPage.jsx";
 export default function App() {
   const [route, setRoute] = useState(readPath);
   const [menuType, setMenuType] = useState(readMenuType);
-  const [products, setProducts] = useState(catalogProducts);
+  const [products, setProducts] = useState(null);
+  const savedEdits = useRef(new Map());
+  const savedDeletes = useRef(new Set());
   const [cart, setCart] = useState(() => hydrateBag(readBag(), catalogProducts));
   const [cartOpen, setCartOpen] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -65,7 +68,12 @@ export default function App() {
     let alive = true;
     fetchExtraProducts().then((extras) => {
       if (!alive) return;
-      const merged = mergeCatalog(catalogProducts, extras);
+      const merged = withSavedEdit(
+        catalogProducts,
+        extras,
+        [...savedEdits.current.values()],
+        [...savedDeletes.current],
+      );
       setProducts(merged);
       setCart((items) => hydrateBag(serializeBag(items), merged));
     });
@@ -75,14 +83,20 @@ export default function App() {
   }, []);
 
   const applyPublished = (product) => {
+    if (product?.slug) {
+      savedDeletes.current.delete(product.slug);
+      savedEdits.current.set(product.slug, product);
+    }
     setProducts((current) => {
-      const merged = mergeCatalog(current, [product]);
+      const merged = mergeCatalog(current || catalogProducts, [product]);
       setCart((items) => hydrateBag(serializeBag(items), merged));
       return merged;
     });
   };
 
   const applyDeleted = (slug) => {
+    savedEdits.current.delete(slug);
+    savedDeletes.current.add(slug);
     setProducts((current) => {
       const next = removeProduct(current, slug);
       setCart((items) => hydrateBag(serializeBag(items), next));
@@ -140,15 +154,21 @@ export default function App() {
     );
   const total = cart.reduce((sum, item) => sum + lineTotal(item), 0);
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
+  const shop = products || [];
   const productSlug = readProductSlug();
-  const activeProduct = products.find((p) => p.slug === productSlug);
+  const activeProduct = shop.find((p) => p.slug === productSlug);
 
   useEffect(() => {
     scrollToTop();
   }, [route, productSlug]);
 
-  const page =
-    productSlug && activeProduct ? (
+  const page = !products ? (
+      <main id="main-content">
+        <section className="page-hero wrap">
+          <p>Loading the menu…</p>
+        </section>
+      </main>
+    ) : productSlug && activeProduct ? (
       <ProductPage product={activeProduct} add={add} navigate={navigate} />
     ) : route === "/menu" || (productSlug && !activeProduct) ? (
       <MenuPage
@@ -181,12 +201,12 @@ export default function App() {
       <HomePage
         navigate={navigate}
         add={add}
-        bestSellers={bestSellersFrom(products)}
+        bestSellers={bestSellersFrom(shop)}
       />
     );
 
   return (
-    <div className="app">
+    <div className={route === "/admin" ? "app app-admin" : "app"}>
       <a className="skip-link" href="#main-content">
         Skip to content
       </a>

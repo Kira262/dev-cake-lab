@@ -10,6 +10,7 @@
   --line: #d8cbb9;
   --soft: #eee3d3;
   --shadow: 0 24px 60px rgba(79, 53, 30, 0.12);
+  --header-h: 92px;
 }
 * {
   box-sizing: border-box;
@@ -70,8 +71,12 @@ button {
   width: min(1160px, calc(100% - 48px));
   margin: auto;
 }
+.app-admin .header {
+  position: static;
+}
 .header {
-  height: 92px;
+  height: var(--header-h);
+  overflow: hidden;
   padding: 0 max(24px, calc((100% - 1280px) / 2));
   padding-left: max(24px, env(safe-area-inset-left), calc((100% - 1280px) / 2));
   padding-right: max(
@@ -1598,6 +1603,9 @@ button {
   color: #75695d;
   line-height: 1.65;
 }
+.admin-edit-field input {
+  scroll-margin-top: calc(var(--header-h) + 12px);
+}
 .admin-check {
   display: flex;
   align-items: center;
@@ -1643,12 +1651,39 @@ button {
   color: #9a8d80;
 }
 .admin-photos figcaption {
-  padding: 10px 12px 12px;
+  padding: 10px 12px 4px;
   font-size: 10px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   font-weight: 700;
   color: #84776b;
+}
+.admin-upload {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 8px 12px 12px;
+  border: 1px solid var(--olive);
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.admin-upload input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+.admin-upload:has(input:disabled) {
+  opacity: 0.45;
+  cursor: default;
 }
 .admin-extra-list {
   list-style: none;
@@ -2223,7 +2258,8 @@ footer {
     height: 32px;
   }
   .header {
-    height: 76px;
+    --header-h: 76px;
+    height: var(--header-h);
     justify-content: space-between;
   }
   .wordmark-logo {

@@ -17,37 +17,127 @@ function checkPassword(request, env) {
   return Boolean(env.ADMIN_PASSWORD && password === env.ADMIN_PASSWORD);
 }
 
-function heroPrompt({ name, type, note }) {
+const LOOK = {
+  Cheesecakes: "a slice of cheesecake with a biscuit base",
+  "Cookie Lava Tins": "a round metal tin filled with a gooey cookie and a molten center",
+  Cookies: "one thick round bakery cookie",
+  "Cake Bowls": "a clear glass bowl of layered cake and cream",
+  Cupcakes: "one cupcake in a paper liner with swirled frosting",
+  Brownies: "one square fudgy brownie",
+};
+
+const INGREDIENTS = [
+  [/biscoff/i, "caramelized Lotus biscuit spread and crumbs"],
+  [/nutella/i, "chocolate hazelnut spread"],
+  [/oreo/i, "chocolate sandwich cookies"],
+];
+
+export function visualNote(note) {
+  return String(note || "")
+    .replace(/^\s*\d[\d.\s–-]*g\s*(?:·|-|–)?\s*/i, "")
+    .replace(/\bper piece\b/gi, "")
+    .replace(/\s*·\s*/g, " ")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+function flavourLine(flavours) {
+  const items = (Array.isArray(flavours) ? flavours : [])
+    .map((item) => String(item || "").trim())
+    .filter(Boolean)
+    .slice(0, 2);
+  if (!items.length) return "";
+  return `Also showing ${items.join(" and ")}.`;
+}
+
+function ingredientHint(name, note) {
+  const text = `${name} ${note}`;
+  const hits = INGREDIENTS.filter(([pattern]) => pattern.test(text)).map(([, phrase]) => phrase);
+  return hits.length ? `Made with ${hits.join(" and ")}.` : "";
+}
+
+function kindOf(type) {
+  return String(type || "dessert").toLowerCase().replace(/s$/, "");
+}
+
+function describeDessert({ name, type, note, flavours }) {
+  const look = LOOK[type] || "an artisan bakery dessert";
+  const kind = kindOf(type);
+  const cleaned = visualNote(note);
+  const extra = cleaned && cleaned.toLowerCase() !== String(name || "").trim().toLowerCase()
+    ? cleaned
+    : "";
   return [
-    "Square professional food photograph, 1:1.",
-    `Artisan bakery ${String(type || "dessert").toLowerCase()}: ${name}.`,
-    note,
-    "Cream ceramic plate, warm marble countertop, soft natural window light.",
-    "Photorealistic. No logo, no watermark, no text, no labels.",
+    `${name}: ${look}.`,
+    ingredientHint(name, extra || note),
+    extra ? `${extra}.` : "",
+    `Only this ${kind}.`,
+    flavourLine(flavours),
   ]
     .filter(Boolean)
     .join(" ");
 }
 
-function detailPrompt({ name, type, note }) {
-  return [
-    "Extreme close-up square food photograph, 1:1.",
-    `${name}, ${String(type || "dessert").toLowerCase()}.`,
-    note,
-    "Tight crop filling the frame, photorealistic texture.",
-    "No logo, no watermark, no text.",
-  ]
-    .filter(Boolean)
-    .join(" ");
+function photoPrompt(input, camera) {
+  const kind = kindOf(input.type);
+  return JSON.stringify({
+    scene: "a bakery counter with a warm marble top and a cream ceramic plate",
+    subjects: [
+      {
+        type: `${input.name} ${kind}`,
+        description: describeDessert(input),
+        pose: "presented as one finished bakery serving",
+        position: "foreground",
+      },
+    ],
+    style: "photorealistic food photography",
+    color_palette: ["cream", "caramel", "cocoa brown"],
+    lighting: "soft natural window light",
+    mood: "fresh and appetizing",
+    background: "warm marble countertop",
+    composition: "minimalist negative space",
+    camera,
+  });
+}
+
+export function heroPrompt(input) {
+  return photoPrompt(input, {
+    angle: "slightly low",
+    distance: "medium close-up",
+    focus: "sharp on subject",
+    lens: "50mm",
+    "f-number": "f/2.8",
+  });
+}
+
+export function detailPrompt(input) {
+  return photoPrompt(input, {
+    angle: "eye level",
+    distance: "close-up",
+    focus: "macro focus",
+    lens: "85mm",
+    "f-number": "f/2.8",
+  });
 }
 
 async function generateImage(env, prompt) {
   if (!env.AI) {
     throw new Error("Workers AI is not bound on this Worker.");
   }
-  const result = await env.AI.run("@cf/black-forest-labs/flux-1-schnell", {
-    prompt: String(prompt || "").slice(0, 2048),
-    steps: 4,
+  const form = new FormData();
+  form.append("prompt", String(prompt || "").slice(0, 2048));
+  form.append("guidance", "4");
+  form.append("width", "1024");
+  form.append("height", "1024");
+  const formRequest = new Request("http://dummy", {
+    method: "POST",
+    body: form,
+  });
+  const result = await env.AI.run("@cf/black-forest-labs/flux-2-klein-4b", {
+    multipart: {
+      body: formRequest.body,
+      contentType: formRequest.headers.get("content-type") || "multipart/form-data",
+    },
   });
   const b64 = result?.image;
   if (!b64) throw new Error("Image generation returned no photo.");
@@ -63,18 +153,14 @@ function githubHeaders(env) {
 }
 
 function parseStore(decoded) {
-  try {
-    const parsed = JSON.parse(decoded);
-    if (Array.isArray(parsed)) return { items: parsed, deletedSlugs: [] };
-    return {
-      items: Array.isArray(parsed?.items) ? parsed.items : [],
-      deletedSlugs: (Array.isArray(parsed?.deletedSlugs) ? parsed.deletedSlugs : [])
-        .map((item) => String(item || "").trim())
-        .filter(Boolean),
-    };
-  } catch {
-    return { items: [], deletedSlugs: [] };
-  }
+  const parsed = JSON.parse(decoded);
+  if (Array.isArray(parsed)) return { items: parsed, deletedSlugs: [] };
+  return {
+    items: Array.isArray(parsed?.items) ? parsed.items : [],
+    deletedSlugs: (Array.isArray(parsed?.deletedSlugs) ? parsed.deletedSlugs : [])
+      .map((item) => String(item || "").trim())
+      .filter(Boolean),
+  };
 }
 
 async function readExtras(env) {
@@ -90,8 +176,16 @@ async function readExtras(env) {
   if (!res.ok) {
     throw new Error(file.message || "Could not read extra products.");
   }
-  const decoded = atob(String(file.content || "").replace(/\n/g, ""));
-  const store = parseStore(decoded);
+  const binary = atob(String(file.content || "").replace(/\n/g, ""));
+  const decoded = new TextDecoder().decode(
+    Uint8Array.from(binary, (char) => char.charCodeAt(0)),
+  );
+  let store;
+  try {
+    store = parseStore(decoded);
+  } catch {
+    throw new Error("Extra products file could not be read. Nothing was saved.");
+  }
   return { sha: file.sha, ...store };
 }
 
@@ -122,9 +216,27 @@ async function writeExtras(env, store, sha, message) {
   );
   const data = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(data.message || "Could not publish to GitHub.");
+    const error = new Error(data.message || "Could not publish to GitHub.");
+    error.status = res.status;
+    throw error;
   }
   return data;
+}
+
+async function commitStore(env, mutate, message) {
+  let lastError = new Error("Could not publish to GitHub.");
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const current = await readExtras(env);
+    const store = mutate(current);
+    try {
+      await writeExtras(env, store, current.sha, message);
+      return store;
+    } catch (err) {
+      lastError = err;
+      if (err?.status !== 409) throw err;
+    }
+  }
+  throw lastError;
 }
 
 function nextId(catalogMax, extras) {
@@ -182,15 +294,35 @@ export default {
         if (!name || !type) {
           return json({ error: "Name and category are required." }, 400);
         }
-        const payload = { name, type, note: String(body.note || "").trim() };
-        const [hero, detail] = await Promise.all([
-          generateImage(env, heroPrompt(payload)),
-          generateImage(env, detailPrompt(payload)),
-        ]);
+        const flavours = (Array.isArray(body.flavours) ? body.flavours : [])
+          .map((item) => String(item || "").trim())
+          .filter(Boolean)
+          .slice(0, 2);
+        const payload = {
+          name,
+          type,
+          note: String(body.note || "").trim(),
+          flavours,
+        };
+        if (body.shot === "hero" || body.shot === "detail") {
+          const image = await generateImage(
+            env,
+            body.shot === "detail" ? detailPrompt(payload) : heroPrompt(payload),
+          );
+          return json(body.shot === "detail" ? { detail: image } : { hero: image });
+        }
+        const hero = await generateImage(env, heroPrompt(payload));
+        const detail = await generateImage(env, detailPrompt(payload));
         return json({ hero, detail });
       } catch (err) {
+        const message = err instanceof Error ? err.message : "Generate failed.";
+        const timedOut = /timeout|3046/i.test(message);
         return json(
-          { error: err instanceof Error ? err.message : "Generate failed." },
+          {
+            error: timedOut
+              ? "Photo generation took too long. Try again."
+              : message,
+          },
           500,
         );
       }
@@ -204,23 +336,18 @@ export default {
         if (!name || !type || !body.image || !body.detailImage) {
           return json({ error: "Product details and both photos are required." }, 400);
         }
-        const { sha, items, deletedSlugs } = await readExtras(env);
-        const catalogMax = Number(env.CATALOG_MAX_ID) || 30;
-        const slug = String(body.slug || "").trim();
-        const existing = items.find((item) => item.slug === slug);
-        const id = existing?.id || Number(body.id) || nextId(catalogMax, items);
-        const product = toProduct({ ...body, name, type, slug }, id);
-        const next = items.filter((item) => item.slug !== product.slug);
-        next.push(product);
-        await writeExtras(
-          env,
-          {
-            items: next,
-            deletedSlugs: deletedSlugs.filter((item) => item !== product.slug),
-          },
-          sha,
-          existing || Number(body.id) ? `Update ${product.name} on the shop` : `Add ${product.name} to the shop`,
-        );
+        let product;
+        await commitStore(env, (current) => {
+          const catalogMax = Number(env.CATALOG_MAX_ID) || 30;
+          const slug = String(body.slug || "").trim();
+          const existing = current.items.find((item) => item.slug === slug);
+          const id = existing?.id || Number(body.id) || nextId(catalogMax, current.items);
+          product = toProduct({ ...body, name, type, slug }, id);
+          return {
+            items: current.items.filter((item) => item.slug !== product.slug).concat(product),
+            deletedSlugs: current.deletedSlugs.filter((item) => item !== product.slug),
+          };
+        }, `Update ${name} on the shop`);
         return json({ product });
       } catch (err) {
         return json(
@@ -235,17 +362,12 @@ export default {
         const body = await request.json();
         const slug = String(body.slug || "").trim();
         if (!slug) return json({ error: "Product slug is required." }, 400);
-        const { sha, items, deletedSlugs } = await readExtras(env);
-        const nextItems = items.filter((item) => item.slug !== slug);
-        const nextDeleted = deletedSlugs.includes(slug)
-          ? deletedSlugs
-          : [...deletedSlugs, slug];
-        await writeExtras(
-          env,
-          { items: nextItems, deletedSlugs: nextDeleted },
-          sha,
-          `Remove ${slug} from the shop`,
-        );
+        await commitStore(env, (current) => ({
+          items: current.items.filter((item) => item.slug !== slug),
+          deletedSlugs: current.deletedSlugs.includes(slug)
+            ? current.deletedSlugs
+            : [...current.deletedSlugs, slug],
+        }), `Remove ${slug} from the shop`);
         return json({ ok: true, slug });
       } catch (err) {
         return json(

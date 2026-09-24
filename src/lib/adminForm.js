@@ -12,6 +12,23 @@ export function adminPublishReady(draft = {}) {
   return adminGenerateReady(draft) && Boolean(draft.hero && draft.detail);
 }
 
+const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
+
+export function readImageFile(file) {
+  if (!file || !/^image\/(jpeg|png|webp)$/i.test(file.type)) {
+    return Promise.reject(new Error("Choose a JPG, PNG, or WebP photo."));
+  }
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return Promise.reject(new Error("That photo is too large. Use one under 8 MB."));
+  }
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ""));
+    reader.onerror = () => reject(new Error("Could not read that photo."));
+    reader.readAsDataURL(file);
+  });
+}
+
 export function productDraftPhotos(product) {
   const hero = String(product?.image || "");
   const detail = String(
