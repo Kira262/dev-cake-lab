@@ -41,3 +41,15 @@ export function isNavActive(label, route) {
   if (label === "Contact") return route === "/contact";
   return false;
 }
+
+const SHOP = "Dev's Cake Lab";
+
+export function pageTitle(route, product) {
+  if (product?.name) return `${product.name} · ${SHOP}`;
+  if (route === "/menu") return `Shop · ${SHOP}`;
+  if (route === "/visit") return `Visit · ${SHOP}`;
+  if (route === "/contact") return `Contact · ${SHOP}`;
+  if (route === "/custom") return `Custom cakes · ${SHOP}`;
+  if (route === "/admin") return `Admin · ${SHOP}`;
+  return SHOP;
+}

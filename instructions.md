@@ -91,7 +91,7 @@ Baked products and prices live in `src/data/catalog.js`. The shop does not paint
 
 ## Assets
 
-Put catalog images in `public/assets/` and reference them with `asset("filename.ext")`. Product photos and the logo go through `SmartImage` (WebP `<source>` + JPEG/PNG `<img>`). After adding new catalog photos, run `node scripts/optimize-images.mjs` to write WebP copies (and shrink oversized JPEGs).
+Put catalog images in `public/assets/` and reference them with `asset("filename.ext")`. Product photos and the logo go through `SmartImage` (WebP `<source>` + JPEG/PNG `<img>`). After adding new catalog photos, run `npm run optimize-images` to write WebP copies (and shrink oversized JPEGs).
 
 Expected brand files include `dev-cake-logo.png`. Per-product hero and `*-detail.jpg` names are in `src/data/catalog.js`. `npm test` fails CI if a referenced catalog file is missing.
 

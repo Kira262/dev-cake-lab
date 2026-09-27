@@ -42,7 +42,7 @@ admin page  →  Worker /generate (one photo)  →  logo stamp in the browser
 
 - The first live custom-cake email needs FormSubmit’s activation message in `devscakelab@gmail.com`.
 - Admin UI changes ship with the Pages workflow on `main`. The Worker ships only when it is deployed from `worker/`.
-- A new catalog photo still needs a JPEG or PNG in `public/assets/` and `node scripts/optimize-images.mjs` for WebP. Admin-published photos are stored in the extras file, not as new asset files.
+- A new catalog photo still needs a JPEG or PNG in `public/assets/` and `npm run optimize-images` for WebP. Admin-published photos are stored in the extras file, not as new asset files.
 
 ## Brand
 

@@ -4,6 +4,7 @@ import {
   ENQUIRE_WHATSAPP_TEXT,
   buildEnquiryPayload,
   enquireWhatsAppUrl,
+  enquiryFailureMessage,
   enquiryWhatsAppText,
   submitEnquiry,
 } from "../../lib/enquiry.js";
@@ -79,7 +80,13 @@ describe("submitEnquiry", () => {
         json: async () => ({ success: "false", message: "Not activated" }),
       }),
     );
-    await expect(submitEnquiry(values)).rejects.toThrow(/not activated/i);
+    await expect(submitEnquiry(values)).rejects.toThrow(/devscakelab@gmail.com/i);
+  });
+
+  it("asks the shop inbox to open the FormSubmit activation email", () => {
+    expect(enquiryFailureMessage({ message: "This form needs to be activated" }))
+      .toMatch(/Open the FormSubmit email in devscakelab@gmail.com/i);
+    expect(enquiryFailureMessage({ message: "rate limited" })).toBe("rate limited");
   });
 });
 

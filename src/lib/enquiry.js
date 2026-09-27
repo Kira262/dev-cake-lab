@@ -93,7 +93,15 @@ export async function submitEnquiry(values) {
     data = {};
   }
   if (!response.ok || data.success === false || data.success === "false") {
-    throw new Error(data.message || "Could not send this enquiry. Please try again.");
+    throw new Error(enquiryFailureMessage(data));
   }
   return data;
+}
+
+export function enquiryFailureMessage(data = {}) {
+  const message = String(data.message || "");
+  if (/activat/i.test(message)) {
+    return `Open the FormSubmit email in ${CONTACTS.email} to activate custom-cake email, then try again.`;
+  }
+  return message || "Could not send this enquiry. Please try again.";
 }

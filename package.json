@@ -1,5 +1,5 @@
 {
-  "name": "cat-biscuit-cafe",
+  "name": "dev-cake-lab",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "optimize-images": "node scripts/optimize-images.mjs"
   },
   "dependencies": {
     "@vitejs/plugin-react": "latest",

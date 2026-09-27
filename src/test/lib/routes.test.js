@@ -1,5 +1,10 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { isNavActive, productPath, readProductSlug } from "../../lib/routes.js";
+import {
+  isNavActive,
+  pageTitle,
+  productPath,
+  readProductSlug,
+} from "../../lib/routes.js";
 
 describe("readProductSlug", () => {
   afterEach(() => {
@@ -34,5 +39,18 @@ describe("productPath", () => {
     expect(productPath("biscoff-cheesecake")).toBe(
       "/product/biscoff-cheesecake",
     );
+  });
+});
+
+describe("pageTitle", () => {
+  it("names shop, visit, contact, custom, admin, and product pages", () => {
+    expect(pageTitle("/")).toBe("Dev's Cake Lab");
+    expect(pageTitle("/menu")).toBe("Shop · Dev's Cake Lab");
+    expect(pageTitle("/visit")).toBe("Visit · Dev's Cake Lab");
+    expect(pageTitle("/contact")).toBe("Contact · Dev's Cake Lab");
+    expect(pageTitle("/custom")).toBe("Custom cakes · Dev's Cake Lab");
+    expect(pageTitle("/admin")).toBe("Admin · Dev's Cake Lab");
+    expect(pageTitle("/product/oreo-cheesecake", { name: "Oreo Cheesecake" }))
+      .toBe("Oreo Cheesecake · Dev's Cake Lab");
   });
 });

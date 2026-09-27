@@ -152,8 +152,10 @@ function githubHeaders(env) {
   };
 }
 
-function parseStore(decoded) {
-  const parsed = JSON.parse(decoded);
+export function parseStore(decoded) {
+  const text = String(decoded ?? "").trim();
+  if (!text) return { items: [], deletedSlugs: [] };
+  const parsed = JSON.parse(text);
   if (Array.isArray(parsed)) return { items: parsed, deletedSlugs: [] };
   return {
     items: Array.isArray(parsed?.items) ? parsed.items : [],
@@ -174,7 +176,7 @@ async function readExtras(env) {
   if (res.status === 404) return { sha: null, items: [], deletedSlugs: [] };
   const file = await res.json().catch(() => ({}));
   if (!res.ok) {
-    throw new Error(file.message || "Could not read extra products.");
+    throw new Error(file.message || "Could not read extra products from GitHub.");
   }
   const binary = atob(String(file.content || "").replace(/\n/g, ""));
   const decoded = new TextDecoder().decode(
@@ -184,7 +186,7 @@ async function readExtras(env) {
   try {
     store = parseStore(decoded);
   } catch {
-    throw new Error("Extra products file could not be read. Nothing was saved.");
+    throw new Error("Extra products file is unreadable. Nothing was saved.");
   }
   return { sha: file.sha, ...store };
 }
