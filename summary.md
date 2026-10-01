@@ -31,7 +31,7 @@ catalog.js  +  extra-products.json  →  shop
 admin page  →  Worker /generate (one photo)  →  logo stamp in the browser
 ```
 
-- The Pages site is the Vite `dist`. Deep links use a copied `404.html`. Static catalog photos come from `public/assets/` through `asset()` and `SmartImage` (WebP, JPEG/PNG fallback).
+- The Pages site is the Vite `dist`. Deep links use a copied `404.html`. Post-build share shells (`scripts/generate-share-shells.mjs`) write per-route `index.html` with absolute `og:title`, `og:url`, and `og:image` for WhatsApp and other link previews. Static catalog photos come from `public/assets/` through `asset()` and `SmartImage` (WebP, JPEG/PNG fallback).
 - `src/data/catalog.js` is the baked menu. `public/data/extra-products.json` overrides a row by slug (price, photos, notes, or a delete). The shop waits until that file loads. Saves in the current browser session are reapplied after the fetch (`withSavedEdit` in `src/lib/extraProducts.js`).
 - `/admin` is not in the header. On that route the header is not sticky. The page talks to `https://cakelab-admin-api.cakelab.workers.dev` (`VITE_ADMIN_API` can override) with `x-admin-password`.
 - The Worker (`worker/admin.js`) exposes `POST /unlock`, `/generate`, `/publish`, and `/delete`. Generate uses `@cf/black-forest-labs/flux-2-klein-4b`, one shot per request (`hero`, then `detail`). The browser stamps the logo (`src/lib/brandImage.js`). Publish and delete commit the extras file to GitHub `main`, retry conflicts, and refuse to overwrite a file that cannot be parsed.

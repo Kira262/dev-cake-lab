@@ -19,7 +19,8 @@ import {
 } from "./lib/extraProducts.js";
 import { NOTES_MAX, clipText } from "./lib/validate.js";
 import { toLocation } from "./lib/paths.js";
-import { pageTitle, readMenuType, readPath, readProductSlug } from "./lib/routes.js";
+import { readMenuType, readPath, readProductSlug } from "./lib/routes.js";
+import { applyShareMeta } from "./lib/shareMeta.js";
 import { scrollToTop } from "./lib/scroll.js";
 import { Cart } from "./components/Cart.jsx";
 import { Footer } from "./components/Footer.jsx";
@@ -163,8 +164,12 @@ export default function App() {
   }, [route, productSlug]);
 
   useEffect(() => {
-    document.title = pageTitle(route, activeProduct);
-  }, [route, activeProduct]);
+    applyShareMeta({
+      route: productSlug ? `/product/${productSlug}` : route,
+      product: activeProduct,
+      productSlug,
+    });
+  }, [route, activeProduct, productSlug]);
 
   const page = !products ? (
       <main id="main-content">
