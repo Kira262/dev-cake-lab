@@ -18,6 +18,16 @@ const SHELL = `<!doctype html>
 </head><body></body></html>`;
 
 describe("patchShareHtml", () => {
+  it("escapes angle brackets in the title", () => {
+    const html = patchShareHtml(SHELL, {
+      title: "Evil <script>",
+      description: "x",
+      url: `${SITE_ORIGIN}/`,
+      image: `${SITE_ORIGIN}/assets/dev-cake-logo.png`,
+    });
+    expect(html).toContain("<title>Evil &lt;script&gt;</title>");
+  });
+
   it("replaces title, description, and og tags and inserts og:url", () => {
     const html = patchShareHtml(SHELL, {
       title: "Shop · Dev's Cake Lab",
@@ -57,6 +67,18 @@ describe("shareMetaForRoute", () => {
     expect(meta.title).toBe("Oreo Cheesecake · Dev's Cake Lab");
     expect(meta.description).toContain("Oreo Cheesecake");
     expect(meta.image).toBe(`${SITE_ORIGIN}/assets/oreo-cheesecake.jpg`);
+  });
+
+  it("points extra photos at Pages assets/extra", () => {
+    const meta = shareMetaForRoute("/product/walnut-brownie", {
+      name: "Walnut Brownie",
+      slug: "walnut-brownie",
+      note: "100 g",
+      image: "assets/extra/walnut-brownie-hero-abc.jpg",
+    });
+    expect(meta.image).toBe(
+      `${SITE_ORIGIN}/assets/extra/walnut-brownie-hero-abc.jpg`,
+    );
   });
 });
 

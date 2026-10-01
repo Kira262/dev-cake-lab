@@ -19,7 +19,8 @@ describe("ProductCard photos", () => {
     const img = container.querySelector("img");
     const source = container.querySelector("source");
     expect(source.getAttribute("type")).toBe("image/webp");
-    expect(source.getAttribute("srcSet")).toBe("/assets/biscoff-cheesecake.webp");
+    expect(source.getAttribute("srcSet")).toContain("/assets/biscoff-cheesecake-400.webp 400w");
+    expect(source.getAttribute("srcSet")).toContain("/assets/biscoff-cheesecake.webp 1200w");
     expect(img.getAttribute("src")).toBe(product.image);
     expect(img.getAttribute("loading")).toBe("lazy");
 

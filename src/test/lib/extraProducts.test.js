@@ -56,6 +56,9 @@ describe("normalizeExtraProduct", () => {
     expect(shopPhotoUrl("/dev-cake-lab/assets/biscoff-cheesecake.jpg")).toBe(
       asset("biscoff-cheesecake.jpg"),
     );
+    expect(shopPhotoUrl("assets/extra/walnut-brownie-hero-abc.jpg")).toContain(
+      "/assets/extra/walnut-brownie-hero-abc.jpg",
+    );
     const extra = normalizeExtraProduct(
       {
         name: "Biscoff Cheesecake",

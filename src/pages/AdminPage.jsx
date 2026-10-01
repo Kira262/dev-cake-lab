@@ -3,6 +3,7 @@ import { ArrowRight } from "lucide-react";
 import { ADMIN_BADGES } from "../data/admin.js";
 import { asset } from "../lib/paths.js";
 import {
+  getAdminToken,
   unlockAdmin,
   generatePhotos,
   publishProduct,
@@ -71,6 +72,10 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
   const canPublish = adminPublishReady(draft);
 
   useEffect(() => {
+    if (getAdminToken()) setUnlocked(true);
+  }, []);
+
+  useEffect(() => {
     if (!type || noteTouched || editing) return;
     setNote(categoryDefaults(type, name).note);
   }, [type, name, noteTouched, editing]);
@@ -130,6 +135,7 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
     setUnlocking(true);
     try {
       await unlockAdmin(password);
+      setPassword("");
       setUnlocked(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not unlock admin.");
@@ -153,9 +159,9 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
           .map((item) => item.trim())
           .filter(Boolean),
       };
-      const heroPhoto = await generatePhotos(password, { ...payload, shot: "hero" });
+      const heroPhoto = await generatePhotos({ ...payload, shot: "hero" });
       setHero(await brandProductPhoto(heroPhoto.hero, logo));
-      const detailPhoto = await generatePhotos(password, { ...payload, shot: "detail" });
+      const detailPhoto = await generatePhotos({ ...payload, shot: "detail" });
       setDetail(await brandProductPhoto(detailPhoto.detail, logo));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not generate photos.");
@@ -192,7 +198,7 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
         editing?.id || nextProductId(products),
         editing,
       );
-      const saved = await publishProduct(password, payload);
+      const saved = await publishProduct(payload);
       onPublished?.(saved.product || payload);
       setDone(`${payload.name} is on the shop.`);
       if (editing) {
@@ -230,7 +236,7 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
     setDone("");
     setBusy(`delete:${product.slug}`);
     try {
-      await deleteProduct(password, product.slug);
+      await deleteProduct(product.slug);
       onDeleted?.(product.slug);
       if (editing?.slug === product.slug) resetForm();
       setDone(`${product.name} was removed.`);

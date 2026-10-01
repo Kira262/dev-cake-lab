@@ -16,6 +16,7 @@ export function ProductCard({ product, add, navigate, priority = false }) {
               src={product.image}
               alt={product.name}
               priority={priority}
+              sizes="(max-width: 640px) 50vw, 280px"
             />
           ) : (
             <DessertArt type={product.art} />

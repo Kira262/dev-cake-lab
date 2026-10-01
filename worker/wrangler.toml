@@ -11,3 +11,15 @@ GITHUB_REPO = "kira262/dev-cake-lab"
 GITHUB_BRANCH = "main"
 GITHUB_PATH = "public/data/extra-products.json"
 CATALOG_MAX_ID = "31"
+
+# Create with: wrangler kv namespace create ADMIN_KV
+[[kv_namespaces]]
+binding = "ADMIN_KV"
+id = "a75c3805b7774a84b5b88c289f422c8d"
+
+# Optional: replace namespace_id with your account's rate-limit namespace (dashboard or wrangler).
+[[unsafe.bindings]]
+name = "ADMIN_RATE"
+type = "ratelimit"
+namespace_id = "1001"
+simple = { limit = 5, period = 60 }

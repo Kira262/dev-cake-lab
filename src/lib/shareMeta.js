@@ -1,14 +1,22 @@
+import { CONTACTS, mapsLink } from "../data/contacts.js";
 import { pageTitle } from "./routes.js";
 
 export const SITE_ORIGIN = "https://kira262.github.io/dev-cake-lab";
+export const SITE_PATH = "/dev-cake-lab";
 
-const DEFAULT_DESCRIPTION = "Dev's Cake Lab — crafted, tested, perfected.";
+const DEFAULT_DESCRIPTION =
+  "Dev's Cake Lab in Ahmedabad. Small-batch cheesecakes, cookies, and brownies. Order on WhatsApp.";
 const LOGO_FILE = "dev-cake-logo.png";
+const OG_COVER_FILE = "og-cover.jpg";
 
 export function shareAssetUrl(filename) {
-  const name = String(filename || LOGO_FILE)
-    .split("/")
-    .pop();
+  const raw = String(filename || LOGO_FILE).replace(/\\/g, "/");
+  const parts = raw.split("/").filter(Boolean);
+  const extraAt = parts.lastIndexOf("extra");
+  if (extraAt >= 0 && parts[extraAt + 1]) {
+    return `${SITE_ORIGIN}/assets/extra/${encodeURIComponent(parts[extraAt + 1])}`;
+  }
+  const name = parts.pop() || LOGO_FILE;
   return `${SITE_ORIGIN}/assets/${encodeURIComponent(name)}`;
 }
 
@@ -42,9 +50,16 @@ export function sharePageUrl(route, productSlug = "") {
 }
 
 export function shareImageUrl(route, product) {
-  if (product?.image) {
-    const file = product.image.split("/").pop();
-    return shareAssetUrl(file);
+  const image = product?.image;
+  if (image) {
+    const value = String(image).trim();
+    if (value.startsWith("data:")) {
+      return shareAssetUrl(LOGO_FILE);
+    }
+    return shareAssetUrl(value);
+  }
+  if (!route || route === "/") {
+    return shareAssetUrl(OG_COVER_FILE);
   }
   return shareAssetUrl(LOGO_FILE);
 }
@@ -55,7 +70,8 @@ export function shareMetaForRoute(route, product, productSlug = "") {
   const description = pageDescription(route, product);
   const url = sharePageUrl(route, slug && route.startsWith("/product") ? slug : "");
   const image = shareImageUrl(route, product);
-  return { title, description, url, image };
+  const noindex = route === "/admin";
+  return { title, description, url, image, noindex };
 }
 
 function escapeAttr(value) {
@@ -64,14 +80,73 @@ function escapeAttr(value) {
     .replace(/"/g, "&quot;");
 }
 
-export function patchShareHtml(html, meta) {
-  const { title, description, url, image } = meta;
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+export function bakeryJsonLd() {
+  const address = CONTACTS.addressLines.join(", ");
+  return {
+    "@context": "https://schema.org",
+    "@type": "Bakery",
+    name: CONTACTS.addressName,
+    telephone: CONTACTS.phoneTel,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: CONTACTS.addressLines[0],
+      addressLocality: "Ahmedabad",
+      postalCode: "380006",
+      addressCountry: "IN",
+    },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: [
+          "Monday",
+          "Tuesday",
+          "Wednesday",
+          "Thursday",
+          "Friday",
+          "Saturday",
+          "Sunday",
+        ],
+        opens: "11:00",
+        closes: "01:00",
+      },
+    ],
+    hasMap: mapsLink(),
+    description: DEFAULT_DESCRIPTION,
+    url: `${SITE_ORIGIN}/`,
+    image: shareAssetUrl(OG_COVER_FILE),
+    areaServed: address,
+  };
+}
+
+export function patchShareHtml(html, meta, options = {}) {
+  const { title, description, url, image, noindex } = meta;
+  const { jsonLd } = options;
   let out = html;
-  out = out.replace(/<title>[^<]*<\/title>/, `<title>${title}</title>`);
+  out = out.replace(/<title>[^<]*<\/title>/, `<title>${escapeHtml(title)}</title>`);
   out = out.replace(
     /<meta\s+name="description"\s+content="[^"]*"\s*\/?>/i,
     `<meta name="description" content="${escapeAttr(description)}" />`,
   );
+  if (noindex) {
+    if (/name="robots"/i.test(out)) {
+      out = out.replace(
+        /<meta\s+name="robots"\s+content="[^"]*"\s*\/?>/i,
+        `<meta name="robots" content="noindex, nofollow" />`,
+      );
+    } else {
+      out = out.replace(
+        /<meta\s+name="description"/i,
+        `<meta name="robots" content="noindex, nofollow" />\n    <meta name="description"`,
+      );
+    }
+  }
   out = out.replace(
     /<meta\s+property="og:title"\s+content="[^"]*"\s*\/?>/i,
     `<meta property="og:title" content="${escapeAttr(title)}" />`,
@@ -94,6 +169,28 @@ export function patchShareHtml(html, meta) {
       /<meta\s+property="og:type"\s+content="[^"]*"\s*\/?>/i,
       `<meta property="og:url" content="${escapeAttr(url)}" />\n    <meta property="og:type" content="website" />`,
     );
+  }
+  if (/rel="canonical"/i.test(out)) {
+    out = out.replace(
+      /<link\s+rel="canonical"\s+href="[^"]*"\s*\/?>/i,
+      `<link rel="canonical" href="${escapeAttr(url)}" />`,
+    );
+  } else {
+    out = out.replace(
+      /<title>/i,
+      `<link rel="canonical" href="${escapeAttr(url)}" />\n    <title>`,
+    );
+  }
+  if (jsonLd) {
+    const block = `<script type="application/ld+json">${JSON.stringify(jsonLd)}</script>`;
+    if (/<script type="application\/ld\+json">/i.test(out)) {
+      out = out.replace(
+        /<script type="application\/ld\+json">[\s\S]*?<\/script>/i,
+        block,
+      );
+    } else {
+      out = out.replace(/<\/head>/i, `    ${block}\n  </head>`);
+    }
   }
   return out;
 }
@@ -118,12 +215,26 @@ function setMetaProperty(property, content) {
   el.setAttribute("content", content);
 }
 
+function setCanonical(url) {
+  let el = document.querySelector('link[rel="canonical"]');
+  if (!el) {
+    el = document.createElement("link");
+    el.setAttribute("rel", "canonical");
+    document.head.appendChild(el);
+  }
+  el.setAttribute("href", url);
+}
+
 export function applyShareMeta({ route, product, productSlug = "" }) {
   const meta = shareMetaForRoute(route, product, productSlug);
   document.title = meta.title;
   setMetaName("description", meta.description);
+  if (meta.noindex) {
+    setMetaName("robots", "noindex, nofollow");
+  }
   setMetaProperty("og:title", meta.title);
   setMetaProperty("og:description", meta.description);
   setMetaProperty("og:url", meta.url);
   setMetaProperty("og:image", meta.image);
+  setCanonical(meta.url);
 }

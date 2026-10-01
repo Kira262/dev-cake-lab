@@ -39,7 +39,6 @@ export function buildEnquiryPayload(values) {
     message: values.message || "(No extra notes)",
     _subject: `Dev's Cake Lab enquiry — ${values.topic}`,
     _template: "table",
-    _captcha: "false",
     _replyto: values.email || CONTACTS.email,
   };
 }

@@ -10,12 +10,13 @@ import { brandProductPhoto } from "../../lib/brandImage.js";
 import { AdminPage } from "../../pages/AdminPage.jsx";
 
 vi.mock("../../lib/adminApi.js", () => ({
-  unlockAdmin: vi.fn(async () => ({ ok: true })),
+  unlockAdmin: vi.fn(async () => ({ ok: true, token: "test-token" })),
+  getAdminToken: vi.fn(() => ""),
   generatePhotos: vi.fn(async () => ({
     hero: "data:image/png;base64,hero",
     detail: "data:image/png;base64,detail",
   })),
-  publishProduct: vi.fn(async (password, product) => ({ product })),
+  publishProduct: vi.fn(async (product) => ({ product })),
   deleteProduct: vi.fn(async () => ({ ok: true })),
 }));
 
@@ -72,14 +73,14 @@ describe("AdminPage", () => {
     await user.click(generate);
     expect(await screen.findByAltText(/hero preview/i)).toBeTruthy();
     expect(publish.disabled).toBe(false);
-    expect(generatePhotos).toHaveBeenNthCalledWith(1, "secret", {
+    expect(generatePhotos).toHaveBeenNthCalledWith(1, {
       name: "Walnut Brownie",
       type: "Brownies",
       note: "100–120 g · Walnut Brownie",
       flavours: ["Milk", "Dark"],
       shot: "hero",
     });
-    expect(generatePhotos).toHaveBeenNthCalledWith(2, "secret", {
+    expect(generatePhotos).toHaveBeenNthCalledWith(2, {
       name: "Walnut Brownie",
       type: "Brownies",
       note: "100–120 g · Walnut Brownie",
@@ -133,7 +134,6 @@ describe("AdminPage", () => {
     await user.click(save);
 
     expect(publishProduct).toHaveBeenCalledWith(
-      "secret",
       expect.objectContaining({
         id: 3,
         slug: "biscoff-cheesecake",
@@ -161,7 +161,7 @@ describe("AdminPage", () => {
     await user.click(screen.getByRole("button", { name: /delete biscoff cheesecake/i }));
 
     expect(window.confirm).toHaveBeenCalled();
-    expect(deleteProduct).toHaveBeenCalledWith("secret", "biscoff-cheesecake");
+    expect(deleteProduct).toHaveBeenCalledWith("biscoff-cheesecake");
     expect(onDeleted).toHaveBeenCalledWith("biscoff-cheesecake");
   });
 });

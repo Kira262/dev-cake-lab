@@ -14,9 +14,9 @@ describe("index.html CSP", () => {
     expect(html).toContain("https://fonts.gstatic.com");
     expect(html).toContain("https://maps.google.com");
     expect(html).toContain("https://formsubmit.co");
-    expect(html).toContain("https://*.workers.dev");
-    expect(html).toContain("https://*.cakelab.workers.dev");
+    expect(html).toContain("img-src 'self' data:");
     expect(html).toContain("https://cakelab-admin-api.cakelab.workers.dev");
+    expect(html).not.toContain("https://*.workers.dev");
     expect(html).not.toContain("http://localhost:3001");
   });
 });

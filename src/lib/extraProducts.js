@@ -42,8 +42,11 @@ export function categoryDefaults(type, name = "") {
   };
 }
 
+const extrasVersion =
+  typeof __EXTRAS_VERSION__ !== "undefined" ? __EXTRAS_VERSION__ : "dev";
+
 export function extraProductsUrl() {
-  return `${import.meta.env.BASE_URL}data/extra-products.json`;
+  return `${import.meta.env.BASE_URL}data/extra-products.json?v=${extrasVersion}`;
 }
 
 export function parseExtrasPayload(data) {
@@ -63,9 +66,7 @@ export function parseExtrasPayload(data) {
 
 export async function fetchExtraProducts() {
   try {
-    const res = await fetch(`${extraProductsUrl()}?t=${Date.now()}`, {
-      cache: "no-store",
-    });
+    const res = await fetch(extraProductsUrl());
     if (!res.ok) return { items: [], deletedSlugs: [] };
     return parseExtrasPayload(await res.json());
   } catch {
@@ -92,8 +93,7 @@ export function shopPhotoUrl(src) {
   const value = String(src || "").trim();
   if (!value || value.startsWith("data:") || value.startsWith("blob:")) return value;
   if (/^https?:\/\//i.test(value)) return value;
-  const file = value.split("?")[0].split("#")[0].split("/").pop();
-  return file ? asset(file) : value;
+  return asset(value);
 }
 
 export function normalizeExtraProduct(raw, fallbackId) {

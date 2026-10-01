@@ -1,21 +1,28 @@
-const CORS = {
-  "access-control-allow-origin": "*",
-  "access-control-allow-headers": "content-type, x-admin-password",
-  "access-control-allow-methods": "POST, OPTIONS",
-  "access-control-max-age": "86400",
-};
+import {
+  checkPostRateLimit,
+  clearUnlockFailures,
+  clientIp,
+  corsHeaders,
+  isUnlockLocked,
+  passwordsMatch,
+  recordUnlockFailure,
+  signAdminToken,
+  verifyAdminToken,
+} from "./lib/auth.js";
+import {
+  GENERIC_DELETE_ERROR,
+  GENERIC_GENERATE_ERROR,
+  GENERIC_PUBLISH_ERROR,
+  GENERATE_DAILY_CAP,
+} from "./lib/constants.js";
+import { commitStore } from "./lib/store.js";
+import {
+  resolvePhotoForStore,
+  validatePublishBody,
+} from "./lib/validate.js";
 
-function json(data, status = 200) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { "content-type": "application/json", ...CORS },
-  });
-}
-
-function checkPassword(request, env) {
-  const password = request.headers.get("x-admin-password") || "";
-  return Boolean(env.ADMIN_PASSWORD && password === env.ADMIN_PASSWORD);
-}
+export { assertExtrasBody, parseStore } from "./lib/store.js";
+export { roundPrice, slugFromName, validatePublishBody } from "./lib/validate.js";
 
 const LOOK = {
   Cheesecakes: "a slice of cheesecake with a biscuit base",
@@ -144,101 +151,19 @@ async function generateImage(env, prompt) {
   return `data:image/jpeg;base64,${b64}`;
 }
 
-function githubHeaders(env) {
-  return {
-    authorization: `Bearer ${env.GITHUB_TOKEN}`,
-    accept: "application/vnd.github+json",
-    "user-agent": "dev-cake-lab-admin",
-  };
+function json(data, status, request) {
+  const headers = { "content-type": "application/json", ...corsHeaders(request) };
+  return new Response(JSON.stringify(data), { status, headers });
 }
 
-export function parseStore(decoded) {
-  const text = String(decoded ?? "").trim();
-  if (!text) return { items: [], deletedSlugs: [] };
-  const parsed = JSON.parse(text);
-  if (Array.isArray(parsed)) return { items: parsed, deletedSlugs: [] };
-  return {
-    items: Array.isArray(parsed?.items) ? parsed.items : [],
-    deletedSlugs: (Array.isArray(parsed?.deletedSlugs) ? parsed.deletedSlugs : [])
-      .map((item) => String(item || "").trim())
-      .filter(Boolean),
-  };
-}
-
-async function readExtras(env) {
-  const repo = env.GITHUB_REPO;
-  const path = env.GITHUB_PATH;
-  const branch = env.GITHUB_BRANCH || "main";
-  const res = await fetch(
-    `https://api.github.com/repos/${repo}/contents/${path}?ref=${branch}`,
-    { headers: githubHeaders(env) },
-  );
-  if (res.status === 404) return { sha: null, items: [], deletedSlugs: [] };
-  const file = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    throw new Error(file.message || "Could not read extra products from GitHub.");
-  }
-  const binary = atob(String(file.content || "").replace(/\n/g, ""));
-  const decoded = new TextDecoder().decode(
-    Uint8Array.from(binary, (char) => char.charCodeAt(0)),
-  );
-  let store;
-  try {
-    store = parseStore(decoded);
-  } catch {
-    throw new Error("Extra products file is unreadable. Nothing was saved.");
-  }
-  return { sha: file.sha, ...store };
-}
-
-async function writeExtras(env, store, sha, message) {
-  const repo = env.GITHUB_REPO;
-  const path = env.GITHUB_PATH;
-  const branch = env.GITHUB_BRANCH || "main";
-  const payload = {
-    items: store.items || [],
-    deletedSlugs: [...new Set(store.deletedSlugs || [])],
-  };
-  const body = {
-    message,
-    content: btoa(unescape(encodeURIComponent(JSON.stringify(payload, null, 2)))),
-    branch,
-  };
-  if (sha) body.sha = sha;
-  const res = await fetch(
-    `https://api.github.com/repos/${repo}/contents/${path}`,
-    {
-      method: "PUT",
-      headers: {
-        ...githubHeaders(env),
-        "content-type": "application/json",
-      },
-      body: JSON.stringify(body),
-    },
-  );
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok) {
-    const error = new Error(data.message || "Could not publish to GitHub.");
-    error.status = res.status;
-    throw error;
-  }
-  return data;
-}
-
-async function commitStore(env, mutate, message) {
-  let lastError = new Error("Could not publish to GitHub.");
-  for (let attempt = 0; attempt < 3; attempt += 1) {
-    const current = await readExtras(env);
-    const store = mutate(current);
-    try {
-      await writeExtras(env, store, current.sha, message);
-      return store;
-    } catch (err) {
-      lastError = err;
-      if (err?.status !== 409) throw err;
-    }
-  }
-  throw lastError;
+async function consumeGenerateQuota(env, shots) {
+  if (!env.ADMIN_KV) return true;
+  const day = new Date().toISOString().slice(0, 10);
+  const key = `gen:${day}`;
+  const count = Number(await env.ADMIN_KV.get(key)) || 0;
+  if (count + shots > GENERATE_DAILY_CAP) return false;
+  await env.ADMIN_KV.put(key, String(count + shots), { expirationTtl: 86400 * 3 });
+  return true;
 }
 
 function nextId(catalogMax, extras) {
@@ -247,45 +172,75 @@ function nextId(catalogMax, extras) {
   return top + 1;
 }
 
-function toProduct(body, id) {
+function buildProduct(validated, id, image, detailImage) {
   const product = {
     id,
-    name: String(body.name || "").trim(),
-    type: String(body.type || "").trim(),
-    price: Number(body.price) || 0,
-    note: String(body.note || ""),
-    badge: String(body.badge || ""),
-    art: body.art || "",
-    image: body.image,
-    detailImage: body.detailImage,
-    slug: String(body.slug || "").trim(),
+    name: validated.name,
+    type: validated.type,
+    price: validated.price,
+    note: validated.note,
+    badge: validated.badge,
+    art: validated.art || "",
+    image,
+    detailImage,
+    slug: validated.slug,
   };
-  if (body.unit) product.unit = body.unit;
-  if (Array.isArray(body.flavours) && body.flavours.length) {
-    product.flavours = body.flavours;
-  }
-  if (body.bestSeller) product.bestSeller = body.bestSeller;
+  if (validated.unit) product.unit = validated.unit;
+  if (validated.flavours?.length) product.flavours = validated.flavours;
+  if (validated.bestSeller) product.bestSeller = validated.bestSeller;
   return product;
 }
 
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const cors = corsHeaders(request);
+
     if (request.method === "OPTIONS") {
-      return new Response(null, { status: 204, headers: CORS });
+      return new Response(null, { status: 204, headers: cors });
     }
+
     if (request.method === "GET" && (url.pathname === "/" || url.pathname === "")) {
-      return json({ ok: true, service: "cakelab-admin-api" });
+      return new Response(null, { status: 204 });
     }
+
     if (request.method !== "POST") {
-      return json({ error: "POST only." }, 405);
+      return json({ error: "POST only." }, 405, request);
     }
-    if (!checkPassword(request, env)) {
-      return json({ error: "Wrong password." }, 401);
+
+    if (!(await checkPostRateLimit(request, env))) {
+      return json({ error: "Too many requests. Wait a minute and try again." }, 429, request);
     }
 
     if (url.pathname === "/unlock") {
-      return json({ ok: true });
+      const ip = clientIp(request);
+      if (await isUnlockLocked(env, ip)) {
+        return json({ error: "Too many tries. Try again later." }, 429, request);
+      }
+      let body = {};
+      try {
+        body = await request.json();
+      } catch {
+        return json({ error: "Wrong password." }, 401, request);
+      }
+      const password = String(body.password || "");
+      const ok = await passwordsMatch(password, env.ADMIN_PASSWORD || "");
+      if (!ok) {
+        await recordUnlockFailure(env, ip);
+        return json({ error: "Wrong password." }, 401, request);
+      }
+      await clearUnlockFailures(env, ip);
+      try {
+        const token = await signAdminToken(env);
+        return json({ ok: true, token }, 200, request);
+      } catch (err) {
+        console.error("unlock token", err);
+        return json({ error: "Admin desk is not configured." }, 500, request);
+      }
+    }
+
+    if (!(await verifyAdminToken(request, env))) {
+      return json({ error: "Session expired. Unlock again." }, 401, request);
     }
 
     if (url.pathname === "/generate") {
@@ -294,7 +249,7 @@ export default {
         const name = String(body.name || "").trim();
         const type = String(body.type || "").trim();
         if (!name || !type) {
-          return json({ error: "Name and category are required." }, 400);
+          return json({ error: "Name and category are required." }, 400, request);
         }
         const flavours = (Array.isArray(body.flavours) ? body.flavours : [])
           .map((item) => String(item || "").trim())
@@ -306,26 +261,41 @@ export default {
           note: String(body.note || "").trim(),
           flavours,
         };
+        const shots =
+          body.shot === "hero" || body.shot === "detail" ? 1 : 2;
+        if (!(await consumeGenerateQuota(env, shots))) {
+          return json(
+            { error: "Daily photo limit reached. Try again tomorrow." },
+            429,
+            request,
+          );
+        }
         if (body.shot === "hero" || body.shot === "detail") {
           const image = await generateImage(
             env,
             body.shot === "detail" ? detailPrompt(payload) : heroPrompt(payload),
           );
-          return json(body.shot === "detail" ? { detail: image } : { hero: image });
+          return json(
+            body.shot === "detail" ? { detail: image } : { hero: image },
+            200,
+            request,
+          );
         }
         const hero = await generateImage(env, heroPrompt(payload));
         const detail = await generateImage(env, detailPrompt(payload));
-        return json({ hero, detail });
+        return json({ hero, detail }, 200, request);
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Generate failed.";
+        console.error("generate", err);
+        const message = err instanceof Error ? err.message : "";
         const timedOut = /timeout|3046/i.test(message);
         return json(
           {
             error: timedOut
               ? "Photo generation took too long. Try again."
-              : message,
+              : GENERIC_GENERATE_ERROR,
           },
           500,
+          request,
         );
       }
     }
@@ -333,29 +303,44 @@ export default {
     if (url.pathname === "/publish") {
       try {
         const body = await request.json();
-        const name = String(body.name || "").trim();
-        const type = String(body.type || "").trim();
-        if (!name || !type || !body.image || !body.detailImage) {
-          return json({ error: "Product details and both photos are required." }, 400);
+        const checked = validatePublishBody(body);
+        if (!checked.ok) {
+          return json({ error: checked.error }, 400, request);
         }
+        const validated = checked.value;
         let product;
-        await commitStore(env, (current) => {
+        await commitStore(env, async (current) => {
           const catalogMax = Number(env.CATALOG_MAX_ID) || 30;
-          const slug = String(body.slug || "").trim();
-          const existing = current.items.find((item) => item.slug === slug);
-          const id = existing?.id || Number(body.id) || nextId(catalogMax, current.items);
-          product = toProduct({ ...body, name, type, slug }, id);
+          const existing = current.items.find((item) => item.slug === validated.slug);
+          const id =
+            existing?.id || Number(validated.id) || nextId(catalogMax, current.items);
+          const image = await resolvePhotoForStore(
+            env,
+            validated.image,
+            validated.slug,
+            "hero",
+          );
+          const detailImage = await resolvePhotoForStore(
+            env,
+            validated.detailImage,
+            validated.slug,
+            "detail",
+          );
+          product = buildProduct(validated, id, image, detailImage);
           return {
-            items: current.items.filter((item) => item.slug !== product.slug).concat(product),
+            items: current.items
+              .filter((item) => item.slug !== product.slug)
+              .concat(product),
             deletedSlugs: current.deletedSlugs.filter((item) => item !== product.slug),
           };
-        }, `Update ${name} on the shop`);
-        return json({ product });
+        }, `Update ${validated.name} on the shop`);
+        return json({ product }, 200, request);
       } catch (err) {
-        return json(
-          { error: err instanceof Error ? err.message : "Publish failed." },
-          500,
-        );
+        console.error("publish", err);
+        if (err instanceof Error && /required|allowed|JPEG|configured/i.test(err.message)) {
+          return json({ error: err.message }, 400, request);
+        }
+        return json({ error: GENERIC_PUBLISH_ERROR }, 500, request);
       }
     }
 
@@ -363,22 +348,24 @@ export default {
       try {
         const body = await request.json();
         const slug = String(body.slug || "").trim();
-        if (!slug) return json({ error: "Product slug is required." }, 400);
-        await commitStore(env, (current) => ({
-          items: current.items.filter((item) => item.slug !== slug),
-          deletedSlugs: current.deletedSlugs.includes(slug)
-            ? current.deletedSlugs
-            : [...current.deletedSlugs, slug],
-        }), `Remove ${slug} from the shop`);
-        return json({ ok: true, slug });
-      } catch (err) {
-        return json(
-          { error: err instanceof Error ? err.message : "Delete failed." },
-          500,
+        if (!slug) return json({ error: "Product slug is required." }, 400, request);
+        await commitStore(
+          env,
+          (current) => ({
+            items: current.items.filter((item) => item.slug !== slug),
+            deletedSlugs: current.deletedSlugs.includes(slug)
+              ? current.deletedSlugs
+              : [...current.deletedSlugs, slug],
+          }),
+          `Remove ${slug} from the shop`,
         );
+        return json({ ok: true, slug }, 200, request);
+      } catch (err) {
+        console.error("delete", err);
+        return json({ error: GENERIC_DELETE_ERROR }, 500, request);
       }
     }
 
-    return json({ error: "Unknown admin route." }, 404);
+    return json({ error: "Unknown admin route." }, 404, request);
   },
 };

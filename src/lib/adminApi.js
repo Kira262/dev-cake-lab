@@ -1,14 +1,49 @@
 import { ADMIN_API } from "../data/admin.js";
 
-async function adminPost(path, password, body = {}) {
+const TOKEN_KEY = "cakelab-admin-token";
+
+export function getAdminToken() {
+  try {
+    return sessionStorage.getItem(TOKEN_KEY) || "";
+  } catch {
+    return "";
+  }
+}
+
+export function setAdminToken(token) {
+  try {
+    sessionStorage.setItem(TOKEN_KEY, token);
+  } catch {
+    /* ignore */
+  }
+}
+
+export function clearAdminToken() {
+  try {
+    sessionStorage.removeItem(TOKEN_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
+async function adminPost(path, { password, body = {} } = {}) {
+  const headers = { "content-type": "application/json" };
+  if (path === "/unlock") {
+    if (password) {
+      Object.assign(body, { password });
+    }
+  } else {
+    const token = getAdminToken();
+    if (!token) {
+      throw new Error("Session expired. Unlock again.");
+    }
+    headers.authorization = `Bearer ${token}`;
+  }
   let res;
   try {
     res = await fetch(`${ADMIN_API}${path}`, {
       method: "POST",
-      headers: {
-        "content-type": "application/json",
-        "x-admin-password": password,
-      },
+      headers,
       body: JSON.stringify(body),
     });
   } catch {
@@ -22,17 +57,20 @@ async function adminPost(path, password, body = {}) {
 }
 
 export function unlockAdmin(password) {
-  return adminPost("/unlock", password);
+  return adminPost("/unlock", { password }).then((data) => {
+    if (data.token) setAdminToken(data.token);
+    return data;
+  });
 }
 
-export function generatePhotos(password, payload) {
-  return adminPost("/generate", password, payload);
+export function generatePhotos(payload) {
+  return adminPost("/generate", { body: payload });
 }
 
-export function publishProduct(password, product) {
-  return adminPost("/publish", password, product);
+export function publishProduct(product) {
+  return adminPost("/publish", { body: product });
 }
 
-export function deleteProduct(password, slug) {
-  return adminPost("/delete", password, { slug });
+export function deleteProduct(slug) {
+  return adminPost("/delete", { body: { slug } });
 }

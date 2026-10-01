@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { Suspense, useEffect, useRef, useState } from "react";
 import { Check } from "lucide-react";
 import { products as catalogProducts } from "./data/catalog.js";
 import {
@@ -25,7 +25,7 @@ import { scrollToTop } from "./lib/scroll.js";
 import { Cart } from "./components/Cart.jsx";
 import { Footer } from "./components/Footer.jsx";
 import { Header } from "./components/Header.jsx";
-import { AdminPage } from "./pages/AdminPage.jsx";
+const AdminPage = React.lazy(() => import("./pages/AdminPage.jsx"));
 import { ContactPage } from "./pages/ContactPage.jsx";
 import { CustomCakePage } from "./pages/CustomCakePage.jsx";
 import { HomePage } from "./pages/HomePage.jsx";
@@ -36,7 +36,8 @@ import { VisitPage } from "./pages/VisitPage.jsx";
 export default function App() {
   const [route, setRoute] = useState(readPath);
   const [menuType, setMenuType] = useState(readMenuType);
-  const [products, setProducts] = useState(null);
+  const [products, setProducts] = useState(catalogProducts);
+  const [extrasReady, setExtrasReady] = useState(false);
   const savedEdits = useRef(new Map());
   const savedDeletes = useRef(new Set());
   const [cart, setCart] = useState(() => hydrateBag(readBag(), catalogProducts));
@@ -67,17 +68,21 @@ export default function App() {
 
   useEffect(() => {
     let alive = true;
-    fetchExtraProducts().then((extras) => {
-      if (!alive) return;
-      const merged = withSavedEdit(
-        catalogProducts,
-        extras,
-        [...savedEdits.current.values()],
-        [...savedDeletes.current],
-      );
-      setProducts(merged);
-      setCart((items) => hydrateBag(serializeBag(items), merged));
-    });
+    fetchExtraProducts()
+      .then((extras) => {
+        if (!alive) return;
+        const merged = withSavedEdit(
+          catalogProducts,
+          extras,
+          [...savedEdits.current.values()],
+          [...savedDeletes.current],
+        );
+        setProducts(merged);
+        setCart((items) => hydrateBag(serializeBag(items), merged));
+      })
+      .finally(() => {
+        if (alive) setExtrasReady(true);
+      });
     return () => {
       alive = false;
     };
@@ -155,7 +160,7 @@ export default function App() {
     );
   const total = cart.reduce((sum, item) => sum + lineTotal(item), 0);
   const count = cart.reduce((sum, item) => sum + item.qty, 0);
-  const shop = products || [];
+  const shop = products;
   const productSlug = readProductSlug();
   const activeProduct = shop.find((p) => p.slug === productSlug);
 
@@ -171,7 +176,8 @@ export default function App() {
     });
   }, [route, activeProduct, productSlug]);
 
-  const page = !products ? (
+  const page =
+    productSlug && !activeProduct && !extrasReady ? (
       <main id="main-content">
         <section className="page-hero wrap">
           <p>Loading the menu…</p>
@@ -201,11 +207,21 @@ export default function App() {
     ) : route === "/visit" ? (
       <VisitPage />
     ) : route === "/admin" ? (
-      <AdminPage
-        products={products}
-        onPublished={applyPublished}
-        onDeleted={applyDeleted}
-      />
+      <Suspense
+        fallback={
+          <main id="main-content">
+            <section className="page-hero wrap">
+              <p>Loading admin…</p>
+            </section>
+          </main>
+        }
+      >
+        <AdminPage
+          products={products}
+          onPublished={applyPublished}
+          onDeleted={applyDeleted}
+        />
+      </Suspense>
     ) : (
       <HomePage
         navigate={navigate}
