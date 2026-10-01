@@ -11,9 +11,9 @@ export const CONTACTS = {
     "Ellisbridge, Ahmedabad, India 380006",
   ],
   mapsQuery:
-    "401, P.D. Apartment, Opp Mira Madhav Flat, Ellisbridge, Ahmedabad, India 380006",
-  mapsLat: 23.018963,
-  mapsLng: 72.566415,
+    "41, Pritam Nagar Rd, Pritam Nagar, Paldi, Ahmedabad, Gujarat 380006, India",
+  mapsLat: 23.0195896,
+  mapsLng: 72.5662623,
   hoursLabel: "Daily",
   hoursDisplay: "11:00 AM — 1:00 AM",
 };
