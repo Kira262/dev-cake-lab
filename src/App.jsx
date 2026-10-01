@@ -178,7 +178,7 @@ export default function App() {
   }, [route, activeProduct, productSlug]);
 
   const page =
-    productSlug && !activeProduct && !extrasReady ? (
+    productSlug && !extrasReady ? (
       <main id="main-content">
         <section className="page-hero wrap">
           <p>Loading the menu…</p>
@@ -196,6 +196,7 @@ export default function App() {
         navigate={navigate}
         focusSearch={focusSearch}
         onSearchFocused={() => setFocusSearch(false)}
+        menuReady={extrasReady}
       />
     ) : route === "/contact" ? (
       <ContactPage
@@ -228,6 +229,7 @@ export default function App() {
         navigate={navigate}
         add={add}
         bestSellers={bestSellersFrom(shop)}
+        menuReady={extrasReady}
       />
     );
 
@@ -254,6 +256,7 @@ export default function App() {
         total={total}
         changeQty={changeQty}
         navigate={navigate}
+        pricesReady={extrasReady}
       />
       {toast && (
         <div className="cart-toast" role="status" aria-live="polite">

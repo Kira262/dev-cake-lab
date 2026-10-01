@@ -14,14 +14,16 @@ import {
   GENERIC_GENERATE_ERROR,
   GENERIC_PUBLISH_ERROR,
   GENERATE_DAILY_CAP,
+  POST_RATE_PER_MINUTE,
+  WRITE_RATE_PER_MINUTE,
 } from "./lib/constants.js";
-import { commitStore } from "./lib/store.js";
+import { commitStore, extraPathsToDelete } from "./lib/store.js";
 import {
   resolvePhotoForStore,
   validatePublishBody,
 } from "./lib/validate.js";
 
-export { assertExtrasBody, parseStore } from "./lib/store.js";
+export { assertExtrasBody, extraPathsToDelete, parseStore } from "./lib/store.js";
 export { roundPrice, slugFromName, validatePublishBody } from "./lib/validate.js";
 
 const LOOK = {
@@ -208,7 +210,11 @@ export default {
       return json({ error: "POST only." }, 405, request);
     }
 
-    if (!(await checkPostRateLimit(request, env))) {
+    const routeLimit =
+      url.pathname === "/unlock"
+        ? { limit: POST_RATE_PER_MINUTE, binding: "ADMIN_RATE", bucket: "unlock" }
+        : { limit: WRITE_RATE_PER_MINUTE, binding: "ADMIN_RATE_WRITE", bucket: "write" };
+    if (!(await checkPostRateLimit(request, env, routeLimit))) {
       return json({ error: "Too many requests. Wait a minute and try again." }, 429, request);
     }
 
@@ -314,24 +320,23 @@ export default {
           const existing = current.items.find((item) => item.slug === validated.slug);
           const id =
             existing?.id || Number(validated.id) || nextId(catalogMax, current.items);
-          const image = await resolvePhotoForStore(
-            env,
-            validated.image,
-            validated.slug,
-            "hero",
-          );
-          const detailImage = await resolvePhotoForStore(
-            env,
+          const hero = await resolvePhotoForStore(validated.image, validated.slug, "hero");
+          const detail = await resolvePhotoForStore(
             validated.detailImage,
             validated.slug,
             "detail",
           );
-          product = buildProduct(validated, id, image, detailImage);
+          product = buildProduct(validated, id, hero.asset, detail.asset);
+          const items = current.items
+            .filter((item) => item.slug !== product.slug)
+            .concat(product);
           return {
-            items: current.items
-              .filter((item) => item.slug !== product.slug)
-              .concat(product),
-            deletedSlugs: current.deletedSlugs.filter((item) => item !== product.slug),
+            store: {
+              items,
+              deletedSlugs: current.deletedSlugs.filter((item) => item !== product.slug),
+            },
+            files: [hero.file, detail.file].filter(Boolean),
+            deletes: extraPathsToDelete(current.items, items),
           };
         }, `Update ${validated.name} on the shop`);
         return json({ product }, 200, request);
@@ -351,12 +356,18 @@ export default {
         if (!slug) return json({ error: "Product slug is required." }, 400, request);
         await commitStore(
           env,
-          (current) => ({
-            items: current.items.filter((item) => item.slug !== slug),
-            deletedSlugs: current.deletedSlugs.includes(slug)
-              ? current.deletedSlugs
-              : [...current.deletedSlugs, slug],
-          }),
+          (current) => {
+            const items = current.items.filter((item) => item.slug !== slug);
+            return {
+              store: {
+                items,
+                deletedSlugs: current.deletedSlugs.includes(slug)
+                  ? current.deletedSlugs
+                  : [...current.deletedSlugs, slug],
+              },
+              deletes: extraPathsToDelete(current.items, items),
+            };
+          },
           `Remove ${slug} from the shop`,
         );
         return json({ ok: true, slug }, 200, request);

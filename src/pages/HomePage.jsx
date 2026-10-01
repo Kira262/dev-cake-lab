@@ -6,7 +6,12 @@ import { FAQ } from "../components/FAQ.jsx";
 import { ProductCard } from "../components/ProductCard.jsx";
 import { TypewriterWord } from "../components/TypewriterWord.jsx";
 
-export function HomePage({ navigate, add, bestSellers = catalogBestSellers }) {
+export function HomePage({
+  navigate,
+  add,
+  bestSellers = catalogBestSellers,
+  menuReady = true,
+}) {
   return (
     <main id="main-content">
       <section className="hero wrap">
@@ -67,15 +72,19 @@ export function HomePage({ navigate, add, bestSellers = catalogBestSellers }) {
           </button>
         </div>
         <div className="products">
-          {bestSellers.map((p, i) => (
-            <ProductCard
-              key={p.id}
-              product={p}
-              add={add}
-              navigate={navigate}
-              priority={i < 2}
-            />
-          ))}
+          {menuReady ? (
+            bestSellers.map((p, i) => (
+              <ProductCard
+                key={p.id}
+                product={p}
+                add={add}
+                navigate={navigate}
+                priority={i < 2}
+              />
+            ))
+          ) : (
+            <p>Loading the menu…</p>
+          )}
         </div>
       </section>
 

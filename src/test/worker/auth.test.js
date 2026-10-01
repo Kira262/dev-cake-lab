@@ -21,6 +21,14 @@ describe("admin token", () => {
     await expect(verifyAdminToken(request, env)).resolves.toBe(true);
   });
 
+  it("rejects a malformed token", async () => {
+    const request = new Request("https://example.com/publish", {
+      method: "POST",
+      headers: { authorization: "Bearer abc.%%%" },
+    });
+    await expect(verifyAdminToken(request, env)).resolves.toBe(false);
+  });
+
   it("rejects a tampered token", async () => {
     const token = await signAdminToken(env);
     const request = new Request("https://example.com/publish", {

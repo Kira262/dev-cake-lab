@@ -18,6 +18,7 @@ export function Cart({
   total,
   changeQty,
   navigate,
+  pricesReady = true,
 }) {
   const draft = readEnquiryDraft();
   const firstWhen = open ? bagWhenFromDraft(draft) : { date: "", time: "" };
@@ -86,7 +87,7 @@ export function Cart({
                     <div>
                       <b>{item.name}</b>
                       <small>
-                        ₹{item.price.toLocaleString("en-IN")}
+                        {pricesReady ? `₹${item.price.toLocaleString("en-IN")}` : "…"}
                         {item.notes ? ` · ${item.notes}` : ""}
                       </small>
                       <div className="qty">
@@ -142,7 +143,7 @@ export function Cart({
             <div className="cart-foot">
               <div className="cart-subtotal">
                 <span>Subtotal</span>
-                <strong>₹{total.toLocaleString("en-IN")}</strong>
+                <strong>{pricesReady ? `₹${total.toLocaleString("en-IN")}` : "…"}</strong>
               </div>
               <a
                 className="primary"

@@ -3,6 +3,8 @@ import { ArrowRight } from "lucide-react";
 import { ADMIN_BADGES } from "../data/admin.js";
 import { asset } from "../lib/paths.js";
 import {
+  adminTokenExpired,
+  clearAdminToken,
   getAdminToken,
   unlockAdmin,
   generatePhotos,
@@ -71,8 +73,19 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
   const canGenerate = adminGenerateReady(draft);
   const canPublish = adminPublishReady(draft);
 
+  const noteFailure = (err, fallback) => {
+    if (!getAdminToken()) setUnlocked(false);
+    setError(err instanceof Error ? err.message : fallback);
+  };
+
   useEffect(() => {
-    if (getAdminToken()) setUnlocked(true);
+    const token = getAdminToken();
+    if (!token) return;
+    if (adminTokenExpired(token)) {
+      clearAdminToken();
+      return;
+    }
+    setUnlocked(true);
   }, []);
 
   useEffect(() => {
@@ -164,7 +177,7 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
       const detailPhoto = await generatePhotos({ ...payload, shot: "detail" });
       setDetail(await brandProductPhoto(detailPhoto.detail, logo));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not generate photos.");
+      noteFailure(err, "Could not generate photos.");
     } finally {
       setBusy("");
     }
@@ -222,7 +235,7 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
         setDetail("");
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not publish.");
+      noteFailure(err, "Could not publish.");
     } finally {
       setBusy("");
     }
@@ -241,7 +254,7 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
       if (editing?.slug === product.slug) resetForm();
       setDone(`${product.name} was removed.`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not delete.");
+      noteFailure(err, "Could not delete.");
     } finally {
       setBusy("");
     }

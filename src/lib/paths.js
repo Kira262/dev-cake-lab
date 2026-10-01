@@ -21,9 +21,34 @@ export function isRemoteImageUrl(url) {
   return /^https?:\/\//i.test(String(url || ""));
 }
 
+export function isLogoAsset(src) {
+  const name = String(src || "").split("?")[0].split("#")[0].split("/").pop() || "";
+  let decoded = name;
+  try {
+    decoded = decodeURIComponent(name);
+  } catch {
+    decoded = name;
+  }
+  return decoded.toLowerCase() === "dev-cake-logo.png";
+}
+
+export function isExtraAsset(src) {
+  const path = String(src || "").split("?")[0].split("#")[0].replace(/\\/g, "/");
+  return /(?:^|\/)assets\/extra\//i.test(path);
+}
+
+export function prefersPlainImage(src) {
+  return isLogoAsset(src) || isExtraAsset(src);
+}
+
 export function responsiveWebpSrcSet(src) {
   const webp = webpFromUrl(src);
-  if (!webp || isRemoteImageUrl(src) || String(src).startsWith("data:")) {
+  if (
+    !webp ||
+    isRemoteImageUrl(src) ||
+    String(src).startsWith("data:") ||
+    prefersPlainImage(src)
+  ) {
     return null;
   }
   const stem = webp.replace(/\.webp(\?|#|$)/i, "");

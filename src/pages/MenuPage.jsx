@@ -13,6 +13,7 @@ export function MenuPage({
   navigate,
   focusSearch,
   onSearchFocused,
+  menuReady = true,
 }) {
   const searchRef = useRef(null);
   const list = useMemo(
@@ -77,6 +78,8 @@ export function MenuPage({
               Start a custom cake brief <ArrowRight size={17} />
             </button>
           </div>
+        ) : !menuReady ? (
+          <p>Loading the menu…</p>
         ) : (
           <>
             <div className="products">

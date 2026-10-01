@@ -22,6 +22,21 @@ export const UNLOCK_MAX_FAILURES = 5;
 export const UNLOCK_LOCK_SECONDS = 15 * 60;
 export const TOKEN_TTL_SECONDS = 30 * 60;
 export const POST_RATE_PER_MINUTE = 5;
+export const WRITE_RATE_PER_MINUTE = 30;
+export const SLUG_MAX = 80;
+export const ID_MAX = 100000;
+export const ADMIN_ARTS = [
+  "",
+  "cake",
+  "tin",
+  "cookie",
+  "jar",
+  "cupcake",
+  "brownie",
+  "chocolate",
+  "signature",
+];
+export const ADMIN_UNITS = ["per piece"];
 
 export const GENERIC_READ_ERROR =
   "Could not read the shop data. Try again in a moment.";

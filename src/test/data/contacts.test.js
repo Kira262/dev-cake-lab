@@ -22,6 +22,8 @@ describe("pickup address", () => {
     expect(pickupAddressText()).toContain("Ellisbridge, Ahmedabad, India 380006");
     expect(mapsLink()).toContain("https://maps.google.com/?q=");
     expect(mapsEmbedSrc()).toContain("https://maps.google.com/maps");
+    expect(mapsEmbedSrc()).toContain("23.018963");
+    expect(mapsEmbedSrc()).toContain("72.566415");
     expect(mapsEmbedSrc()).toContain("output=embed");
   });
 });

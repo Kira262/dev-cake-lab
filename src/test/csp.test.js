@@ -18,5 +18,6 @@ describe("index.html CSP", () => {
     expect(html).toContain("https://cakelab-admin-api.cakelab.workers.dev");
     expect(html).not.toContain("https://*.workers.dev");
     expect(html).not.toContain("http://localhost:3001");
+    expect(html).toContain('name="twitter:card" content="summary_large_image"');
   });
 });

@@ -1,20 +1,31 @@
 import {
+  ADMIN_ARTS,
   ADMIN_BADGES,
+  ADMIN_UNITS,
   FLAVOUR_MAX,
+  ID_MAX,
   JPEG_MAX_BYTES,
   NAME_MAX,
   NOTE_MAX,
   PRICE_MAX,
   PRICE_MIN,
   SHOP_CATEGORIES,
+  SLUG_MAX,
 } from "./constants.js";
-import { putGithubFile } from "./store.js";
+
+const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export function slugFromName(name) {
   return String(name || "")
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+export function validSlug(value) {
+  const slug = String(value || "").trim();
+  if (!slug || slug.length > SLUG_MAX || !SLUG_RE.test(slug)) return null;
+  return slug;
 }
 
 export function parseJpegDataUrl(value) {
@@ -83,8 +94,32 @@ export function validatePublishBody(body) {
     .map((item) => String(item || "").trim().slice(0, FLAVOUR_MAX))
     .filter(Boolean)
     .slice(0, 2);
-  const slug = slugFromName(name);
-  if (!slug) return { ok: false, error: "Name must produce a valid slug." };
+  const slugGiven = body.slug != null && String(body.slug).trim() !== "";
+  const slug = slugGiven ? validSlug(body.slug) : validSlug(slugFromName(name));
+  if (!slug) {
+    return {
+      ok: false,
+      error: slugGiven ? "Slug is not valid." : "Name must produce a valid slug.",
+    };
+  }
+  let id;
+  if (body.id != null && body.id !== "") {
+    const numeric =
+      typeof body.id === "number" ||
+      (typeof body.id === "string" && /^\d+$/.test(body.id));
+    id = numeric ? Number(body.id) : NaN;
+    if (!Number.isInteger(id) || id < 1 || id > ID_MAX) {
+      return { ok: false, error: "Product id is not valid." };
+    }
+  }
+  const unitText = body.unit == null ? "" : String(body.unit).trim();
+  if (unitText && !ADMIN_UNITS.includes(unitText)) {
+    return { ok: false, error: "Unit is not allowed." };
+  }
+  const art = body.art == null || body.art === "" ? "" : String(body.art);
+  if (!ADMIN_ARTS.includes(art)) {
+    return { ok: false, error: "Art is not allowed." };
+  }
   if (!body.image || !body.detailImage) {
     return { ok: false, error: "Both photos are required." };
   }
@@ -100,10 +135,10 @@ export function validatePublishBody(body) {
       slug,
       image: body.image,
       detailImage: body.detailImage,
-      unit: body.unit ? String(body.unit).slice(0, 40) : undefined,
-      art: body.art ? String(body.art).slice(0, 40) : "",
+      unit: unitText || undefined,
+      art,
       bestSeller: body.bestSeller ? Number(body.bestSeller) || true : undefined,
-      id: body.id,
+      id,
     },
   };
 }
@@ -116,20 +151,20 @@ export async function shortHash(bytes) {
     .join("");
 }
 
-export async function resolvePhotoForStore(env, value, slug, role) {
+export async function resolvePhotoForStore(value, slug, role) {
   const asset = normalizeAssetPath(value);
-  if (asset) return asset;
+  if (asset) return { asset, file: null };
   const jpeg = parseJpegDataUrl(value);
   if (!jpeg) {
     throw new Error("Photos must be JPEG uploads or existing shop images.");
   }
   const hash = await shortHash(jpeg.bytes);
   const fileName = `${slug}-${role}-${hash}.jpg`;
-  await putGithubFile(
-    env,
-    `public/assets/extra/${fileName}`,
-    jpeg.b64,
-    `Add ${fileName} to the shop`,
-  );
-  return `assets/extra/${fileName}`;
+  return {
+    asset: `assets/extra/${fileName}`,
+    file: {
+      path: `public/assets/extra/${fileName}`,
+      contentBase64: jpeg.b64,
+    },
+  };
 }

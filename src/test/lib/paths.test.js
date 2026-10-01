@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it } from "vitest";
-import { appPath, webpFromUrl } from "../../lib/paths.js";
+import { appPath, prefersPlainImage, responsiveWebpSrcSet, webpFromUrl } from "../../lib/paths.js";
 
 describe("appPath", () => {
   const { pathname: originalPath } = window.location;
@@ -26,6 +26,18 @@ describe("webpFromUrl", () => {
     );
     expect(webpFromUrl("/assets/dev-cake-logo.png")).toBe(
       "/assets/dev-cake-logo.webp",
+    );
+  });
+});
+
+describe("responsiveWebpSrcSet", () => {
+  it("skips the logo and admin photos", () => {
+    expect(prefersPlainImage("/dev-cake-lab/assets/dev-cake-logo.png")).toBe(true);
+    expect(prefersPlainImage("/assets/extra/walnut-brownie-hero-abc.jpg")).toBe(true);
+    expect(responsiveWebpSrcSet("/assets/dev-cake-logo.png")).toBeNull();
+    expect(responsiveWebpSrcSet("/assets/extra/walnut-brownie-hero-abc.jpg")).toBeNull();
+    expect(responsiveWebpSrcSet("/assets/biscoff-cheesecake.jpg")).toContain(
+      "/assets/biscoff-cheesecake-400.webp 400w",
     );
   });
 });

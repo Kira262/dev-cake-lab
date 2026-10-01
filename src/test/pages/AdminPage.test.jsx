@@ -12,6 +12,8 @@ import { AdminPage } from "../../pages/AdminPage.jsx";
 vi.mock("../../lib/adminApi.js", () => ({
   unlockAdmin: vi.fn(async () => ({ ok: true, token: "test-token" })),
   getAdminToken: vi.fn(() => ""),
+  clearAdminToken: vi.fn(),
+  adminTokenExpired: vi.fn(() => false),
   generatePhotos: vi.fn(async () => ({
     hero: "data:image/png;base64,hero",
     detail: "data:image/png;base64,detail",

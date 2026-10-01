@@ -17,11 +17,27 @@ describe("worker validatePublishBody", () => {
     detailImage: "data:image/jpeg;base64,/9j/4AAQ",
   };
 
-  it("rebuilds slug from name and rounds price", () => {
-    const result = validatePublishBody({ ...base, slug: "ignored" });
+  it("keeps a valid slug and rounds price", () => {
+    const result = validatePublishBody({ ...base, slug: "ganache-cookie-tin" });
+    expect(result.ok).toBe(true);
+    expect(result.value.slug).toBe("ganache-cookie-tin");
+    expect(result.value.price).toBe(85);
+  });
+
+  it("builds a slug only when the request omits one", () => {
+    const result = validatePublishBody(base);
     expect(result.ok).toBe(true);
     expect(result.value.slug).toBe(slugFromName("Walnut Brownie"));
-    expect(result.value.price).toBe(85);
+  });
+
+  it("rejects an invalid slug, id, unit, and art", () => {
+    expect(validatePublishBody({ ...base, slug: "../x" }).ok).toBe(false);
+    expect(validatePublishBody({ ...base, id: "nope" }).ok).toBe(false);
+    expect(validatePublishBody({ ...base, id: 12 }).value.id).toBe(12);
+    expect(validatePublishBody({ ...base, unit: "per piece" }).value.unit).toBe("per piece");
+    expect(validatePublishBody({ ...base, unit: "kg" }).ok).toBe(false);
+    expect(validatePublishBody({ ...base, art: "brownie" }).value.art).toBe("brownie");
+    expect(validatePublishBody({ ...base, art: "script" }).ok).toBe(false);
   });
 
   it("rejects invalid categories and prices", () => {

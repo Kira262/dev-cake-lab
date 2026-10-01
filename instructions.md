@@ -48,7 +48,7 @@ src/
     enquiry.js         Header Enquire text + FormSubmit (custom cake email)
     customCake.js      Brief labels and WhatsApp text
     extraProducts.js   Load and merge extra-products.json
-    adminApi.js        Admin password header and Worker calls
+    adminApi.js        Admin Bearer token and Worker calls
     adminForm.js       Generate / publish readiness
     brandImage.js      Stamp the logo onto a generated photo
   test/                Vitest (mirrors data/, lib/, pages/, components/)
@@ -87,11 +87,11 @@ When changing routes or links, always go through `navigate()` / `toLocation()` s
 
 ## Menu data
 
-Baked products and prices live in `src/data/catalog.js`. The shop does not paint that list first. It waits for `public/data/extra-products.json`, then merges by slug. An extras price, photo, or delete replaces the catalog row. Edits made in this browser session are reapplied after that fetch so a stale file cannot put the catalog price back.
+Baked products and prices live in `src/data/catalog.js`. Home bestsellers, the shop grid, a product page, and bag prices stay on “Loading the menu…” until `public/data/extra-products.json` loads, then merge by slug. If that fetch fails, the catalog is shown. An extras price, photo, or delete replaces the catalog row. Edits made in this browser session are reapplied after that fetch so a stale file cannot put the catalog price back.
 
 ## Assets
 
-Put catalog images in `public/assets/` and reference them with `asset("filename.ext")`. Product photos and the logo go through `SmartImage` (WebP `<source>` + JPEG/PNG `<img>`). After adding new catalog photos, run `npm run optimize-images` to write WebP copies (and shrink oversized JPEGs).
+Put catalog images in `public/assets/` and reference them with `asset("filename.ext")`. Catalog photos go through `SmartImage` (WebP srcset plus a JPEG/PNG `<img>`). The logo and files under `assets/extra/` are a plain `<img>` with no WebP srcset. After adding new catalog photos, run `npm run optimize-images` to write WebP copies (and shrink oversized JPEGs).
 
 Expected brand files include `dev-cake-logo.png`. Per-product hero and `*-detail.jpg` names are in `src/data/catalog.js`. `npm test` fails CI if a referenced catalog file is missing.
 
@@ -99,9 +99,9 @@ Expected brand files include `dev-cake-logo.png`. Per-product hero and `*-detail
 
 Open `/admin` on the Vite dev server. The page is not linked from the header. The header on this route is not sticky, so it does not cover the form.
 
-The API defaults to `https://cakelab-admin-api.cakelab.workers.dev`. Set `VITE_ADMIN_API` to point elsewhere. Calls send `x-admin-password`. Endpoints are `POST /unlock`, `/generate`, `/publish`, and `/delete`.
+The API defaults to `https://cakelab-admin-api.cakelab.workers.dev`. Set `VITE_ADMIN_API` to point elsewhere. `POST /unlock` returns a Bearer token. Later calls send `Authorization: Bearer`. Endpoints are `POST /unlock`, `/generate`, `/publish`, and `/delete`. A 401 clears the token and shows the lock screen.
 
-**Generate photos** sends two requests, `shot: "hero"` then `shot: "detail"`. Each call makes one image with `@cf/black-forest-labs/flux-2-klein-4b`. The browser then stamps the logo (`brandProductPhoto`). **Publish** and **Delete** write `public/data/extra-products.json` on GitHub `main`.
+**Generate photos** sends two requests, `shot: "hero"` then `shot: "detail"`. Each call makes one image with `@cf/black-forest-labs/flux-2-klein-4b`. The browser then stamps the logo (`brandProductPhoto`). **Publish** and **Delete** make one Git commit: JPEG files under `public/assets/extra/` plus `public/data/extra-products.json`. Replaced or removed extra photos are deleted in that same commit. An existing product slug is kept; a slug is built from the name only for a new product.
 
 Deploy the Worker from `worker/`:
 

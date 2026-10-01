@@ -1,4 +1,9 @@
-import { isRemoteImageUrl, responsiveWebpSrcSet, webpFromUrl } from "../lib/paths.js";
+import {
+  isRemoteImageUrl,
+  prefersPlainImage,
+  responsiveWebpSrcSet,
+  webpFromUrl,
+} from "../lib/paths.js";
 
 export function SmartImage({
   src,
@@ -21,7 +26,7 @@ export function SmartImage({
       />
     );
   }
-  if (isRemoteImageUrl(src)) {
+  if (isRemoteImageUrl(src) || prefersPlainImage(src)) {
     return (
       <img
         className={className}

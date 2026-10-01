@@ -87,11 +87,11 @@ export async function verifyAdminToken(request, env) {
   if (!secret) return false;
   const [payloadB64, sigB64] = match[1].split(".");
   if (!payloadB64 || !sigB64) return false;
-  const expected = await hmacSign(secret, payloadB64);
-  const given = fromBase64Url(sigB64);
-  const expSig = new Uint8Array(expected);
-  if (!timingSafeEqualBytes(given, expSig)) return false;
   try {
+    const expected = await hmacSign(secret, payloadB64);
+    const given = fromBase64Url(sigB64);
+    const expSig = new Uint8Array(expected);
+    if (!timingSafeEqualBytes(given, expSig)) return false;
     const payload = JSON.parse(new TextDecoder().decode(fromBase64Url(payloadB64)));
     if (!payload?.exp || payload.exp < Math.floor(Date.now() / 1000)) return false;
     return true;
@@ -135,18 +135,20 @@ export async function clearUnlockFailures(env, ip) {
   await env.ADMIN_KV.delete(`lock:${ip}`);
 }
 
-export async function checkPostRateLimit(request, env) {
+export async function checkPostRateLimit(request, env, options = {}) {
   const ip = clientIp(request);
-  if (env.ADMIN_RATE) {
-    const { success } = await env.ADMIN_RATE.limit({ key: ip });
-    if (!success) return false;
-    return true;
+  const limit = Number(options.limit) || 5;
+  const bucketName = options.bucket || "post";
+  const limiter = options.binding ? env[options.binding] : env.ADMIN_RATE;
+  if (limiter?.limit) {
+    const { success } = await limiter.limit({ key: `${bucketName}:${ip}` });
+    return Boolean(success);
   }
   if (!env.ADMIN_KV) return true;
-  const bucket = Math.floor(Date.now() / 60000);
-  const key = `post:${ip}:${bucket}`;
+  const window = Math.floor(Date.now() / 60000);
+  const key = `${bucketName}:${ip}:${window}`;
   const count = Number(await env.ADMIN_KV.get(key)) || 0;
-  if (count >= 5) return false;
+  if (count >= limit) return false;
   await env.ADMIN_KV.put(key, String(count + 1), { expirationTtl: 120 });
   return true;
 }

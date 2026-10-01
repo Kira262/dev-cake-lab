@@ -1179,6 +1179,9 @@ button {
   background: #fffaf2;
   padding: 36px;
 }
+.visit-card > svg {
+  color: var(--rust);
+}
 .visit-card h2 {
   font-family: "Playfair Display";
   font-size: 42px;

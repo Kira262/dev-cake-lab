@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { assertExtrasBody, parseStore } from "../../../worker/admin.js";
+import { assertExtrasBody, extraPathsToDelete, parseStore } from "../../../worker/admin.js";
 
 describe("parseStore", () => {
   it("treats an empty extras file as an empty shop store", () => {
@@ -34,5 +34,27 @@ describe("assertExtrasBody", () => {
 
   it("allows a truly empty file", () => {
     expect(() => assertExtrasBody(0, "")).not.toThrow();
+  });
+});
+
+describe("extraPathsToDelete", () => {
+  it("drops replaced extra photos and keeps catalog files", () => {
+    const previous = [
+      {
+        slug: "walnut",
+        image: "assets/extra/walnut-hero-old.jpg",
+        detailImage: "assets/biscoff-cheesecake.jpg",
+      },
+    ];
+    const next = [
+      {
+        slug: "walnut",
+        image: "assets/extra/walnut-hero-new.jpg",
+        detailImage: "assets/biscoff-cheesecake.jpg",
+      },
+    ];
+    expect(extraPathsToDelete(previous, next)).toEqual([
+      "public/assets/extra/walnut-hero-old.jpg",
+    ]);
   });
 });

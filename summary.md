@@ -32,9 +32,9 @@ admin page  →  Worker /generate (one photo)  →  logo stamp in the browser
 ```
 
 - The Pages site is the Vite `dist`. Deep links use a copied `404.html`. Post-build share shells (`scripts/generate-share-shells.mjs`) write per-route `index.html` with absolute `og:title`, `og:url`, and `og:image` for WhatsApp and other link previews. Static catalog photos come from `public/assets/` through `asset()` and `SmartImage` (WebP, JPEG/PNG fallback).
-- `src/data/catalog.js` is the baked menu. `public/data/extra-products.json` overrides a row by slug (price, photos, notes, or a delete). The shop waits until that file loads. Saves in the current browser session are reapplied after the fetch (`withSavedEdit` in `src/lib/extraProducts.js`).
-- `/admin` is not in the header. On that route the header is not sticky. The page talks to `https://cakelab-admin-api.cakelab.workers.dev` (`VITE_ADMIN_API` can override) with `x-admin-password`.
-- The Worker (`worker/admin.js`) exposes `POST /unlock`, `/generate`, `/publish`, and `/delete`. Generate uses `@cf/black-forest-labs/flux-2-klein-4b`, one shot per request (`hero`, then `detail`). The browser stamps the logo (`src/lib/brandImage.js`). Publish and delete commit the extras file to GitHub `main`, retry conflicts, and refuse to overwrite a file that cannot be parsed.
+- `src/data/catalog.js` is the baked menu. `public/data/extra-products.json` overrides a row by slug (price, photos, notes, or a delete). Home bestsellers, the shop grid, product pages, and bag prices stay on “Loading the menu…” until that file loads, then fall back to the catalog if the fetch fails. Saves in the current browser session are reapplied after the fetch (`withSavedEdit` in `src/lib/extraProducts.js`).
+- `/admin` is not in the header. On that route the header is not sticky. The page talks to `https://cakelab-admin-api.cakelab.workers.dev` (`VITE_ADMIN_API` can override) with a Bearer token from `POST /unlock`.
+- The Worker (`worker/admin.js`) exposes `POST /unlock`, `/generate`, `/publish`, and `/delete`. Generate uses `@cf/black-forest-labs/flux-2-klein-4b`, one shot per request (`hero`, then `detail`). The browser stamps the logo (`src/lib/brandImage.js`). Publish and delete make one Git commit on `main` (extra JPEGs plus the extras file), retry conflicts, delete replaced extra photos, and refuse to overwrite a file that cannot be parsed.
 - `ADMIN_PASSWORD` and `GITHUB_TOKEN` live on the Worker, not in the repo.
 - Cart and enquiry drafts stay in `localStorage`. Custom-cake email is FormSubmit from `/custom` only. Menu orders go out on WhatsApp.
 
@@ -42,7 +42,7 @@ admin page  →  Worker /generate (one photo)  →  logo stamp in the browser
 
 - The first live custom-cake email needs FormSubmit’s activation message in `devscakelab@gmail.com`.
 - Admin UI changes ship with the Pages workflow on `main`. The Worker ships only when it is deployed from `worker/`.
-- A new catalog photo still needs a JPEG or PNG in `public/assets/` and `npm run optimize-images` for WebP. Admin-published photos are stored in the extras file, not as new asset files.
+- A new catalog photo still needs a JPEG or PNG in `public/assets/` and `npm run optimize-images` for WebP. Admin-published photos are JPEG files under `public/assets/extra/`. One save commits those files and `extra-products.json` together, and deletes an extra photo that the updated or removed product no longer uses. The logo and extra photos are plain images, not WebP srcsets.
 
 ## Brand
 

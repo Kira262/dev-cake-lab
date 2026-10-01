@@ -12,6 +12,8 @@ export const CONTACTS = {
   ],
   mapsQuery:
     "401, P.D. Apartment, Opp Mira Madhav Flat, Ellisbridge, Ahmedabad, India 380006",
+  mapsLat: 23.018963,
+  mapsLng: 72.566415,
   hoursLabel: "Daily",
   hoursDisplay: "11:00 AM — 1:00 AM",
 };
@@ -25,7 +27,8 @@ export function mapsLink() {
 }
 
 export function mapsEmbedSrc() {
-  return `https://maps.google.com/maps?q=${encodeURIComponent(CONTACTS.mapsQuery)}&z=15&output=embed`;
+  const pin = `${CONTACTS.mapsLat},${CONTACTS.mapsLng}`;
+  return `https://maps.google.com/maps?q=${encodeURIComponent(pin)}&z=16&output=embed`;
 }
 
 export function whatsappOrderUrl(text = "") {

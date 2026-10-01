@@ -11,4 +11,22 @@ describe("SmartImage", () => {
     expect(img.getAttribute("src")).toBe(src);
     expect(img.getAttribute("alt")).toBe("Walnut brownie");
   });
+
+  it("renders a plain img for the logo and extra photos", () => {
+    const { container, rerender } = render(
+      <SmartImage src="/assets/dev-cake-logo.png" alt="Dev's Cake Lab" />,
+    );
+    expect(container.querySelector("source")).toBeNull();
+    expect(container.querySelector("img").getAttribute("src")).toBe(
+      "/assets/dev-cake-logo.png",
+    );
+
+    rerender(
+      <SmartImage src="/assets/extra/walnut-brownie-hero-abc.jpg" alt="Walnut" />,
+    );
+    expect(container.querySelector("source")).toBeNull();
+    expect(container.querySelector("img").getAttribute("src")).toBe(
+      "/assets/extra/walnut-brownie-hero-abc.jpg",
+    );
+  });
 });
