@@ -535,3 +535,5 @@ export function AdminPage({ products = [], onPublished, onDeleted }) {
     </main>
   );
 }
+
+export default AdminPage;

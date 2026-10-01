@@ -25,13 +25,14 @@ import { scrollToTop } from "./lib/scroll.js";
 import { Cart } from "./components/Cart.jsx";
 import { Footer } from "./components/Footer.jsx";
 import { Header } from "./components/Header.jsx";
-const AdminPage = React.lazy(() => import("./pages/AdminPage.jsx"));
 import { ContactPage } from "./pages/ContactPage.jsx";
 import { CustomCakePage } from "./pages/CustomCakePage.jsx";
 import { HomePage } from "./pages/HomePage.jsx";
 import { MenuPage } from "./pages/MenuPage.jsx";
 import { ProductPage } from "./pages/ProductPage.jsx";
 import { VisitPage } from "./pages/VisitPage.jsx";
+
+const AdminPage = React.lazy(() => import("./pages/AdminPage.jsx"));
 
 export default function App() {
   const [route, setRoute] = useState(readPath);
